@@ -1,0 +1,39 @@
+"""Game configuration and constants."""
+
+# Screen settings
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+FPS = 60
+TITLE = "Warrior vs Monster"
+
+# Colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (220, 50, 50)
+GREEN = (50, 220, 50)
+BLUE = (50, 50, 220)
+DARK_RED = (139, 0, 0)
+DARK_GREEN = (0, 100, 0)
+GRAY = (128, 128, 128)
+YELLOW = (255, 255, 0)
+
+# Entity settings
+WARRIOR_SIZE = 40
+WARRIOR_SPEED = 5
+WARRIOR_MAX_HEALTH = 100
+WARRIOR_ATTACK_DAMAGE = 15
+WARRIOR_ATTACK_COOLDOWN = 500  # milliseconds
+
+MONSTER_SIZE = 50
+MONSTER_SPEED = 2
+MONSTER_MAX_HEALTH = 80
+MONSTER_ATTACK_DAMAGE = 10
+MONSTER_ATTACK_COOLDOWN = 800  # milliseconds
+MONSTER_CHASE_RANGE = 300
+MONSTER_ATTACK_RANGE = 60
+
+# Game states
+STATE_PLAYING = "playing"
+STATE_VICTORY = "victory"
+STATE_GAME_OVER = "game_over"
+STATE_INVENTORY = "inventory"
