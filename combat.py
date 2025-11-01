@@ -9,29 +9,19 @@ class CombatSystem:
     """Manages combat interactions between entities."""
 
     @staticmethod
-    def check_attack_input(warrior: Entity, monster: Entity, current_time: int) -> bool:
+    def is_in_attack_range(entity1: Entity, entity2: Entity) -> bool:
         """
-        Check if player wants to attack and process it.
+        Check if entity1 is in attack range of entity2.
 
         Args:
-            warrior: The warrior entity
-            monster: The monster entity
-            current_time: Current game time in milliseconds
+            entity1: The attacking entity
+            entity2: The target entity
 
         Returns:
-            True if attack was executed, False otherwise
+            True if in attack range, False otherwise
         """
-        keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_SPACE]:
-            # Check if warrior is in range to attack
-            distance = warrior.distance_to(monster)
-
-            if distance <= config.MONSTER_ATTACK_RANGE and warrior.can_attack(current_time):
-                warrior.attack(monster, current_time)
-                return True
-
-        return False
+        distance = entity1.grid_distance_to(entity2)
+        return distance <= config.MONSTER_ATTACK_RANGE
 
     @staticmethod
     def draw_combat_ui(screen: pygame.Surface, warrior: Entity, monster: Entity):
@@ -76,9 +66,7 @@ class CombatSystem:
             warrior: The warrior entity
             monster: The monster entity
         """
-        distance = warrior.distance_to(monster)
-
-        if distance <= config.MONSTER_ATTACK_RANGE:
+        if CombatSystem.is_in_attack_range(warrior, monster):
             # Draw line connecting entities when in range
             warrior_center = warrior.get_center()
             monster_center = monster.get_center()

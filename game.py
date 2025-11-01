@@ -21,11 +21,16 @@ class Game:
         self.running = True
         self.state = config.STATE_PLAYING
 
-        # Initialize game objects
-        self.warrior = Warrior(100, config.SCREEN_HEIGHT // 2)
-        self.monster = Monster(config.SCREEN_WIDTH - 150, config.SCREEN_HEIGHT // 2)
+        # Initialize game objects with grid coordinates
+        self.warrior = Warrior(2, config.GRID_HEIGHT // 2)
+        self.monster = Monster(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
+
+        # Turn-based state
+        self.waiting_for_player_input = True
+        self.last_key_time = 0
+        self.key_delay = 200  # milliseconds between key presses
 
         # Add sample items to warrior's inventory
         self._add_sample_items()
@@ -48,6 +53,8 @@ class Game:
 
     def handle_events(self):
         """Handle pygame events."""
+        current_time = pygame.time.get_ticks()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -63,6 +70,29 @@ class Game:
                         self.state = config.STATE_INVENTORY
                     else:
                         self.state = config.STATE_PLAYING
+                # Handle turn-based movement input
+                elif self.state == config.STATE_PLAYING and self.waiting_for_player_input:
+                    if current_time - self.last_key_time >= self.key_delay:
+                        action_queued = False
+                        if event.key in [pygame.K_w, pygame.K_UP]:
+                            self.warrior.queue_movement(0, -1)
+                            action_queued = True
+                        elif event.key in [pygame.K_s, pygame.K_DOWN]:
+                            self.warrior.queue_movement(0, 1)
+                            action_queued = True
+                        elif event.key in [pygame.K_a, pygame.K_LEFT]:
+                            self.warrior.queue_movement(-1, 0)
+                            action_queued = True
+                        elif event.key in [pygame.K_d, pygame.K_RIGHT]:
+                            self.warrior.queue_movement(1, 0)
+                            action_queued = True
+                        elif event.key == pygame.K_SPACE:
+                            self.warrior.queue_attack()
+                            action_queued = True
+
+                        if action_queued:
+                            self.waiting_for_player_input = False
+                            self.last_key_time = current_time
 
             # Handle inventory input when inventory is open
             if self.state == config.STATE_INVENTORY:
@@ -70,9 +100,11 @@ class Game:
 
     def restart(self):
         """Restart the game."""
-        self.warrior = Warrior(100, config.SCREEN_HEIGHT // 2)
-        self.monster = Monster(config.SCREEN_WIDTH - 150, config.SCREEN_HEIGHT // 2)
+        self.warrior = Warrior(2, config.GRID_HEIGHT // 2)
+        self.monster = Monster(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
         self.state = config.STATE_PLAYING
+        self.waiting_for_player_input = True
+        self._add_sample_items()
 
     def update(self, dt: float):
         """
@@ -85,23 +117,29 @@ class Game:
         if self.state != config.STATE_PLAYING:
             return
 
-        current_time = pygame.time.get_ticks()
-
-        # Handle warrior input
-        keys = pygame.key.get_pressed()
-        self.warrior.handle_input(keys)
-
-        # Check for warrior attacks
-        self.combat_system.check_attack_input(self.warrior, self.monster, current_time)
-
-        # Update monster AI
-        self.monster.update(dt, self.warrior, current_time)
+        # Process turn if player has queued an action
+        if not self.waiting_for_player_input:
+            self.process_turn()
 
         # Check game over conditions
         if not self.warrior.is_alive:
             self.state = config.STATE_GAME_OVER
         elif not self.monster.is_alive:
             self.state = config.STATE_VICTORY
+
+    def process_turn(self):
+        """Process one complete turn (hero then monsters)."""
+        # Hero turn
+        self.warrior.on_turn_start()
+        self.warrior.execute_turn(self.monster)
+
+        # Monster turns
+        if self.monster.is_alive:
+            self.monster.on_turn_start()
+            self.monster.execute_turn(self.warrior)
+
+        # Wait for next player input
+        self.waiting_for_player_input = True
 
     def draw(self):
         """Draw all game objects."""

@@ -2,17 +2,18 @@
 
 import pygame
 from entity import Entity
+from grid import Grid
 import config
 
 
 class Monster(Entity):
     """AI-controlled monster enemy."""
 
-    def __init__(self, x: float, y: float):
-        """Initialize the monster at the given position."""
+    def __init__(self, grid_x: int, grid_y: int):
+        """Initialize the monster at the given grid position."""
         super().__init__(
-            x=x,
-            y=y,
+            grid_x=grid_x,
+            grid_y=grid_y,
             size=config.MONSTER_SIZE,
             color=config.RED,
             max_health=config.MONSTER_MAX_HEALTH,
@@ -21,41 +22,50 @@ class Monster(Entity):
             attack_cooldown=config.MONSTER_ATTACK_COOLDOWN
         )
 
-    def update(self, dt: float, target: Entity, current_time: int):
+    def execute_turn(self, target: Entity):
         """
-        Update monster AI behavior.
+        Execute one turn of monster AI behavior.
 
         Args:
-            dt: Delta time since last update
             target: The entity to chase/attack (usually the warrior)
-            current_time: Current game time in milliseconds
         """
         if not self.is_alive or not target.is_alive:
             return
 
-        distance = self.distance_to(target)
+        distance = self.grid_distance_to(target)
 
         # Check if target is in chase range
         if distance <= config.MONSTER_CHASE_RANGE:
-            # Move towards target
-            self_center = self.get_center()
-            target_center = target.get_center()
-
-            dx = target_center[0] - self_center[0]
-            dy = target_center[1] - self_center[1]
-
-            # Normalize direction
-            if distance > 0:
-                dx /= distance
-                dy /= distance
-
             # Check if in attack range
             if distance <= config.MONSTER_ATTACK_RANGE:
                 # Try to attack
-                self.attack(target, current_time)
+                self.attack(target)
             else:
-                # Move towards target
-                self.move(dx * self.speed, dy * self.speed)
+                # Move towards target (one tile at a time)
+                dx = 0
+                dy = 0
+
+                if target.grid_x < self.grid_x:
+                    dx = -1
+                elif target.grid_x > self.grid_x:
+                    dx = 1
+
+                if target.grid_y < self.grid_y:
+                    dy = -1
+                elif target.grid_y > self.grid_y:
+                    dy = 1
+
+                # Try to move (prioritize direction with larger distance)
+                if abs(target.grid_x - self.grid_x) > abs(target.grid_y - self.grid_y):
+                    # Prioritize horizontal movement
+                    if dx != 0 and not self.move(dx, 0):
+                        # If blocked, try vertical
+                        self.move(0, dy)
+                else:
+                    # Prioritize vertical movement
+                    if dy != 0 and not self.move(0, dy):
+                        # If blocked, try horizontal
+                        self.move(dx, 0)
 
     def draw(self, screen: pygame.Surface):
         """Draw the monster with special styling."""

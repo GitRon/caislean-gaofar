@@ -17,20 +17,25 @@ DARK_GREEN = (0, 100, 0)
 GRAY = (128, 128, 128)
 YELLOW = (255, 255, 0)
 
+# Grid settings
+TILE_SIZE = 50  # Size of each grid tile
+GRID_WIDTH = SCREEN_WIDTH // TILE_SIZE  # 16 tiles
+GRID_HEIGHT = SCREEN_HEIGHT // TILE_SIZE  # 12 tiles
+
 # Entity settings
-WARRIOR_SIZE = 40
-WARRIOR_SPEED = 5
+WARRIOR_SIZE = TILE_SIZE  # Same as tile size
+WARRIOR_SPEED = 1  # Movement in tiles per turn
 WARRIOR_MAX_HEALTH = 100
 WARRIOR_ATTACK_DAMAGE = 15
-WARRIOR_ATTACK_COOLDOWN = 500  # milliseconds
+WARRIOR_ATTACK_COOLDOWN = 1  # turns between attacks
 
-MONSTER_SIZE = 50
-MONSTER_SPEED = 2
+MONSTER_SIZE = TILE_SIZE  # Same as tile size
+MONSTER_SPEED = 1  # Movement in tiles per turn
 MONSTER_MAX_HEALTH = 80
 MONSTER_ATTACK_DAMAGE = 10
-MONSTER_ATTACK_COOLDOWN = 800  # milliseconds
-MONSTER_CHASE_RANGE = 300
-MONSTER_ATTACK_RANGE = 60
+MONSTER_ATTACK_COOLDOWN = 1  # turns between attacks
+MONSTER_CHASE_RANGE = 5  # Chase range in tiles
+MONSTER_ATTACK_RANGE = 1  # Attack range in tiles (adjacent tiles)
 
 # Game states
 STATE_PLAYING = "playing"

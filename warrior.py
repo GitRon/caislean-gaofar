@@ -3,17 +3,18 @@
 import pygame
 from entity import Entity
 from inventory import Inventory
+from grid import Grid
 import config
 
 
 class Warrior(Entity):
     """Player-controlled warrior character."""
 
-    def __init__(self, x: float, y: float):
-        """Initialize the warrior at the given position."""
+    def __init__(self, grid_x: int, grid_y: int):
+        """Initialize the warrior at the given grid position."""
         super().__init__(
-            x=x,
-            y=y,
+            grid_x=grid_x,
+            grid_y=grid_y,
             size=config.WARRIOR_SIZE,
             color=config.BLUE,
             max_health=config.WARRIOR_MAX_HEALTH,
@@ -23,50 +24,70 @@ class Warrior(Entity):
         )
         self.inventory = Inventory()
         self.base_attack_damage = config.WARRIOR_ATTACK_DAMAGE
+        self.pending_action = None  # Store pending action for this turn
 
     def get_effective_attack_damage(self) -> int:
         """Get total attack damage including inventory bonuses."""
         return self.base_attack_damage + self.inventory.get_total_attack_bonus()
 
-    def attack(self, target: 'Entity', current_time: int) -> bool:
+    def attack(self, target: 'Entity') -> bool:
         """
         Attempt to attack a target with effective damage.
 
         Returns:
             True if attack was successful, False otherwise
         """
-        if not self.can_attack(current_time):
+        if not self.can_attack():
             return False
 
         effective_damage = self.get_effective_attack_damage()
         target.take_damage(effective_damage)
-        self.last_attack_time = current_time
+        self.turns_since_last_attack = 0
         return True
 
-    def handle_input(self, keys: pygame.key.ScancodeWrapper):
+    def queue_movement(self, dx: int, dy: int):
         """
-        Handle player input for movement.
+        Queue a movement action for the next turn.
 
         Args:
-            keys: Pygame key state
+            dx: Delta x in tiles
+            dy: Delta y in tiles
         """
-        dx, dy = 0, 0
+        self.pending_action = ('move', dx, dy)
 
-        if keys[pygame.K_w] or keys[pygame.K_UP]:
-            dy -= self.speed
-        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-            dy += self.speed
-        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            dx -= self.speed
-        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            dx += self.speed
+    def queue_attack(self):
+        """Queue an attack action for the next turn."""
+        self.pending_action = ('attack',)
 
-        # Normalize diagonal movement
-        if dx != 0 and dy != 0:
-            dx *= 0.707  # 1/sqrt(2)
-            dy *= 0.707
+    def execute_turn(self, target: 'Entity' = None) -> bool:
+        """
+        Execute the queued action for this turn.
 
-        self.move(dx, dy)
+        Args:
+            target: Target entity for attack actions
+
+        Returns:
+            True if an action was executed, False otherwise
+        """
+        if self.pending_action is None:
+            return False
+
+        action_type = self.pending_action[0]
+
+        if action_type == 'move':
+            _, dx, dy = self.pending_action
+            self.move(dx, dy)
+            self.pending_action = None
+            return True
+        elif action_type == 'attack':
+            if target and self.grid_distance_to(target) <= config.MONSTER_ATTACK_RANGE:
+                success = self.attack(target)
+                self.pending_action = None
+                return success
+            self.pending_action = None
+            return False
+
+        return False
 
     def draw(self, screen: pygame.Surface):
         """Draw the warrior with special styling."""
