@@ -1,8 +1,9 @@
 """Main game class and game loop."""
 
 import pygame
+import random
 from warrior import Warrior
-from monster import Monster
+from monsters import MONSTER_CLASSES
 from combat import CombatSystem
 from inventory_ui import InventoryUI
 from item import Item, ItemType
@@ -23,7 +24,23 @@ class Game:
 
         # Initialize game objects with grid coordinates
         self.warrior = Warrior(2, config.GRID_HEIGHT // 2)
-        self.monster = Monster(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
+        # Randomly select a monster type for variety
+        monster_types = [
+            config.MONSTER_TYPE_BANSHEE,
+            config.MONSTER_TYPE_LEPRECHAUN,
+            config.MONSTER_TYPE_POOKA,
+            config.MONSTER_TYPE_SELKIE,
+            config.MONSTER_TYPE_DULLAHAN,
+            config.MONSTER_TYPE_CHANGELING,
+            config.MONSTER_TYPE_CLURICHAUN,
+            config.MONSTER_TYPE_MERROW,
+            config.MONSTER_TYPE_FEAR_GORTA,
+            config.MONSTER_TYPE_CAT_SI,
+        ]
+        random_type = random.choice(monster_types)
+        # Create monster using the appropriate class
+        monster_class = MONSTER_CLASSES[random_type]
+        self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
 
@@ -101,7 +118,23 @@ class Game:
     def restart(self):
         """Restart the game."""
         self.warrior = Warrior(2, config.GRID_HEIGHT // 2)
-        self.monster = Monster(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
+        # Randomly select a new monster type on restart
+        monster_types = [
+            config.MONSTER_TYPE_BANSHEE,
+            config.MONSTER_TYPE_LEPRECHAUN,
+            config.MONSTER_TYPE_POOKA,
+            config.MONSTER_TYPE_SELKIE,
+            config.MONSTER_TYPE_DULLAHAN,
+            config.MONSTER_TYPE_CHANGELING,
+            config.MONSTER_TYPE_CLURICHAUN,
+            config.MONSTER_TYPE_MERROW,
+            config.MONSTER_TYPE_FEAR_GORTA,
+            config.MONSTER_TYPE_CAT_SI,
+        ]
+        random_type = random.choice(monster_types)
+        # Create monster using the appropriate class
+        monster_class = MONSTER_CLASSES[random_type]
+        self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
         self.state = config.STATE_PLAYING
         self.waiting_for_player_input = True
         self._add_sample_items()

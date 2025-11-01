@@ -1,4 +1,4 @@
-"""Monster class - AI controlled enemy."""
+"""Base Monster class - shared logic for all monster types."""
 
 import pygame
 from entity import Entity
@@ -7,21 +7,23 @@ import config
 from monster_renderer import MONSTER_RENDERERS
 
 
-class Monster(Entity):
-    """AI-controlled monster enemy."""
+class BaseMonster(Entity):
+    """
+    Base class for all monsters with shared AI and rendering logic.
 
-    def __init__(self, grid_x: int, grid_y: int, monster_type: str = config.MONSTER_TYPE_BANSHEE):
+    Subclasses should override execute_turn() for unique behaviors.
+    """
+
+    def __init__(self, grid_x: int, grid_y: int, monster_type: str, stats: dict):
         """
-        Initialize the monster at the given grid position.
+        Initialize the base monster.
 
         Args:
             grid_x: Grid X position
             grid_y: Grid Y position
-            monster_type: Type of monster (banshee, leprechaun, pooka, etc.)
+            monster_type: Type of monster (for rendering)
+            stats: Dictionary with health, attack_damage, speed, chase_range, attack_range, description
         """
-        # Get stats for this monster type
-        stats = config.MONSTER_STATS.get(monster_type, config.MONSTER_STATS[config.MONSTER_TYPE_BANSHEE])
-
         super().__init__(
             grid_x=grid_x,
             grid_y=grid_y,
@@ -42,6 +44,9 @@ class Monster(Entity):
         """
         Execute one turn of monster AI behavior.
 
+        Default behavior: chase and attack when in range.
+        Subclasses can override this for unique behaviors.
+
         Args:
             target: The entity to chase/attack (usually the warrior)
         """
@@ -57,31 +62,43 @@ class Monster(Entity):
                 # Try to attack
                 self.attack(target)
             else:
-                # Move towards target (one tile at a time)
-                dx = 0
-                dy = 0
+                # Move towards target
+                self._move_towards_target(target)
 
-                if target.grid_x < self.grid_x:
-                    dx = -1
-                elif target.grid_x > self.grid_x:
-                    dx = 1
+    def _move_towards_target(self, target: Entity):
+        """
+        Move one tile towards the target.
 
-                if target.grid_y < self.grid_y:
-                    dy = -1
-                elif target.grid_y > self.grid_y:
-                    dy = 1
+        This is the default pathfinding behavior.
+        Subclasses can override for unique movement patterns.
 
-                # Try to move (prioritize direction with larger distance)
-                if abs(target.grid_x - self.grid_x) > abs(target.grid_y - self.grid_y):
-                    # Prioritize horizontal movement
-                    if dx != 0 and not self.move(dx, 0):
-                        # If blocked, try vertical
-                        self.move(0, dy)
-                else:
-                    # Prioritize vertical movement
-                    if dy != 0 and not self.move(0, dy):
-                        # If blocked, try horizontal
-                        self.move(dx, 0)
+        Args:
+            target: The entity to move towards
+        """
+        dx = 0
+        dy = 0
+
+        if target.grid_x < self.grid_x:
+            dx = -1
+        elif target.grid_x > self.grid_x:
+            dx = 1
+
+        if target.grid_y < self.grid_y:
+            dy = -1
+        elif target.grid_y > self.grid_y:
+            dy = 1
+
+        # Try to move (prioritize direction with larger distance)
+        if abs(target.grid_x - self.grid_x) > abs(target.grid_y - self.grid_y):
+            # Prioritize horizontal movement
+            if dx != 0 and not self.move(dx, 0):
+                # If blocked, try vertical
+                self.move(0, dy)
+        else:
+            # Prioritize vertical movement
+            if dy != 0 and not self.move(0, dy):
+                # If blocked, try horizontal
+                self.move(dx, 0)
 
     def draw(self, screen: pygame.Surface):
         """Draw the monster using its specific renderer."""
