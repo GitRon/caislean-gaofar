@@ -80,7 +80,8 @@ class Warrior(Entity):
             self.pending_action = None
             return True
         elif action_type == 'attack':
-            if target and self.grid_distance_to(target) <= config.MONSTER_ATTACK_RANGE:
+            # Warrior attacks in melee range (1 tile)
+            if target and self.grid_distance_to(target) <= 1:
                 success = self.attack(target)
                 self.pending_action = None
                 return success

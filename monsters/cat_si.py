@@ -1,6 +1,5 @@
 """Cat Sí monster - large black fairy cat that steals souls."""
 
-import config
 from monsters.base_monster import BaseMonster
 
 
@@ -15,10 +14,14 @@ class CatSi(BaseMonster):
     - Prowling movements with swishing tail
     """
 
-    def __init__(self, grid_x: int, grid_y: int):
-        """Initialize the Cat Sí."""
-        stats = config.MONSTER_STATS[config.MONSTER_TYPE_CAT_SI]
-        super().__init__(grid_x, grid_y, config.MONSTER_TYPE_CAT_SI, stats)
+    # Monster stats
+    HEALTH = 65
+    ATTACK_DAMAGE = 16
+    SPEED = 2  # Fast like a cat
+    CHASE_RANGE = 5
+    ATTACK_RANGE = 1
+    DESCRIPTION = "Fairy cat - fast and deadly"
+    MONSTER_TYPE = "cat_si"
 
     # Future: Can override execute_turn() for unique behavior
     # For example: pounce attacks with extra range, steal player souls/experience,

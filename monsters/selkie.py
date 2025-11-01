@@ -1,6 +1,5 @@
 """Selkie monster - seal that transforms to human."""
 
-import config
 from monsters.base_monster import BaseMonster
 
 
@@ -14,10 +13,14 @@ class Selkie(BaseMonster):
     - Seal-human hybrid appearance with swimming motion
     """
 
-    def __init__(self, grid_x: int, grid_y: int):
-        """Initialize the Selkie."""
-        stats = config.MONSTER_STATS[config.MONSTER_TYPE_SELKIE]
-        super().__init__(grid_x, grid_y, config.MONSTER_TYPE_SELKIE, stats)
+    # Monster stats
+    HEALTH = 70
+    ATTACK_DAMAGE = 10
+    SPEED = 1
+    CHASE_RANGE = 5
+    ATTACK_RANGE = 1
+    DESCRIPTION = "Seal-human hybrid - balanced stats"
+    MONSTER_TYPE = "selkie"
 
     # Future: Can override execute_turn() for unique behavior
     # For example: transform between seal/human forms, water pools that slow player,

@@ -21,7 +21,11 @@ class CombatSystem:
             True if in attack range, False otherwise
         """
         distance = entity1.grid_distance_to(entity2)
-        return distance <= config.MONSTER_ATTACK_RANGE
+        # Check if entity1 has an attack_range attribute (monsters have this)
+        if hasattr(entity1, 'attack_range'):
+            return distance <= entity1.attack_range
+        # Default to melee range (1 tile) for warriors and other entities
+        return distance <= 1
 
     @staticmethod
     def draw_combat_ui(screen: pygame.Surface, warrior: Entity, monster: Entity):

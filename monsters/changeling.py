@@ -1,6 +1,5 @@
 """Changeling monster - fairy child left in place of human baby."""
 
-import config
 from monsters.base_monster import BaseMonster
 
 
@@ -15,10 +14,14 @@ class Changeling(BaseMonster):
     - Child-like appearance with disturbing features
     """
 
-    def __init__(self, grid_x: int, grid_y: int):
-        """Initialize the Changeling."""
-        stats = config.MONSTER_STATS[config.MONSTER_TYPE_CHANGELING]
-        super().__init__(grid_x, grid_y, config.MONSTER_TYPE_CHANGELING, stats)
+    # Monster stats
+    HEALTH = 50
+    ATTACK_DAMAGE = 14
+    SPEED = 1
+    CHASE_RANGE = 4
+    ATTACK_RANGE = 1
+    DESCRIPTION = "Fairy child - deceptively dangerous"
+    MONSTER_TYPE = "changeling"
 
     # Future: Can override execute_turn() for unique behavior
     # For example: confuse player controls, summon fairy allies, steal items,

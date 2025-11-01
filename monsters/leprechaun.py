@@ -1,6 +1,5 @@
 """Leprechaun monster - fast and tricky fairy."""
 
-import config
 from monsters.base_monster import BaseMonster
 
 
@@ -15,10 +14,14 @@ class Leprechaun(BaseMonster):
     - Green appearance with bouncing animation
     """
 
-    def __init__(self, grid_x: int, grid_y: int):
-        """Initialize the Leprechaun."""
-        stats = config.MONSTER_STATS[config.MONSTER_TYPE_LEPRECHAUN]
-        super().__init__(grid_x, grid_y, config.MONSTER_TYPE_LEPRECHAUN, stats)
+    # Monster stats
+    HEALTH = 40
+    ATTACK_DAMAGE = 8
+    SPEED = 2  # Very fast and tricky
+    CHASE_RANGE = 4
+    ATTACK_RANGE = 1
+    DESCRIPTION = "Mischievous fairy - weak but very fast"
+    MONSTER_TYPE = "leprechaun"
 
     # Future: Can override execute_turn() for unique behavior
     # For example: teleport away when hit, leave gold traps, confusion effects, etc.

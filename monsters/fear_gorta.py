@@ -1,6 +1,5 @@
 """Fear Gorta monster - spirit of hunger."""
 
-import config
 from monsters.base_monster import BaseMonster
 
 
@@ -15,10 +14,14 @@ class FearGorta(BaseMonster):
     - Those who defeat him may be rewarded (future feature)
     """
 
-    def __init__(self, grid_x: int, grid_y: int):
-        """Initialize the Fear Gorta."""
-        stats = config.MONSTER_STATS[config.MONSTER_TYPE_FEAR_GORTA]
-        super().__init__(grid_x, grid_y, config.MONSTER_TYPE_FEAR_GORTA, stats)
+    # Monster stats
+    HEALTH = 55
+    ATTACK_DAMAGE = 13
+    SPEED = 1
+    CHASE_RANGE = 6
+    ATTACK_RANGE = 1
+    DESCRIPTION = "Hunger spirit - drains vitality"
+    MONSTER_TYPE = "fear_gorta"
 
     # Future: Can override execute_turn() for unique behavior
     # For example: life drain attacks, weaken player over time, hunger aura,

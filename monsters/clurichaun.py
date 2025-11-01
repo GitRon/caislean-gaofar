@@ -1,6 +1,5 @@
 """Clurichaun monster - drunk cousin of leprechaun."""
 
-import config
 from monsters.base_monster import BaseMonster
 
 
@@ -15,10 +14,14 @@ class Clurichaun(BaseMonster):
     - Red coat with wine bottle
     """
 
-    def __init__(self, grid_x: int, grid_y: int):
-        """Initialize the Clurichaun."""
-        stats = config.MONSTER_STATS[config.MONSTER_TYPE_CLURICHAUN]
-        super().__init__(grid_x, grid_y, config.MONSTER_TYPE_CLURICHAUN, stats)
+    # Monster stats
+    HEALTH = 45
+    ATTACK_DAMAGE = 9
+    SPEED = 1  # Drunk, slower reactions
+    CHASE_RANGE = 3  # Short chase (guards wine cellars)
+    ATTACK_RANGE = 1
+    DESCRIPTION = "Drunken fairy - weak but unpredictable"
+    MONSTER_TYPE = "clurichaun"
 
     # Future: Can override execute_turn() for unique behavior
     # For example: random movement (drunk), throw wine bottles, berserker rage,

@@ -1,6 +1,5 @@
 """Pooka monster - shape-shifting creature."""
 
-import config
 from monsters.base_monster import BaseMonster
 
 
@@ -15,10 +14,14 @@ class Pooka(BaseMonster):
     - Dark horse form with pulsing shadow aura
     """
 
-    def __init__(self, grid_x: int, grid_y: int):
-        """Initialize the Pooka."""
-        stats = config.MONSTER_STATS[config.MONSTER_TYPE_POOKA]
-        super().__init__(grid_x, grid_y, config.MONSTER_TYPE_POOKA, stats)
+    # Monster stats
+    HEALTH = 100
+    ATTACK_DAMAGE = 15
+    SPEED = 1
+    CHASE_RANGE = 7  # Pursues relentlessly
+    ATTACK_RANGE = 1
+    DESCRIPTION = "Shape-shifter - high health, relentless pursuit"
+    MONSTER_TYPE = "pooka"
 
     # Future: Can override execute_turn() for unique behavior
     # For example: shape-shift to different forms with different abilities,

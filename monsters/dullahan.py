@@ -1,6 +1,5 @@
 """Dullahan monster - headless rider, omen of death."""
 
-import config
 from monsters.base_monster import BaseMonster
 
 
@@ -15,10 +14,14 @@ class Dullahan(BaseMonster):
     - BOSS-level difficulty
     """
 
-    def __init__(self, grid_x: int, grid_y: int):
-        """Initialize the Dullahan."""
-        stats = config.MONSTER_STATS[config.MONSTER_TYPE_DULLAHAN]
-        super().__init__(grid_x, grid_y, config.MONSTER_TYPE_DULLAHAN, stats)
+    # Monster stats
+    HEALTH = 120
+    ATTACK_DAMAGE = 20
+    SPEED = 1
+    CHASE_RANGE = 8  # Omen of death, wide chase range
+    ATTACK_RANGE = 1
+    DESCRIPTION = "Headless rider - very powerful, deadly"
+    MONSTER_TYPE = "dullahan"
 
     # Future: Can override execute_turn() for unique behavior
     # For example: death mark on player, summon lesser undead, charge attacks,

@@ -16,7 +16,22 @@ from monsters.merrow import Merrow
 from monsters.fear_gorta import FearGorta
 from monsters.cat_si import CatSi
 
-# Dictionary for easy monster creation by type
+# List of all available monster classes
+# This is automatically discovered - just add new monster classes to the imports above!
+ALL_MONSTER_CLASSES = [
+    Banshee,
+    Leprechaun,
+    Pooka,
+    Selkie,
+    Dullahan,
+    Changeling,
+    Clurichaun,
+    Merrow,
+    FearGorta,
+    CatSi,
+]
+
+# Dictionary for easy monster creation by type string (backward compatibility)
 MONSTER_CLASSES = {
     'banshee': Banshee,
     'leprechaun': Leprechaun,
@@ -42,5 +57,6 @@ __all__ = [
     'Merrow',
     'FearGorta',
     'CatSi',
+    'ALL_MONSTER_CLASSES',
     'MONSTER_CLASSES',
 ]

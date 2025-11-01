@@ -11,33 +11,47 @@ class BaseMonster(Entity):
     """
     Base class for all monsters with shared AI and rendering logic.
 
-    Subclasses should override execute_turn() for unique behaviors.
+    Subclasses should define class attributes for their stats:
+    - HEALTH: Maximum health points
+    - ATTACK_DAMAGE: Damage dealt per attack
+    - SPEED: Movement speed in tiles per turn
+    - CHASE_RANGE: How far (in tiles) the monster will pursue
+    - ATTACK_RANGE: How far (in tiles) the monster can attack
+    - DESCRIPTION: Short description of monster traits
+    - MONSTER_TYPE: String identifier for rendering
     """
 
-    def __init__(self, grid_x: int, grid_y: int, monster_type: str, stats: dict):
+    # Default stats (should be overridden by subclasses)
+    HEALTH = 50
+    ATTACK_DAMAGE = 10
+    SPEED = 1
+    CHASE_RANGE = 5
+    ATTACK_RANGE = 1
+    DESCRIPTION = "Unknown creature"
+    MONSTER_TYPE = "banshee"  # Default fallback
+
+    def __init__(self, grid_x: int, grid_y: int):
         """
         Initialize the base monster.
 
         Args:
             grid_x: Grid X position
             grid_y: Grid Y position
-            monster_type: Type of monster (for rendering)
-            stats: Dictionary with health, attack_damage, speed, chase_range, attack_range, description
         """
         super().__init__(
             grid_x=grid_x,
             grid_y=grid_y,
             size=config.MONSTER_SIZE,
             color=config.RED,
-            max_health=stats['health'],
-            speed=stats['speed'],
-            attack_damage=stats['attack_damage'],
+            max_health=self.HEALTH,
+            speed=self.SPEED,
+            attack_damage=self.ATTACK_DAMAGE,
             attack_cooldown=config.MONSTER_ATTACK_COOLDOWN
         )
-        self.monster_type = monster_type
-        self.chase_range = stats['chase_range']
-        self.attack_range = stats['attack_range']
-        self.description = stats['description']
+        self.monster_type = self.MONSTER_TYPE
+        self.chase_range = self.CHASE_RANGE
+        self.attack_range = self.ATTACK_RANGE
+        self.description = self.DESCRIPTION
         self.frame_count = 0  # For animation
 
     def execute_turn(self, target: Entity):
