@@ -50,16 +50,23 @@ The project includes a GitHub Actions workflow (`.github/workflows/qa.yml`) that
 
 #### Pipeline Jobs
 
-The pipeline consists of two separate jobs that run sequentially:
+The pipeline consists of three separate jobs:
 
-**Job 1: Code Linting**
+**Job 1: Check Hook Updates** (runs independently, allowed to fail)
 1. **Checkout**: Clones the repository
 2. **Python Setup**: Configures Python 3.13 environment
 3. **Install pre-commit**: Installs pre-commit package
-4. **Hook Updates Check**: Runs `pre-commit autoupdate` to check for newer hook versions (allowed to fail)
-5. **Pre-commit Checks**: Runs all configured pre-commit hooks (must pass)
+4. **Check for Updates**: Runs `pre-commit autoupdate` and displays available hook updates with warnings
 
-**Job 2: Testing** (only runs if linting passes)
+This job provides visibility into available hook updates without blocking the pipeline.
+
+**Job 2: Code Linting**
+1. **Checkout**: Clones the repository
+2. **Python Setup**: Configures Python 3.13 environment
+3. **Install pre-commit**: Installs pre-commit package
+4. **Pre-commit Checks**: Runs all configured pre-commit hooks (must pass)
+
+**Job 3: Testing** (only runs if linting passes)
 1. **Checkout**: Clones the repository
 2. **Python Setup**: Configures Python 3.13 environment
 3. **Install pytest**: Installs pytest package
