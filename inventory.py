@@ -31,21 +31,23 @@ class Inventory:
 
         return False  # No space available
 
-    def remove_item_from_slot(self, slot_type: str, slot_index: int = 0) -> Optional[Item]:
+    def remove_item_from_slot(
+        self, slot_type: str, slot_index: int = 0
+    ) -> Optional[Item]:
         """
         Remove and return an item from a specific slot.
         slot_type can be: 'weapon', 'armor', or 'backpack'
         slot_index is used for backpack slots (0-2)
         """
-        if slot_type == 'weapon':
+        if slot_type == "weapon":
             item = self.weapon_slot
             self.weapon_slot = None
             return item
-        elif slot_type == 'armor':
+        elif slot_type == "armor":
             item = self.armor_slot
             self.armor_slot = None
             return item
-        elif slot_type == 'backpack' and 0 <= slot_index < 3:
+        elif slot_type == "backpack" and 0 <= slot_index < 3:
             item = self.backpack_slots[slot_index]
             self.backpack_slots[slot_index] = None
             return item

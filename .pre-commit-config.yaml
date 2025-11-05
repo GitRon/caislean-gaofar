@@ -1,0 +1,24 @@
+# Pre-commit hooks for code quality and consistency
+# See https://pre-commit.com for more information
+
+repos:
+  # Ruff - Fast Python linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      # Ruff linter
+      - id: ruff
+        name: ruff-check
+        args: [--fix]
+        types_or: [python, pyi]
+      # Ruff formatter
+      - id: ruff-format
+        name: ruff-format
+        types_or: [python, pyi]
+
+  # Boa Restrictor - Restrict problematic Python patterns
+  - repo: https://github.com/ambient-innovation/boa-restrictor
+    rev: v1.12.1
+    hooks:
+      - id: boa-restrictor
+        args: [--config=pyproject.toml]

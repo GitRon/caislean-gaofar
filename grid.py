@@ -47,12 +47,12 @@ class Grid:
         Returns:
             True if position is valid, False otherwise
         """
-        return (0 <= grid_x < config.GRID_WIDTH and
-                0 <= grid_y < config.GRID_HEIGHT)
+        return 0 <= grid_x < config.GRID_WIDTH and 0 <= grid_y < config.GRID_HEIGHT
 
     @staticmethod
-    def manhattan_distance(grid_x1: int, grid_y1: int,
-                          grid_x2: int, grid_y2: int) -> int:
+    def manhattan_distance(
+        grid_x1: int, grid_y1: int, grid_x2: int, grid_y2: int
+    ) -> int:
         """
         Calculate Manhattan distance between two grid positions.
 

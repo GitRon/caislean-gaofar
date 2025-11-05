@@ -2,7 +2,6 @@
 
 import pygame
 from entity import Entity
-from grid import Grid
 import config
 from monster_renderer import MONSTER_RENDERERS
 
@@ -46,7 +45,7 @@ class BaseMonster(Entity):
             max_health=self.HEALTH,
             speed=self.SPEED,
             attack_damage=self.ATTACK_DAMAGE,
-            attack_cooldown=config.MONSTER_ATTACK_COOLDOWN
+            attack_cooldown=config.MONSTER_ATTACK_COOLDOWN,
         )
         self.monster_type = self.MONSTER_TYPE
         self.chase_range = self.CHASE_RANGE
@@ -137,7 +136,9 @@ class BaseMonster(Entity):
             pygame.draw.circle(screen, config.YELLOW, (left_eye_x, eye_y), eye_size)
             pygame.draw.circle(screen, config.YELLOW, (right_eye_x, eye_y), eye_size)
             pygame.draw.circle(screen, config.BLACK, (left_eye_x, eye_y), eye_size // 2)
-            pygame.draw.circle(screen, config.BLACK, (right_eye_x, eye_y), eye_size // 2)
+            pygame.draw.circle(
+                screen, config.BLACK, (right_eye_x, eye_y), eye_size // 2
+            )
 
         # Draw health bar on top of custom render
         self.draw_health_bar(screen)

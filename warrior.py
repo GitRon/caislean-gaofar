@@ -3,7 +3,6 @@
 import pygame
 from entity import Entity
 from inventory import Inventory
-from grid import Grid
 import config
 
 
@@ -20,7 +19,7 @@ class Warrior(Entity):
             max_health=config.WARRIOR_MAX_HEALTH,
             speed=config.WARRIOR_SPEED,
             attack_damage=config.WARRIOR_ATTACK_DAMAGE,
-            attack_cooldown=config.WARRIOR_ATTACK_COOLDOWN
+            attack_cooldown=config.WARRIOR_ATTACK_COOLDOWN,
         )
         self.inventory = Inventory()
         self.base_attack_damage = config.WARRIOR_ATTACK_DAMAGE
@@ -30,7 +29,7 @@ class Warrior(Entity):
         """Get total attack damage including inventory bonuses."""
         return self.base_attack_damage + self.inventory.get_total_attack_bonus()
 
-    def attack(self, target: 'Entity') -> bool:
+    def attack(self, target: "Entity") -> bool:
         """
         Attempt to attack a target with effective damage.
 
@@ -53,13 +52,13 @@ class Warrior(Entity):
             dx: Delta x in tiles
             dy: Delta y in tiles
         """
-        self.pending_action = ('move', dx, dy)
+        self.pending_action = ("move", dx, dy)
 
     def queue_attack(self):
         """Queue an attack action for the next turn."""
-        self.pending_action = ('attack',)
+        self.pending_action = ("attack",)
 
-    def execute_turn(self, target: 'Entity' = None) -> bool:
+    def execute_turn(self, target: "Entity" = None) -> bool:
         """
         Execute the queued action for this turn.
 
@@ -74,12 +73,12 @@ class Warrior(Entity):
 
         action_type = self.pending_action[0]
 
-        if action_type == 'move':
+        if action_type == "move":
             _, dx, dy = self.pending_action
             self.move(dx, dy)
             self.pending_action = None
             return True
-        elif action_type == 'attack':
+        elif action_type == "attack":
             # Warrior attacks in melee range (1 tile)
             if target and self.grid_distance_to(target) <= 1:
                 success = self.attack(target)
@@ -100,11 +99,19 @@ class Warrior(Entity):
         center_y = self.y + self.size // 2
 
         # Vertical line
-        pygame.draw.line(screen, config.WHITE,
-                        (center_x, self.y + 5),
-                        (center_x, self.y + self.size - 5), 2)
+        pygame.draw.line(
+            screen,
+            config.WHITE,
+            (center_x, self.y + 5),
+            (center_x, self.y + self.size - 5),
+            2,
+        )
 
         # Horizontal line
-        pygame.draw.line(screen, config.WHITE,
-                        (self.x + 5, center_y),
-                        (self.x + self.size - 5, center_y), 2)
+        pygame.draw.line(
+            screen,
+            config.WHITE,
+            (self.x + 5, center_y),
+            (self.x + self.size - 5, center_y),
+            2,
+        )
