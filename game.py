@@ -6,6 +6,7 @@ from warrior import Warrior
 from monsters import ALL_MONSTER_CLASSES
 from combat import CombatSystem
 from inventory_ui import InventoryUI
+from ui_button import Button
 from item import Item, ItemType
 from chest import Chest
 from ground_item import GroundItem
@@ -33,6 +34,15 @@ class Game:
         self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
+
+        # Create UI button for inventory
+        button_width = 100
+        button_height = 40
+        button_x = config.SCREEN_WIDTH - button_width - 10
+        button_y = 10
+        self.inventory_button = Button(
+            button_x, button_y, button_width, button_height, "Inventory (I)"
+        )
 
         # Turn-based state
         self.waiting_for_player_input = True
@@ -113,6 +123,11 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                # Handle inventory button click (only when playing)
+                if event.button == 1 and self.state == config.STATE_PLAYING:
+                    if self.inventory_button.is_clicked(event.pos):
+                        self.state = config.STATE_INVENTORY
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
@@ -290,6 +305,9 @@ class Game:
             # Draw message if active
             if self.message:
                 self._draw_message()
+
+            # Draw inventory button
+            self.inventory_button.draw(self.screen)
 
         elif self.state == config.STATE_INVENTORY:
             # Draw the game in the background
