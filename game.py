@@ -153,7 +153,9 @@ class Game:
                             action_queued = True
                         elif event.key == pygame.K_g:
                             # Try to pick up item at player's position
-                            if self.pickup_item_at_position(self.warrior.grid_x, self.warrior.grid_y):
+                            if self.pickup_item_at_position(
+                                self.warrior.grid_x, self.warrior.grid_y
+                            ):
                                 action_queued = True
 
                         if action_queued:
@@ -219,7 +221,7 @@ class Game:
 
     def _drop_monster_loot(self):
         """Drop loot from defeated monster."""
-        if hasattr(self.monster, 'monster_type'):
+        if hasattr(self.monster, "monster_type"):
             loot_item = get_loot_for_monster(self.monster.monster_type)
             if loot_item:
                 self.drop_item(loot_item, self.monster.grid_x, self.monster.grid_y)

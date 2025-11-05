@@ -74,7 +74,9 @@ class DroppedItem:
         text_y = self.y + self.size + 2
 
         # Draw text background for readability
-        text_bg = pygame.Rect(text_x - 2, text_y - 1, text.get_width() + 4, text.get_height() + 2)
+        text_bg = pygame.Rect(
+            text_x - 2, text_y - 1, text.get_width() + 4, text.get_height() + 2
+        )
         pygame.draw.rect(screen, config.BLACK, text_bg)
 
         screen.blit(text, (text_x, text_y))

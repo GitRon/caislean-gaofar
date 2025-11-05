@@ -201,7 +201,9 @@ class InventoryUI:
             text = self.small_font.render(instruction, True, (200, 200, 200))
             screen.blit(text, (panel_x + self.padding, panel_y + y_offset + i * 18))
 
-    def handle_input(self, event: pygame.event.Event, inventory: Inventory, game=None) -> bool:
+    def handle_input(
+        self, event: pygame.event.Event, inventory: Inventory, game=None
+    ) -> bool:
         """
         Handle input events for inventory management.
 
