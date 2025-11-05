@@ -1,7 +1,5 @@
 import pygame
 from inventory import Inventory
-from item import ItemType
-import config
 
 
 class InventoryUI:
@@ -44,8 +42,12 @@ class InventoryUI:
         screen.blit(overlay, (panel_x, panel_y))
 
         # Draw border
-        pygame.draw.rect(screen, self.slot_border_color,
-                        (panel_x, panel_y, self.panel_width, self.panel_height), 2)
+        pygame.draw.rect(
+            screen,
+            self.slot_border_color,
+            (panel_x, panel_y, self.panel_width, self.panel_height),
+            2,
+        )
 
         # Draw title
         title_text = self.title_font.render("INVENTORY", True, self.text_color)
@@ -65,27 +67,43 @@ class InventoryUI:
         # Draw instructions
         self._draw_instructions(screen, panel_x, panel_y)
 
-    def _draw_equipment_section(self, screen: pygame.Surface, inventory: Inventory,
-                                panel_x: int, start_y: int):
+    def _draw_equipment_section(
+        self, screen: pygame.Surface, inventory: Inventory, panel_x: int, start_y: int
+    ):
         """Draw weapon and armor equipment slots"""
         # Weapon slot
         weapon_x = panel_x + self.padding
         weapon_y = start_y
 
-        is_selected = self.selected_slot == ('weapon', 0)
-        self._draw_slot(screen, weapon_x, weapon_y, "WEAPON", inventory.weapon_slot,
-                       is_equipped=True, is_selected=is_selected)
+        is_selected = self.selected_slot == ("weapon", 0)
+        self._draw_slot(
+            screen,
+            weapon_x,
+            weapon_y,
+            "WEAPON",
+            inventory.weapon_slot,
+            is_equipped=True,
+            is_selected=is_selected,
+        )
 
         # Armor slot
         armor_x = weapon_x + self.slot_size + self.slot_margin * 3
         armor_y = start_y
 
-        is_selected = self.selected_slot == ('armor', 0)
-        self._draw_slot(screen, armor_x, armor_y, "ARMOR", inventory.armor_slot,
-                       is_equipped=True, is_selected=is_selected)
+        is_selected = self.selected_slot == ("armor", 0)
+        self._draw_slot(
+            screen,
+            armor_x,
+            armor_y,
+            "ARMOR",
+            inventory.armor_slot,
+            is_equipped=True,
+            is_selected=is_selected,
+        )
 
-    def _draw_backpack_section(self, screen: pygame.Surface, inventory: Inventory,
-                              panel_x: int, start_y: int):
+    def _draw_backpack_section(
+        self, screen: pygame.Surface, inventory: Inventory, panel_x: int, start_y: int
+    ):
         """Draw backpack slots"""
         # Backpack label
         label = self.font.render("BACKPACK", True, self.text_color)
@@ -96,12 +114,26 @@ class InventoryUI:
             slot_x = panel_x + self.padding + i * (self.slot_size + self.slot_margin)
             slot_y = start_y
 
-            is_selected = self.selected_slot == ('backpack', i)
-            self._draw_slot(screen, slot_x, slot_y, f"SLOT {i+1}",
-                           inventory.backpack_slots[i], is_selected=is_selected)
+            is_selected = self.selected_slot == ("backpack", i)
+            self._draw_slot(
+                screen,
+                slot_x,
+                slot_y,
+                f"SLOT {i + 1}",
+                inventory.backpack_slots[i],
+                is_selected=is_selected,
+            )
 
-    def _draw_slot(self, screen: pygame.Surface, x: int, y: int, label: str,
-                   item, is_equipped: bool = False, is_selected: bool = False):
+    def _draw_slot(
+        self,
+        screen: pygame.Surface,
+        x: int,
+        y: int,
+        label: str,
+        item,
+        is_equipped: bool = False,
+        is_selected: bool = False,
+    ):
         """Draw a single inventory slot"""
         # Determine slot color
         if is_equipped:
@@ -115,8 +147,9 @@ class InventoryUI:
         # Draw border (highlighted if selected)
         border_color = self.selected_color if is_selected else self.slot_border_color
         border_width = 3 if is_selected else 2
-        pygame.draw.rect(screen, border_color, (x, y, self.slot_size, self.slot_size),
-                        border_width)
+        pygame.draw.rect(
+            screen, border_color, (x, y, self.slot_size, self.slot_size), border_width
+        )
 
         # Draw label
         label_text = self.small_font.render(label, True, self.text_color)
@@ -141,12 +174,16 @@ class InventoryUI:
         # Draw stats
         stats_y = y + 50
         if item.attack_bonus > 0:
-            stat_text = self.small_font.render(f"+{item.attack_bonus} ATK", True, (255, 100, 100))
+            stat_text = self.small_font.render(
+                f"+{item.attack_bonus} ATK", True, (255, 100, 100)
+            )
             stat_x = x + (self.slot_size - stat_text.get_width()) // 2
             screen.blit(stat_text, (stat_x, stats_y))
 
         if item.defense_bonus > 0:
-            stat_text = self.small_font.render(f"+{item.defense_bonus} DEF", True, (100, 100, 255))
+            stat_text = self.small_font.render(
+                f"+{item.defense_bonus} DEF", True, (100, 100, 255)
+            )
             stat_x = x + (self.slot_size - stat_text.get_width()) // 2
             screen.blit(stat_text, (stat_x, stats_y))
 
@@ -156,7 +193,7 @@ class InventoryUI:
             "I - Close Inventory",
             "1-5 - Select Slot",
             "E - Equip from Backpack",
-            "X - Drop Item"
+            "X - Drop Item",
         ]
 
         y_offset = self.panel_height - 80
@@ -174,24 +211,24 @@ class InventoryUI:
 
         # Select slots with number keys
         if event.key == pygame.K_1:
-            self.selected_slot = ('weapon', 0)
+            self.selected_slot = ("weapon", 0)
             return True
         elif event.key == pygame.K_2:
-            self.selected_slot = ('armor', 0)
+            self.selected_slot = ("armor", 0)
             return True
         elif event.key == pygame.K_3:
-            self.selected_slot = ('backpack', 0)
+            self.selected_slot = ("backpack", 0)
             return True
         elif event.key == pygame.K_4:
-            self.selected_slot = ('backpack', 1)
+            self.selected_slot = ("backpack", 1)
             return True
         elif event.key == pygame.K_5:
-            self.selected_slot = ('backpack', 2)
+            self.selected_slot = ("backpack", 2)
             return True
 
         # Equip item from backpack
         elif event.key == pygame.K_e:
-            if self.selected_slot and self.selected_slot[0] == 'backpack':
+            if self.selected_slot and self.selected_slot[0] == "backpack":
                 inventory.equip_from_backpack(self.selected_slot[1])
                 return True
 

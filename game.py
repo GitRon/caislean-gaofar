@@ -19,7 +19,9 @@ class Game:
     def __init__(self):
         """Initialize the game."""
         pygame.init()
-        self.screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode(
+            (config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
+        )
         pygame.display.set_caption(config.TITLE)
         self.clock = pygame.time.Clock()
         self.running = True
@@ -56,10 +58,22 @@ class Game:
     def _add_sample_items(self):
         """Add sample items to the warrior's inventory for testing."""
         # Create sample items
-        iron_sword = Item("Iron Sword", ItemType.WEAPON, "A basic sword", attack_bonus=10)
-        steel_sword = Item("Steel Sword", ItemType.WEAPON, "A stronger sword", attack_bonus=20)
-        leather_armor = Item("Leather Armor", ItemType.ARMOR, "Basic protection", defense_bonus=5, health_bonus=20)
-        health_potion = Item("Health Potion", ItemType.CONSUMABLE, "Restores health", health_bonus=30)
+        iron_sword = Item(
+            "Iron Sword", ItemType.WEAPON, "A basic sword", attack_bonus=10
+        )
+        steel_sword = Item(
+            "Steel Sword", ItemType.WEAPON, "A stronger sword", attack_bonus=20
+        )
+        leather_armor = Item(
+            "Leather Armor",
+            ItemType.ARMOR,
+            "Basic protection",
+            defense_bonus=5,
+            health_bonus=20,
+        )
+        health_potion = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores health", health_bonus=30
+        )
         gold_coin = Item("Gold Coin", ItemType.MISC, "Shiny currency")
 
         # Add items to inventory
@@ -106,14 +120,19 @@ class Game:
                 elif event.key == pygame.K_r and self.state != config.STATE_PLAYING:
                     # Restart game
                     self.restart()
-                elif event.key == pygame.K_i and self.state in [config.STATE_PLAYING, config.STATE_INVENTORY]:
+                elif event.key == pygame.K_i and self.state in [
+                    config.STATE_PLAYING,
+                    config.STATE_INVENTORY,
+                ]:
                     # Toggle inventory
                     if self.state == config.STATE_PLAYING:
                         self.state = config.STATE_INVENTORY
                     else:
                         self.state = config.STATE_PLAYING
                 # Handle turn-based movement input
-                elif self.state == config.STATE_PLAYING and self.waiting_for_player_input:
+                elif (
+                    self.state == config.STATE_PLAYING and self.waiting_for_player_input
+                ):
                     if current_time - self.last_key_time >= self.key_delay:
                         action_queued = False
                         if event.key in [pygame.K_w, pygame.K_UP]:
@@ -249,7 +268,9 @@ class Game:
                 ground_item.draw(self.screen)
 
             # Draw attack range indicator
-            self.combat_system.draw_attack_range_indicator(self.screen, self.warrior, self.monster)
+            self.combat_system.draw_attack_range_indicator(
+                self.screen, self.warrior, self.monster
+            )
 
             # Draw entities
             self.warrior.draw(self.screen)
@@ -270,7 +291,9 @@ class Game:
             for ground_item in self.ground_items:
                 ground_item.draw(self.screen)
 
-            self.combat_system.draw_attack_range_indicator(self.screen, self.warrior, self.monster)
+            self.combat_system.draw_attack_range_indicator(
+                self.screen, self.warrior, self.monster
+            )
             self.warrior.draw(self.screen)
             self.monster.draw(self.screen)
             self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
@@ -299,17 +322,23 @@ class Game:
 
         # Main message
         text = font_large.render(message, True, color)
-        text_rect = text.get_rect(center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2 - 50))
+        text_rect = text.get_rect(
+            center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2 - 50)
+        )
         self.screen.blit(text, text_rect)
 
         # Restart instruction
         restart_text = font_small.render("Press R to Restart", True, config.WHITE)
-        restart_rect = restart_text.get_rect(center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2 + 50))
+        restart_rect = restart_text.get_rect(
+            center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2 + 50)
+        )
         self.screen.blit(restart_text, restart_rect)
 
         # Exit instruction
         exit_text = font_small.render("Press ESC to Exit", True, config.WHITE)
-        exit_rect = exit_text.get_rect(center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2 + 100))
+        exit_rect = exit_text.get_rect(
+            center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2 + 100)
+        )
         self.screen.blit(exit_text, exit_rect)
 
     def _draw_message(self):
