@@ -6,3 +6,13 @@ requires-python = ">=3.13"
 dependencies = [
     "pygame>=2.6.1",
 ]
+
+[tool.boa-restrictor]
+# Disable Django-specific rules since this is a pygame project (python-only mode)
+enable_django_rules = false
+
+# Disable overly strict Python rules that would require extensive refactoring
+exclude = [
+    "PBR001",  # Positional arguments discouraged (too strict for this project)
+    "PBR002",  # Return type hints required (too strict for this project)
+]

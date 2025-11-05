@@ -1,9 +1,9 @@
-import pygame
 from enum import Enum
 
 
 class ItemType(Enum):
     """Types of items that can be stored in inventory"""
+
     WEAPON = "weapon"
     ARMOR = "armor"
     CONSUMABLE = "consumable"
@@ -13,8 +13,15 @@ class ItemType(Enum):
 class Item:
     """Represents an item that can be stored in inventory"""
 
-    def __init__(self, name: str, item_type: ItemType, description: str = "",
-                 attack_bonus: int = 0, defense_bonus: int = 0, health_bonus: int = 0):
+    def __init__(
+        self,
+        name: str,
+        item_type: ItemType,
+        description: str = "",
+        attack_bonus: int = 0,
+        defense_bonus: int = 0,
+        health_bonus: int = 0,
+    ):
         self.name = name
         self.item_type = item_type
         self.description = description
