@@ -9,8 +9,17 @@ from grid import Grid
 class Entity:
     """Base class for all game entities (warriors, monsters, etc.)."""
 
-    def __init__(self, grid_x: int, grid_y: int, size: int, color: Tuple[int, int, int],
-                 max_health: int, speed: int, attack_damage: int, attack_cooldown: int):
+    def __init__(
+        self,
+        grid_x: int,
+        grid_y: int,
+        size: int,
+        color: Tuple[int, int, int],
+        max_health: int,
+        speed: int,
+        attack_damage: int,
+        attack_cooldown: int,
+    ):
         """
         Initialize an entity.
 
@@ -54,16 +63,17 @@ class Entity:
         """Get the center position of the entity in pixels."""
         return (self.x + self.size / 2, self.y + self.size / 2)
 
-    def grid_distance_to(self, other: 'Entity') -> int:
+    def grid_distance_to(self, other: "Entity") -> int:
         """Calculate Manhattan distance to another entity in tiles."""
-        return Grid.manhattan_distance(self.grid_x, self.grid_y,
-                                      other.grid_x, other.grid_y)
+        return Grid.manhattan_distance(
+            self.grid_x, self.grid_y, other.grid_x, other.grid_y
+        )
 
     def can_attack(self) -> bool:
         """Check if entity can attack based on turn cooldown."""
         return self.turns_since_last_attack >= self.attack_cooldown
 
-    def attack(self, target: 'Entity') -> bool:
+    def attack(self, target: "Entity") -> bool:
         """
         Attempt to attack a target.
 
@@ -126,7 +136,9 @@ class Entity:
         # Health (green)
         health_ratio = self.health / self.max_health
         health_width = bar_width * health_ratio
-        pygame.draw.rect(screen, config.DARK_GREEN, (bar_x, bar_y, health_width, bar_height))
+        pygame.draw.rect(
+            screen, config.DARK_GREEN, (bar_x, bar_y, health_width, bar_height)
+        )
 
         # Border
         pygame.draw.rect(screen, config.WHITE, (bar_x, bar_y, bar_width, bar_height), 1)
