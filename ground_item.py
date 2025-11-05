@@ -38,12 +38,7 @@ class GroundItem:
         """Get collision rectangle for pickup detection."""
         # Small square in center of tile
         size = TILE_SIZE // 2
-        return pygame.Rect(
-            self.x - size // 2,
-            self.y - size // 2,
-            size,
-            size
-        )
+        return pygame.Rect(self.x - size // 2, self.y - size // 2, size, size)
 
     def draw(self, screen: pygame.Surface):
         """

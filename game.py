@@ -9,7 +9,6 @@ from inventory_ui import InventoryUI
 from item import Item, ItemType
 from chest import Chest
 from ground_item import GroundItem
-from grid import Grid
 import config
 
 
@@ -91,10 +90,10 @@ class Game:
         # Define positions where chests can spawn (avoid spawning on player or monster)
         # For now, manually place some chests at good locations
         chest_positions = [
-            (5, 3),   # Top middle area
+            (5, 3),  # Top middle area
             (10, 2),  # Top right area
-            (7, 5),   # Center
-            (3, 8),   # Bottom left
+            (7, 5),  # Center
+            (3, 8),  # Bottom left
             (12, 9),  # Bottom right
             (8, 10),  # Bottom center
         ]
@@ -223,7 +222,11 @@ class Game:
     def _check_chest_collision(self):
         """Check if warrior stepped on a chest and open it."""
         for chest in self.chests[:]:  # Iterate over copy to allow removal
-            if not chest.is_opened and chest.grid_x == self.warrior.grid_x and chest.grid_y == self.warrior.grid_y:
+            if (
+                not chest.is_opened
+                and chest.grid_x == self.warrior.grid_x
+                and chest.grid_y == self.warrior.grid_y
+            ):
                 # Open the chest
                 item = chest.open()
 
@@ -235,12 +238,17 @@ class Game:
                 self.chests.remove(chest)
 
                 # Show message
-                self._show_message(f"You open the chest. Inside you find a {item.name}!")
+                self._show_message(
+                    f"You open the chest. Inside you find a {item.name}!"
+                )
 
     def _check_ground_item_pickup(self):
         """Check if warrior is standing on a ground item and pick it up."""
         for ground_item in self.ground_items[:]:  # Iterate over copy to allow removal
-            if ground_item.grid_x == self.warrior.grid_x and ground_item.grid_y == self.warrior.grid_y:
+            if (
+                ground_item.grid_x == self.warrior.grid_x
+                and ground_item.grid_y == self.warrior.grid_y
+            ):
                 # Try to add item to inventory
                 if self.warrior.inventory.add_item(ground_item.item):
                     # Successfully added
@@ -348,7 +356,9 @@ class Game:
 
         # Draw semi-transparent background
         padding = 10
-        text_rect = text_surface.get_rect(center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT - 40))
+        text_rect = text_surface.get_rect(
+            center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT - 40)
+        )
         bg_rect = text_rect.inflate(padding * 2, padding * 2)
 
         bg_surface = pygame.Surface((bg_rect.width, bg_rect.height))
