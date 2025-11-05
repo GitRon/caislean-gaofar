@@ -119,7 +119,7 @@ class InventoryUI:
                 screen,
                 slot_x,
                 slot_y,
-                f"SLOT {i+1}",
+                f"SLOT {i + 1}",
                 inventory.backpack_slots[i],
                 is_selected=is_selected,
             )

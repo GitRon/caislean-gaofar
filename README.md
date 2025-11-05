@@ -48,15 +48,24 @@ The project includes a GitHub Actions workflow (`.github/workflows/qa.yml`) that
 - Pull requests targeting the `main` branch
 - Manual workflow dispatch (via GitHub Actions UI)
 
-#### Pipeline Stages
+#### Pipeline Jobs
 
+The pipeline consists of two separate jobs that run sequentially:
+
+**Job 1: Code Linting**
 1. **Checkout**: Clones the repository
 2. **Python Setup**: Configures Python 3.13 environment
-3. **Dependencies**: Installs `pre-commit` and `pytest`
-4. **Pre-commit Checks**: Runs all configured pre-commit hooks
-5. **Tests**: Executes pytest (extensible for future test additions)
+3. **Install pre-commit**: Installs pre-commit package
+4. **Hook Updates Check**: Runs `pre-commit autoupdate` to check for newer hook versions (allowed to fail)
+5. **Pre-commit Checks**: Runs all configured pre-commit hooks (must pass)
 
-The pipeline will fail if any pre-commit hook fails, ensuring code quality standards are maintained before merging.
+**Job 2: Testing** (only runs if linting passes)
+1. **Checkout**: Clones the repository
+2. **Python Setup**: Configures Python 3.13 environment
+3. **Install pytest**: Installs pytest package
+4. **Run Tests**: Executes pytest (extensible for future test additions)
+
+The pipeline will fail if any pre-commit hook fails, ensuring code quality standards are maintained. Testing only proceeds after successful linting.
 
 #### Manual Trigger
 
