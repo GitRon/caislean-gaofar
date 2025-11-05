@@ -7,6 +7,8 @@ from monsters import ALL_MONSTER_CLASSES
 from combat import CombatSystem
 from inventory_ui import InventoryUI
 from item import Item, ItemType
+from dropped_item import DroppedItem
+from loot_table import get_loot_for_monster
 import config
 
 
@@ -35,6 +37,9 @@ class Game:
         self.last_key_time = 0
         self.key_delay = 200  # milliseconds between key presses
 
+        # Ground items list
+        self.ground_items = []
+
         # Add sample items to warrior's inventory
         self._add_sample_items()
 
@@ -53,6 +58,41 @@ class Game:
         self.warrior.inventory.add_item(steel_sword)  # Goes to backpack
         self.warrior.inventory.add_item(health_potion)  # Goes to backpack
         self.warrior.inventory.add_item(gold_coin)  # Goes to backpack
+
+    def drop_item(self, item: Item, grid_x: int, grid_y: int):
+        """
+        Drop an item on the ground at specified grid coordinates.
+
+        Args:
+            item: The item to drop
+            grid_x: Grid x position
+            grid_y: Grid y position
+        """
+        dropped = DroppedItem(item, grid_x, grid_y)
+        self.ground_items.append(dropped)
+
+    def pickup_item_at_position(self, grid_x: int, grid_y: int) -> bool:
+        """
+        Try to pick up an item at the specified grid position.
+
+        Args:
+            grid_x: Grid x position
+            grid_y: Grid y position
+
+        Returns:
+            True if an item was picked up, False otherwise
+        """
+        # Find item at this position
+        for dropped_item in self.ground_items:
+            if dropped_item.grid_x == grid_x and dropped_item.grid_y == grid_y:
+                # Try to add to inventory
+                if self.warrior.inventory.add_item(dropped_item.item):
+                    self.ground_items.remove(dropped_item)
+                    return True
+                else:
+                    # Inventory full
+                    return False
+        return False
 
     def handle_events(self):
         """Handle pygame events."""
@@ -92,6 +132,10 @@ class Game:
                         elif event.key == pygame.K_SPACE:
                             self.warrior.queue_attack()
                             action_queued = True
+                        elif event.key == pygame.K_g:
+                            # Try to pick up item at player's position
+                            if self.pickup_item_at_position(self.warrior.grid_x, self.warrior.grid_y):
+                                action_queued = True
 
                         if action_queued:
                             self.waiting_for_player_input = False
@@ -99,7 +143,7 @@ class Game:
 
             # Handle inventory input when inventory is open
             if self.state == config.STATE_INVENTORY:
-                self.inventory_ui.handle_input(event, self.warrior.inventory)
+                self.inventory_ui.handle_input(event, self.warrior.inventory, self)
 
     def restart(self):
         """Restart the game."""
@@ -109,6 +153,7 @@ class Game:
         self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
         self.state = config.STATE_PLAYING
         self.waiting_for_player_input = True
+        self.ground_items = []  # Clear ground items
         self._add_sample_items()
 
     def update(self, dt: float):
@@ -129,14 +174,21 @@ class Game:
         # Check game over conditions
         if not self.warrior.is_alive:
             self.state = config.STATE_GAME_OVER
-        elif not self.monster.is_alive:
-            self.state = config.STATE_VICTORY
+        # Note: Game no longer auto-ends when monster is defeated
+        # Players can continue exploring and managing inventory
 
     def process_turn(self):
         """Process one complete turn (hero then monsters)."""
+        # Track if monster was alive before turn
+        monster_was_alive = self.monster.is_alive
+
         # Hero turn
         self.warrior.on_turn_start()
         self.warrior.execute_turn(self.monster)
+
+        # Check if monster died during hero's turn and drop loot
+        if monster_was_alive and not self.monster.is_alive:
+            self._drop_monster_loot()
 
         # Monster turns
         if self.monster.is_alive:
@@ -146,6 +198,13 @@ class Game:
         # Wait for next player input
         self.waiting_for_player_input = True
 
+    def _drop_monster_loot(self):
+        """Drop loot from defeated monster."""
+        if hasattr(self.monster, 'monster_type'):
+            loot_item = get_loot_for_monster(self.monster.monster_type)
+            if loot_item:
+                self.drop_item(loot_item, self.monster.grid_x, self.monster.grid_y)
+
     def draw(self):
         """Draw all game objects."""
         self.screen.fill(config.BLACK)
@@ -153,6 +212,10 @@ class Game:
         if self.state == config.STATE_PLAYING:
             # Draw attack range indicator
             self.combat_system.draw_attack_range_indicator(self.screen, self.warrior, self.monster)
+
+            # Draw ground items
+            for dropped_item in self.ground_items:
+                dropped_item.draw(self.screen)
 
             # Draw entities
             self.warrior.draw(self.screen)
@@ -164,6 +227,11 @@ class Game:
         elif self.state == config.STATE_INVENTORY:
             # Draw the game in the background
             self.combat_system.draw_attack_range_indicator(self.screen, self.warrior, self.monster)
+
+            # Draw ground items in background
+            for dropped_item in self.ground_items:
+                dropped_item.draw(self.screen)
+
             self.warrior.draw(self.screen)
             self.monster.draw(self.screen)
             self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)

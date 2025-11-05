@@ -164,10 +164,17 @@ class InventoryUI:
             text = self.small_font.render(instruction, True, (200, 200, 200))
             screen.blit(text, (panel_x + self.padding, panel_y + y_offset + i * 18))
 
-    def handle_input(self, event: pygame.event.Event, inventory: Inventory) -> bool:
+    def handle_input(self, event: pygame.event.Event, inventory: Inventory, game=None) -> bool:
         """
         Handle input events for inventory management.
-        Returns True if the event was handled.
+
+        Args:
+            event: The pygame event to handle
+            inventory: The inventory to manage
+            game: The game instance (needed for dropping items)
+
+        Returns:
+            True if the event was handled.
         """
         if event.type != pygame.KEYDOWN:
             return False
@@ -197,9 +204,12 @@ class InventoryUI:
 
         # Drop/remove item
         elif event.key == pygame.K_x:
-            if self.selected_slot:
+            if self.selected_slot and game:
                 slot_type, index = self.selected_slot
-                inventory.remove_item_from_slot(slot_type, index)
-                return True
+                item = inventory.remove_item_from_slot(slot_type, index)
+                if item:
+                    # Drop the item at the warrior's position
+                    game.drop_item(item, game.warrior.grid_x, game.warrior.grid_y)
+                    return True
 
         return False
