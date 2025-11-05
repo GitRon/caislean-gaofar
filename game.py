@@ -85,6 +85,22 @@ class Game:
         dropped = DroppedItem(item, grid_x, grid_y)
         self.ground_items.append(dropped)
 
+    def get_item_at_position(self, grid_x: int, grid_y: int):
+        """
+        Get the item at a specific position.
+
+        Args:
+            grid_x: Grid x position
+            grid_y: Grid y position
+
+        Returns:
+            DroppedItem if found, None otherwise
+        """
+        for dropped_item in self.ground_items:
+            if dropped_item.grid_x == grid_x and dropped_item.grid_y == grid_y:
+                return dropped_item
+        return None
+
     def pickup_item_at_position(self, grid_x: int, grid_y: int) -> bool:
         """
         Try to pick up an item at the specified grid position.
@@ -130,6 +146,11 @@ class Game:
                         self.state = config.STATE_INVENTORY
                     else:
                         self.state = config.STATE_PLAYING
+                # Handle pickup (instant, doesn't consume a turn)
+                elif event.key == pygame.K_g and self.state == config.STATE_PLAYING:
+                    self.pickup_item_at_position(
+                        self.warrior.grid_x, self.warrior.grid_y
+                    )
                 # Handle turn-based movement input
                 elif (
                     self.state == config.STATE_PLAYING and self.waiting_for_player_input
@@ -151,12 +172,6 @@ class Game:
                         elif event.key == pygame.K_SPACE:
                             self.warrior.queue_attack()
                             action_queued = True
-                        elif event.key == pygame.K_g:
-                            # Try to pick up item at player's position
-                            if self.pickup_item_at_position(
-                                self.warrior.grid_x, self.warrior.grid_y
-                            ):
-                                action_queued = True
 
                         if action_queued:
                             self.waiting_for_player_input = False
@@ -231,10 +246,11 @@ class Game:
         self.screen.fill(config.BLACK)
 
         if self.state == config.STATE_PLAYING:
-            # Draw attack range indicator
-            self.combat_system.draw_attack_range_indicator(
-                self.screen, self.warrior, self.monster
-            )
+            # Draw attack range indicator (only if monster is alive)
+            if self.monster.is_alive:
+                self.combat_system.draw_attack_range_indicator(
+                    self.screen, self.warrior, self.monster
+                )
 
             # Draw ground items
             for dropped_item in self.ground_items:
@@ -242,23 +258,51 @@ class Game:
 
             # Draw entities
             self.warrior.draw(self.screen)
-            self.monster.draw(self.screen)
+            if self.monster.is_alive:
+                self.monster.draw(self.screen)
 
             # Draw combat UI
             self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
 
+            # Draw pickup hint if standing on an item
+            item_here = self.get_item_at_position(
+                self.warrior.grid_x, self.warrior.grid_y
+            )
+            if item_here:
+                hint_font = pygame.font.Font(None, 28)
+                hint_text = hint_font.render(
+                    f"Press G to pick up {item_here.item.name}",
+                    True,
+                    config.YELLOW,
+                )
+                hint_rect = hint_text.get_rect(
+                    center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT - 30)
+                )
+                # Draw background for readability
+                bg_rect = pygame.Rect(
+                    hint_rect.x - 5,
+                    hint_rect.y - 2,
+                    hint_rect.width + 10,
+                    hint_rect.height + 4,
+                )
+                pygame.draw.rect(self.screen, config.BLACK, bg_rect)
+                pygame.draw.rect(self.screen, config.YELLOW, bg_rect, 2)
+                self.screen.blit(hint_text, hint_rect)
+
         elif self.state == config.STATE_INVENTORY:
             # Draw the game in the background
-            self.combat_system.draw_attack_range_indicator(
-                self.screen, self.warrior, self.monster
-            )
+            if self.monster.is_alive:
+                self.combat_system.draw_attack_range_indicator(
+                    self.screen, self.warrior, self.monster
+                )
 
             # Draw ground items in background
             for dropped_item in self.ground_items:
                 dropped_item.draw(self.screen)
 
             self.warrior.draw(self.screen)
-            self.monster.draw(self.screen)
+            if self.monster.is_alive:
+                self.monster.draw(self.screen)
             self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
 
             # Draw inventory overlay on top
