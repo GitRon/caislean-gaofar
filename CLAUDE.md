@@ -15,6 +15,33 @@ python main.py
 
 The project uses `uv` for dependency management (Python 3.13+) with pygame as the only dependency.
 
+## Git Branching Conventions
+
+**IMPORTANT**: When creating new branches for development, follow this naming convention:
+
+```
+<prefix>#<ticket-id>-<description>
+```
+
+**Prefix options**:
+- `feature` - For new features or enhancements
+- `refactor` - For code refactoring without changing functionality
+- `bugfix` - For bug fixes
+
+**Format rules**:
+- Use `#` followed by the ticket/issue ID
+- Follow with a descriptive name of the feature/issue
+- Replace all whitespaces with hyphens (`-`)
+- Use lowercase for consistency
+
+**Examples**:
+```
+feature#12-mouse-driven-inventory
+bugfix#23-monster-chase-behavior
+refactor#45-combat-system-cleanup
+feature#8-loot-system
+```
+
 ## Architecture
 
 ### Core Game Loop (game.py:165-174)
