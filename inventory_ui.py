@@ -14,7 +14,7 @@ class InventoryUI:
 
         # UI positioning
         self.panel_width = 500
-        self.panel_height = 400
+        self.panel_height = 500
         self.padding = 20
         self.slot_size = 80
         self.slot_margin = 10
@@ -151,10 +151,23 @@ class InventoryUI:
         label = self.font.render("BACKPACK", True, self.text_color)
         screen.blit(label, (panel_x + self.padding, start_y - 25))
 
-        # Draw 3 backpack slots
-        for i in range(3):
-            slot_x = panel_x + self.padding + i * (self.slot_size + self.slot_margin)
-            slot_y = start_y
+        # Draw 5 backpack slots (first row: 3 slots, second row: 2 slots)
+        for i in range(5):
+            if i < 3:
+                # First row
+                slot_x = (
+                    panel_x + self.padding + i * (self.slot_size + self.slot_margin)
+                )
+                slot_y = start_y
+            else:
+                # Second row (centered)
+                slot_x = (
+                    panel_x
+                    + self.padding
+                    + (i - 3) * (self.slot_size + self.slot_margin)
+                    + (self.slot_size + self.slot_margin) // 2
+                )
+                slot_y = start_y + self.slot_size + self.slot_margin
 
             is_selected = self.selected_slot == ("backpack", i)
             is_hovered = self.hovered_slot == ("backpack", i)
@@ -301,6 +314,12 @@ class InventoryUI:
                 return True
             elif event.key == pygame.K_5:
                 self.selected_slot = ("backpack", 2)
+                return True
+            elif event.key == pygame.K_6:
+                self.selected_slot = ("backpack", 3)
+                return True
+            elif event.key == pygame.K_7:
+                self.selected_slot = ("backpack", 4)
                 return True
 
             # Equip item from backpack
