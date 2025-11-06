@@ -10,6 +10,8 @@ jobs:
   build-release:
     name: Build Windows Executable
     runs-on: windows-latest
+    permissions:
+      contents: write
 
     steps:
       # 1. Checkout repository
@@ -44,26 +46,13 @@ jobs:
         run: |
           pyinstaller --onefile --windowed --name="CaisleanGaofar" main.py
 
-      # 7. Get version from tag
-      - name: Get version
-        id: version
-        shell: bash
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Building version: $VERSION"
-
-      # 8. Create GitHub Release
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # 7. Create GitHub Release and Upload Asset
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Caislean Gaofar ${{ steps.version.outputs.version }}
+          name: Caislean Gaofar ${{ github.ref_name }}
           body: |
-            ## Caislean Gaofar ${{ steps.version.outputs.version }}
+            ## Caislean Gaofar ${{ github.ref_name }}
 
             Windows standalone executable for Caislean Gaofar - A PyGame action RPG inspired by "Castle of the Winds".
 
@@ -76,16 +65,6 @@ jobs:
 
             ---
             **Note**: Windows Defender or other antivirus software may flag PyInstaller executables as suspicious. This is a false positive - the executable is safe to run.
+          files: ./dist/CaisleanGaofar.exe
           draft: false
           prerelease: false
-
-      # 9. Upload Release Asset
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/CaisleanGaofar.exe
-          asset_name: CaisleanGaofar.exe
-          asset_content_type: application/octet-stream
