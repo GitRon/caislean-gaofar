@@ -36,8 +36,6 @@ class TestWarrior:
         assert warrior.base_attack_damage == config.WARRIOR_ATTACK_DAMAGE
         assert warrior.inventory is not None
         assert warrior.pending_action is None
-        assert warrior.gold == 100
-        assert warrior.health_potions == 3
 
     def test_get_effective_attack_damage_no_bonuses(self):
         """Test effective attack damage with no inventory bonuses"""
@@ -338,7 +336,12 @@ class TestWarrior:
         # Arrange
         warrior = Warrior(5, 5)
         warrior.health = 50
-        initial_potions = warrior.health_potions
+        # Add health potion to inventory
+        potion = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores 30 HP", health_bonus=30
+        )
+        warrior.inventory.add_item(potion)
+        initial_potions = warrior.count_health_potions()
 
         # Act
         result = warrior.use_health_potion()
@@ -346,14 +349,19 @@ class TestWarrior:
         # Assert
         assert result is True
         assert warrior.health == 80  # 50 + 30
-        assert warrior.health_potions == initial_potions - 1
+        assert warrior.count_health_potions() == initial_potions - 1
 
     def test_use_health_potion_caps_at_max_health(self):
         """Test using health potion doesn't exceed max health"""
         # Arrange
         warrior = Warrior(5, 5)
         warrior.health = 90
-        initial_potions = warrior.health_potions
+        # Add health potion to inventory
+        potion = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores 30 HP", health_bonus=30
+        )
+        warrior.inventory.add_item(potion)
+        initial_potions = warrior.count_health_potions()
 
         # Act
         result = warrior.use_health_potion()
@@ -361,14 +369,14 @@ class TestWarrior:
         # Assert
         assert result is True
         assert warrior.health == warrior.max_health
-        assert warrior.health_potions == initial_potions - 1
+        assert warrior.count_health_potions() == initial_potions - 1
 
     def test_use_health_potion_no_potions_left(self):
         """Test using health potion fails when none available"""
         # Arrange
         warrior = Warrior(5, 5)
         warrior.health = 50
-        warrior.health_potions = 0
+        # No potions in inventory
 
         # Act
         result = warrior.use_health_potion()
@@ -376,14 +384,19 @@ class TestWarrior:
         # Assert
         assert result is False
         assert warrior.health == 50
-        assert warrior.health_potions == 0
+        assert warrior.count_health_potions() == 0
 
     def test_use_health_potion_at_full_health(self):
         """Test using health potion fails when at full health"""
         # Arrange
         warrior = Warrior(5, 5)
         warrior.health = warrior.max_health
-        initial_potions = warrior.health_potions
+        # Add health potion to inventory
+        potion = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores 30 HP", health_bonus=30
+        )
+        warrior.inventory.add_item(potion)
+        initial_potions = warrior.count_health_potions()
 
         # Act
         result = warrior.use_health_potion()
@@ -391,4 +404,92 @@ class TestWarrior:
         # Assert
         assert result is False
         assert warrior.health == warrior.max_health
-        assert warrior.health_potions == initial_potions
+        assert warrior.count_health_potions() == initial_potions
+
+    def test_count_health_potions_empty(self):
+        """Test counting health potions when none are in inventory"""
+        # Arrange
+        warrior = Warrior(5, 5)
+
+        # Act
+        count = warrior.count_health_potions()
+
+        # Assert
+        assert count == 0
+
+    def test_count_health_potions_multiple(self):
+        """Test counting multiple health potions"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        potion1 = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores HP", health_bonus=30
+        )
+        potion2 = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores HP", health_bonus=30
+        )
+        potion3 = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores HP", health_bonus=30
+        )
+        warrior.inventory.add_item(potion1)
+        warrior.inventory.add_item(potion2)
+        warrior.inventory.add_item(potion3)
+
+        # Act
+        count = warrior.count_health_potions()
+
+        # Assert
+        assert count == 3
+
+    def test_count_gold_empty(self):
+        """Test counting gold when none is in inventory"""
+        # Arrange
+        warrior = Warrior(5, 5)
+
+        # Act
+        gold = warrior.count_gold()
+
+        # Assert
+        assert gold == 0
+
+    def test_count_gold_single_item(self):
+        """Test counting gold from a single gold item"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        gold_item = Item("Gold Coins", ItemType.MISC, "Currency", health_bonus=100)
+        warrior.inventory.add_item(gold_item)
+
+        # Act
+        gold = warrior.count_gold()
+
+        # Assert
+        assert gold == 100
+
+    def test_count_gold_multiple_items(self):
+        """Test counting gold from multiple gold items"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        gold1 = Item("Gold Coins", ItemType.MISC, "Currency", health_bonus=50)
+        gold2 = Item("Gold Pouch", ItemType.MISC, "Currency", health_bonus=30)
+        warrior.inventory.add_item(gold1)
+        warrior.inventory.add_item(gold2)
+
+        # Act
+        gold = warrior.count_gold()
+
+        # Assert
+        assert gold == 80
+
+    def test_count_gold_ignores_non_gold_items(self):
+        """Test that count_gold ignores non-gold MISC items"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        gold_item = Item("Gold Coins", ItemType.MISC, "Currency", health_bonus=50)
+        misc_item = Item("Key", ItemType.MISC, "Opens doors", health_bonus=0)
+        warrior.inventory.add_item(gold_item)
+        warrior.inventory.add_item(misc_item)
+
+        # Act
+        gold = warrior.count_gold()
+
+        # Assert
+        assert gold == 50

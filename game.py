@@ -50,6 +50,9 @@ class Game:
         spawn_x, spawn_y = self.world_map.spawn_point
         self.warrior = Warrior(spawn_x, spawn_y)
 
+        # Add starting items to warrior inventory
+        self._add_starting_items()
+
         # Spawn monsters from map data
         self.monsters = []
         monster_spawns = self.world_map.get_entity_spawns("monsters")
@@ -636,6 +639,27 @@ class Game:
 
         # Draw text
         self.screen.blit(text_surface, text_rect)
+
+    def _add_starting_items(self):
+        """Add starting items (health potions and gold) to warrior inventory."""
+        # Add 3 health potions
+        for _ in range(3):
+            health_potion = Item(
+                name="Health Potion",
+                item_type=ItemType.CONSUMABLE,
+                description="Restores 30 HP",
+                health_bonus=30,
+            )
+            self.warrior.inventory.add_item(health_potion)
+
+        # Add gold (100 gold stored in health_bonus field)
+        gold_item = Item(
+            name="Gold Coins",
+            item_type=ItemType.MISC,
+            description="Gold currency",
+            health_bonus=100,
+        )
+        self.warrior.inventory.add_item(gold_item)
 
     def run(self):
         """Main game loop."""

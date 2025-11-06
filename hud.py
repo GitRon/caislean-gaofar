@@ -10,6 +10,12 @@ class HUD:
 
     def __init__(self):
         """Initialize the HUD with default values."""
+        # HUD positioning (right side of screen)
+        self.x = config.GAME_AREA_WIDTH
+        self.y = 0
+        self.width = config.HUD_WIDTH
+        self.height = config.HUD_HEIGHT
+
         # Animation state
         self.displayed_health = 0  # For smooth health animation
         self.animation_speed = 2.0  # Health bar animation speed
@@ -75,6 +81,10 @@ class HUD:
             screen: Pygame surface to draw on
             warrior: The warrior entity to display stats for
         """
+        # Draw HUD background
+        hud_rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        pygame.draw.rect(screen, self.wood_border, hud_rect)
+
         # Draw health bar panel
         self._draw_health_panel(screen, warrior)
 
@@ -122,11 +132,11 @@ class HUD:
             screen: Pygame surface to draw on
             warrior: The warrior entity
         """
-        # Panel dimensions and position (top-left)
-        panel_width = 280
+        # Panel dimensions and position (relative to HUD)
+        panel_width = self.width - 20  # Fit within HUD width with margins
         panel_height = 80
-        panel_x = 10
-        panel_y = 10
+        panel_x = self.x + 10
+        panel_y = self.y + 10
 
         # Create panel background (wooden frame)
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
@@ -139,9 +149,9 @@ class HUD:
         screen.blit(title_text, (panel_x + 10, panel_y + 8))
 
         # Health bar dimensions
-        bar_width = 240
+        bar_width = panel_width - 40  # Fit within panel with margins
         bar_height = 24
-        bar_x = panel_x + 20
+        bar_x = panel_x + 10
         bar_y = panel_y + 38
 
         # Calculate health percentage
@@ -198,11 +208,11 @@ class HUD:
             screen: Pygame surface to draw on
             warrior: The warrior entity
         """
-        # Panel dimensions and position (below health)
-        panel_width = 280
+        # Panel dimensions and position (below health, relative to HUD)
+        panel_width = self.width - 20
         panel_height = 70
-        panel_x = 10
-        panel_y = 100
+        panel_x = self.x + 10
+        panel_y = self.y + 100
 
         # Create panel background
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
@@ -243,21 +253,20 @@ class HUD:
         pygame.draw.rect(screen, (255, 100, 100), highlight)
 
         # Draw potion count
-        font_title = pygame.font.Font(None, 24)
-        title_text = font_title.render("Health Potions", True, self.ornate_gold)
-        screen.blit(title_text, (panel_x + 65, panel_y + 10))
+        font_title = pygame.font.Font(None, 20)
+        title_text = font_title.render("Potions", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 10))
 
         # Draw count (large and prominent)
-        font_count = pygame.font.Font(None, 42)
-        count_text = font_count.render(
-            f"x {warrior.health_potions}", True, self.text_color
-        )
-        screen.blit(count_text, (panel_x + 70, panel_y + 30))
+        font_count = pygame.font.Font(None, 36)
+        potion_count = warrior.count_health_potions()
+        count_text = font_count.render(f"x {potion_count}", True, self.text_color)
+        screen.blit(count_text, (panel_x + 60, panel_y + 30))
 
         # Draw usage hint
-        font_hint = pygame.font.Font(None, 18)
-        hint_text = font_hint.render("Press P to use", True, config.GRAY)
-        screen.blit(hint_text, (panel_x + 180, panel_y + 42))
+        font_hint = pygame.font.Font(None, 16)
+        hint_text = font_hint.render("Press P", True, config.GRAY)
+        screen.blit(hint_text, (panel_x + 130, panel_y + 40))
 
     def _draw_currency_panel(self, screen: pygame.Surface, warrior):
         """
@@ -267,11 +276,11 @@ class HUD:
             screen: Pygame surface to draw on
             warrior: The warrior entity
         """
-        # Panel dimensions and position (below potions)
-        panel_width = 280
+        # Panel dimensions and position (below potions, relative to HUD)
+        panel_width = self.width - 20
         panel_height = 60
-        panel_x = 10
-        panel_y = 180
+        panel_x = self.x + 10
+        panel_y = self.y + 180
 
         # Create panel background
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
@@ -302,7 +311,8 @@ class HUD:
         screen.blit(title_text, (panel_x + 60, panel_y + 8))
 
         font_gold = pygame.font.Font(None, 36)
-        gold_text = font_gold.render(f"{warrior.gold}", True, self.text_color)
+        gold_amount = warrior.count_gold()
+        gold_text = font_gold.render(f"{gold_amount}", True, self.text_color)
         screen.blit(gold_text, (panel_x + 60, panel_y + 26))
 
     def _draw_critical_health_warning(self, screen: pygame.Surface):
@@ -312,42 +322,42 @@ class HUD:
         Args:
             screen: Pygame surface to draw on
         """
-        # Pulsing red vignette effect
+        # Pulsing red vignette effect (only on game area, not HUD)
         alpha = int(80 * (0.5 + 0.5 * math.sin(self.critical_health_timer / 200)))
 
-        # Create semi-transparent red overlay at screen edges
-        overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        # Create semi-transparent red overlay at game area edges
+        overlay = pygame.Surface((config.GAME_AREA_WIDTH, config.GAME_AREA_HEIGHT))
         overlay.set_alpha(alpha)
         overlay.fill((139, 0, 0))
 
         # Draw vignette (darker at edges)
         # Top
-        pygame.draw.rect(overlay, (139, 0, 0), (0, 0, config.SCREEN_WIDTH, 50))
+        pygame.draw.rect(overlay, (139, 0, 0), (0, 0, config.GAME_AREA_WIDTH, 50))
         # Bottom
         pygame.draw.rect(
             overlay,
             (139, 0, 0),
-            (0, config.SCREEN_HEIGHT - 50, config.SCREEN_WIDTH, 50),
+            (0, config.GAME_AREA_HEIGHT - 50, config.GAME_AREA_WIDTH, 50),
         )
         # Left
-        pygame.draw.rect(overlay, (139, 0, 0), (0, 0, 50, config.SCREEN_HEIGHT))
+        pygame.draw.rect(overlay, (139, 0, 0), (0, 0, 50, config.GAME_AREA_HEIGHT))
         # Right
         pygame.draw.rect(
             overlay,
             (139, 0, 0),
-            (config.SCREEN_WIDTH - 50, 0, 50, config.SCREEN_HEIGHT),
+            (config.GAME_AREA_WIDTH - 50, 0, 50, config.GAME_AREA_HEIGHT),
         )
 
         screen.blit(overlay, (0, 0))
 
-        # Draw warning text (pulsing)
+        # Draw warning text (pulsing) - centered in game area
         if int(self.critical_health_timer / 500) % 2 == 0:
             font_warning = pygame.font.Font(None, 32)
             warning_text = font_warning.render(
                 "LOW HEALTH!", True, self.health_critical
             )
             warning_rect = warning_text.get_rect(
-                center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT - 30)
+                center=(config.GAME_AREA_WIDTH // 2, config.GAME_AREA_HEIGHT - 30)
             )
 
             # Add shadow
