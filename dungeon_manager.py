@@ -95,7 +95,9 @@ class DungeonManager:
                     return dungeon_id
         return None
 
-    def enter_dungeon(self, dungeon_id: str, player_x: int, player_y: int) -> Tuple[int, int]:
+    def enter_dungeon(
+        self, dungeon_id: str, player_x: int, player_y: int
+    ) -> Tuple[int, int]:
         """
         Enter a dungeon and return spawn point.
 
@@ -161,6 +163,6 @@ class DungeonManager:
         # Check if position is an exit tile (marked with '<' character)
         if current_map.is_valid_position(grid_x, grid_y):
             terrain_char = current_map.tiles[grid_y][grid_x]
-            return terrain_char == '<'
+            return terrain_char == "<"
 
         return False

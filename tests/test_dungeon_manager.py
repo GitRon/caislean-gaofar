@@ -230,13 +230,26 @@ class TestDungeonManager:
         dungeon_path = os.path.join("maps", "dark_cave.json")
         manager.load_dungeon("dark_cave", dungeon_path)
 
-        # Enter and exit multiple times
-        for x, y in [(11, 15), (20, 20), (5, 5)]:
-            manager.current_map_id = "world"  # Reset to world
-            manager.enter_dungeon("dark_cave", x, y)
-            return_x, return_y = manager.exit_dungeon()
-            assert return_x == x
-            assert return_y == y
+        # Test first entry/exit
+        manager.current_map_id = "world"
+        manager.enter_dungeon("dark_cave", 11, 15)
+        return_x, return_y = manager.exit_dungeon()
+        assert return_x == 11
+        assert return_y == 15
+
+        # Test second entry/exit
+        manager.current_map_id = "world"
+        manager.enter_dungeon("dark_cave", 20, 20)
+        return_x, return_y = manager.exit_dungeon()
+        assert return_x == 20
+        assert return_y == 20
+
+        # Test third entry/exit
+        manager.current_map_id = "world"
+        manager.enter_dungeon("dark_cave", 5, 5)
+        return_x, return_y = manager.exit_dungeon()
+        assert return_x == 5
+        assert return_y == 5
 
     def test_check_for_exit_invalid_position(self):
         """Test exit check with invalid position returns False."""
