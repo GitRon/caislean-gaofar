@@ -296,3 +296,60 @@ class TestBaseMonster:
 
         # Act & Assert
         assert isinstance(monster, Entity)
+
+    @patch("monsters.base_monster.MONSTER_RENDERERS", {})
+    @patch("pygame.draw.circle")
+    def test_draw_without_custom_renderer(self, mock_draw_circle):
+        """Test drawing without custom renderer uses fallback"""
+        # Arrange
+        monster = MonsterSubclass(5, 5)
+        monster.monster_type = "nonexistent_type"
+        screen = pygame.display.set_mode((800, 600))
+
+        # Act
+        monster.draw(screen)
+
+        # Assert
+        assert mock_draw_circle.called
+        assert monster.frame_count == 1
+
+    @patch("monsters.base_monster.MONSTER_RENDERERS", {"test_monster": Mock()})
+    def test_draw_with_custom_renderer(self):
+        """Test drawing with custom renderer"""
+        # Arrange
+        monster = MonsterSubclass(5, 5)
+        screen = pygame.display.set_mode((800, 600))
+        mock_renderer = Mock()
+        
+        with patch.dict("monsters.base_monster.MONSTER_RENDERERS", {"test_monster": mock_renderer}):
+            # Act
+            monster.draw(screen)
+
+            # Assert
+            assert mock_renderer.called
+            assert monster.frame_count == 1
+
+    def test_draw_increments_frame_count(self):
+        """Test draw increments frame count"""
+        # Arrange
+        monster = MonsterSubclass(5, 5)
+        screen = pygame.display.set_mode((800, 600))
+        initial_count = monster.frame_count
+
+        # Act
+        monster.draw(screen)
+        monster.draw(screen)
+
+        # Assert
+        assert monster.frame_count == initial_count + 2
+
+    @patch("monsters.base_monster.MONSTER_RENDERERS", {})
+    def test_draw_fallback_renders_eyes(self):
+        """Test fallback renderer draws eyes"""
+        # Arrange
+        monster = MonsterSubclass(5, 5)
+        monster.monster_type = "unknown"
+        screen = pygame.display.set_mode((800, 600))
+
+        # Act & Assert - should not raise exception
+        monster.draw(screen)

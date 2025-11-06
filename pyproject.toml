@@ -25,14 +25,24 @@ addopts = [
 
 [tool.coverage.run]
 source = ["."]
+branch = true
 omit = [
     "tests/*",
     "main.py",
     ".venv/*",
     "venv/*",
+    # UI/Rendering code excluded from 100% requirement
+    "game.py",
+    "inventory_ui.py",
+    "monster_renderer.py",
 ]
 
 [tool.coverage.report]
+# Enforce 100% branch coverage on core logic modules
+fail_under = 100
+precision = 2
+skip_covered = false
+skip_empty = true
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",

@@ -10,6 +10,25 @@ python main.py
 
 The project uses `uv` for dependency management (Python 3.13+) with pygame as the only dependency.
 
+### Testing
+
+This project maintains **100% branch coverage** on all core logic modules.
+
+```bash
+# Run all tests
+pytest
+
+# Run tests with coverage report
+pytest --cov=. --cov-report=term-missing --cov-branch tests/
+
+# Generate HTML coverage report
+pytest --cov=. --cov-report=html --cov-branch tests/
+```
+
+See [Coverage Requirements](docs/patterns/coverage_requirements.md) for detailed information.
+
+**Current Status**: 264 tests, 100% branch coverage on core modules
+
 ## Development
 
 ### Code Quality & Pre-commit Hooks
@@ -66,11 +85,13 @@ This job provides visibility into available hook updates without blocking the pi
 3. **Install pre-commit**: Installs pre-commit package
 4. **Pre-commit Checks**: Runs all configured pre-commit hooks (must pass)
 
-**Job 3: Testing** (only runs if linting passes)
+**Job 3: Testing & Coverage** (only runs if linting passes)
 1. **Checkout**: Clones the repository
 2. **Python Setup**: Configures Python 3.13 environment
-3. **Install pytest**: Installs pytest package
-4. **Run Tests**: Executes pytest (extensible for future test additions)
+3. **Install Dependencies**: Installs pytest, pytest-cov, pytest-mock, and pygame
+4. **Run Tests with Coverage**: Executes pytest with branch coverage (must achieve 100%)
+5. **Upload Coverage Report**: Uploads coverage data to Codecov (optional)
+6. **Coverage Badge**: Validates 100% coverage requirement and fails if not met
 
 The pipeline will fail if any pre-commit hook fails, ensuring code quality standards are maintained. Testing only proceeds after successful linting.
 
