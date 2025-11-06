@@ -6,6 +6,12 @@ SCREEN_HEIGHT = 600
 FPS = 60
 TITLE = "Warrior vs Monster"
 
+# HUD layout settings
+HUD_WIDTH = 200
+HUD_HEIGHT = 600
+GAME_AREA_WIDTH = 600  # SCREEN_WIDTH - HUD_WIDTH
+GAME_AREA_HEIGHT = 600  # SCREEN_HEIGHT
+
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -28,6 +34,8 @@ COLOR_CHEST = BROWN
 TILE_SIZE = 50  # Size of each grid tile
 GRID_WIDTH = SCREEN_WIDTH // TILE_SIZE  # 16 tiles
 GRID_HEIGHT = SCREEN_HEIGHT // TILE_SIZE  # 12 tiles
+GAME_GRID_WIDTH = GAME_AREA_WIDTH // TILE_SIZE  # 12 tiles (for game area without HUD)
+GAME_GRID_HEIGHT = GAME_AREA_HEIGHT // TILE_SIZE  # 12 tiles
 
 # Entity settings
 WARRIOR_SIZE = TILE_SIZE  # Same as tile size

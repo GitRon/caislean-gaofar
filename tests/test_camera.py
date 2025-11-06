@@ -17,8 +17,8 @@ class TestCamera:
         assert camera.world_height == 30
         assert camera.x == 0
         assert camera.y == 0
-        assert camera.viewport_width == config.GRID_WIDTH
-        assert camera.viewport_height == config.GRID_HEIGHT
+        assert camera.viewport_width == config.GAME_GRID_WIDTH
+        assert camera.viewport_height == config.GAME_GRID_HEIGHT
 
     def test_update_centers_on_player(self):
         """Test camera centers on player position"""

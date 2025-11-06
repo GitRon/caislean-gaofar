@@ -7,12 +7,12 @@ from warrior import Warrior
 from monsters import ALL_MONSTER_CLASSES
 from combat import CombatSystem
 from inventory_ui import InventoryUI
-from ui_button import Button
 from item import Item, ItemType
 from camera import Camera
 from chest import Chest
 from ground_item import GroundItem
 from loot_table import get_loot_for_monster
+from hud import HUD
 from dungeon_manager import DungeonManager
 import config
 
@@ -60,20 +60,15 @@ class Game:
         spawn_x, spawn_y = self.world_map.spawn_point
         self.warrior = Warrior(spawn_x, spawn_y)
 
+        # Add starting items to warrior inventory
+        self._add_starting_items()
+
         # Spawn monsters from map data
         self._spawn_monsters()
 
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
-
-        # Create UI button for inventory
-        button_width = 100
-        button_height = 40
-        button_x = config.SCREEN_WIDTH - button_width - 10
-        button_y = 10
-        self.inventory_button = Button(
-            button_x, button_y, button_width, button_height, "Inventory (I)"
-        )
+        self.hud = HUD()
 
         # Turn-based state
         self.waiting_for_player_input = True
@@ -237,11 +232,6 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                # Handle inventory button click (only when playing)
-                if event.button == 1 and self.state == config.STATE_PLAYING:
-                    if self.inventory_button.is_clicked(event.pos):
-                        self.state = config.STATE_INVENTORY
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
@@ -262,6 +252,16 @@ class Game:
                     self.pickup_item_at_position(
                         self.warrior.grid_x, self.warrior.grid_y
                     )
+                # Handle health potion usage (instant, doesn't consume a turn)
+                elif event.key == pygame.K_p and self.state == config.STATE_PLAYING:
+                    if self.warrior.use_health_potion():
+                        self.hud.trigger_potion_glow()
+                        self._show_message("Used health potion! +30 HP")
+                    else:
+                        if self.warrior.count_health_potions() <= 0:
+                            self._show_message("No health potions remaining!")
+                        else:
+                            self._show_message("Health is already full!")
                 # Handle turn-based movement input
                 elif (
                     self.state == config.STATE_PLAYING and self.waiting_for_player_input
@@ -328,6 +328,9 @@ class Game:
             self.message_timer -= self.clock.get_time()
             if self.message_timer <= 0:
                 self.message = ""
+
+        # Update HUD (always update for animations)
+        self.hud.update(self.warrior, dt)
 
         # Only update game logic when actively playing
         if self.state != config.STATE_PLAYING:
@@ -529,12 +532,12 @@ class Game:
                     self.screen, self.warrior, nearest_monster
                 )
 
+            # Draw HUD (player stats, potions, gold)
+            self.hud.draw(self.screen, self.warrior)
+
             # Draw message if active
             if self.message:
                 self._draw_message()
-
-            # Draw inventory button
-            self.inventory_button.draw(self.screen)
 
         elif self.state == config.STATE_INVENTORY:
             # Draw the game in the background
@@ -552,6 +555,9 @@ class Game:
                 self.combat_system.draw_combat_ui(
                     self.screen, self.warrior, nearest_monster
                 )
+
+            # Draw HUD (player stats, potions, gold)
+            self.hud.draw(self.screen, self.warrior)
 
             # Draw inventory overlay on top
             self.inventory_ui.draw(self.screen, self.warrior.inventory)
@@ -681,6 +687,40 @@ class Game:
 
         # Draw text
         self.screen.blit(text_surface, text_rect)
+
+    def _add_starting_items(self):
+        """Add starting items (health potions and gold) to warrior inventory."""
+        # Add 3 health potions
+        health_potion1 = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
+        )
+        health_potion2 = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
+        )
+        health_potion3 = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
+        )
+        self.warrior.inventory.add_item(health_potion1)
+        self.warrior.inventory.add_item(health_potion2)
+        self.warrior.inventory.add_item(health_potion3)
+
+        # Add starting gold as currency item
+        gold_item = Item(
+            name="Gold Coins",
+            item_type=ItemType.MISC,
+            description="Gold currency",
+            gold_value=100,
+        )
+        self.warrior.inventory.add_item(gold_item)
 
     def run(self):
         """Main game loop."""

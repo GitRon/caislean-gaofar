@@ -20,9 +20,9 @@ class Camera:
         self.x = 0  # Camera position in grid coordinates
         self.y = 0
 
-        # Viewport dimensions in tiles
-        self.viewport_width = config.GRID_WIDTH
-        self.viewport_height = config.GRID_HEIGHT
+        # Viewport dimensions in tiles (use game area, not full screen)
+        self.viewport_width = config.GAME_GRID_WIDTH
+        self.viewport_height = config.GAME_GRID_HEIGHT
 
     def update(self, player_grid_x: int, player_grid_y: int) -> None:
         """

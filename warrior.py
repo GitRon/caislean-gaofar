@@ -3,6 +3,7 @@
 import pygame
 from entity import Entity
 from inventory import Inventory
+from item import ItemType
 import config
 
 
@@ -28,6 +29,54 @@ class Warrior(Entity):
     def get_effective_attack_damage(self) -> int:
         """Get total attack damage including inventory bonuses."""
         return self.base_attack_damage + self.inventory.get_total_attack_bonus()
+
+    def count_health_potions(self) -> int:
+        """
+        Count health potions in inventory.
+
+        Returns:
+            Number of health potions in inventory
+        """
+        count = 0
+        for item in self.inventory.backpack_slots:
+            if item and item.item_type == ItemType.CONSUMABLE:
+                count += 1
+        return count
+
+    def count_gold(self) -> int:
+        """
+        Count gold coins in inventory.
+
+        Returns:
+            Total gold value from all items with gold_value > 0
+        """
+        gold = 0
+        for item in self.inventory.backpack_slots:
+            if item and item.gold_value > 0:
+                gold += item.gold_value
+        return gold
+
+    def use_health_potion(self) -> bool:
+        """
+        Use a health potion from inventory to restore health.
+
+        Returns:
+            True if potion was used successfully, False if no potions available
+        """
+        if self.health >= self.max_health:
+            return False
+
+        # Find first health potion in backpack
+        for i, item in enumerate(self.inventory.backpack_slots):
+            if item and item.item_type == ItemType.CONSUMABLE:
+                # Use the potion
+                heal_amount = item.health_bonus if item.health_bonus > 0 else 30
+                self.health = min(self.max_health, self.health + heal_amount)
+                # Remove from inventory
+                self.inventory.backpack_slots[i] = None
+                return True
+
+        return False
 
     def attack(self, target: "Entity") -> bool:
         """
