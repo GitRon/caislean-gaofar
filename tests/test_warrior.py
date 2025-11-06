@@ -317,7 +317,7 @@ class TestWarrior:
         assert hasattr(warrior, "inventory")
         assert warrior.inventory.weapon_slot is None
         assert warrior.inventory.armor_slot is None
-        assert warrior.inventory.backpack_slots == [None, None, None]
+        assert warrior.inventory.backpack_slots == [None, None, None, None, None]
 
     def test_execute_turn_unknown_action_type(self):
         """Test execute_turn with unknown action type returns False"""
