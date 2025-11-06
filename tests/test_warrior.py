@@ -285,10 +285,19 @@ class TestWarrior:
         assert target.health == 100
         assert warrior.pending_action is None
 
-    @patch("pygame.draw.line")
+    @patch("pygame.draw.arc")
+    @patch("pygame.draw.ellipse")
+    @patch("pygame.draw.circle")
     @patch("pygame.draw.rect")
-    def test_draw_warrior(self, mock_draw_rect, mock_draw_line, mock_screen):
-        """Test drawing warrior with cross pattern"""
+    def test_draw_warrior(
+        self,
+        mock_draw_rect,
+        mock_draw_circle,
+        mock_draw_ellipse,
+        mock_draw_arc,
+        mock_screen,
+    ):
+        """Test drawing warrior as detailed human character"""
         # Arrange
         warrior = Warrior(5, 5)
 
@@ -296,9 +305,11 @@ class TestWarrior:
         warrior.draw(mock_screen)
 
         # Assert
-        assert mock_draw_rect.called
-        assert mock_draw_line.called
-        assert mock_draw_line.call_count == 2  # vertical and horizontal lines
+        # Verify all drawing methods are called for the detailed human character
+        assert mock_draw_rect.called  # Body, arms, legs, boots, sword
+        assert mock_draw_circle.called  # Head and eyes
+        assert mock_draw_ellipse.called  # Hair
+        assert mock_draw_arc.called  # Smile
 
     def test_warrior_inherits_from_entity(self):
         """Test Warrior inherits from Entity"""

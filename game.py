@@ -8,12 +8,12 @@ from monsters import ALL_MONSTER_CLASSES
 from combat import CombatSystem
 from inventory_ui import InventoryUI
 from item import Item, ItemType
-from world_map import WorldMap
 from camera import Camera
 from chest import Chest
 from ground_item import GroundItem
 from loot_table import get_loot_for_monster
 from hud import HUD
+from dungeon_manager import DungeonManager
 import config
 
 
@@ -36,11 +36,22 @@ class Game:
         self.running = True
         self.state = config.STATE_PLAYING
 
-        # Load world map
-        self.world_map = WorldMap()
+        # Initialize dungeon manager
         if map_file is None:
             map_file = os.path.join("maps", "sample_map.json")
-        self.world_map.load_from_file(map_file)
+        self.dungeon_manager = DungeonManager(map_file)
+        self.dungeon_manager.load_world_map()
+
+        # Load dungeons
+        self.dungeon_manager.load_dungeon(
+            "dark_cave", os.path.join("maps", "dark_cave.json")
+        )
+        self.dungeon_manager.load_dungeon(
+            "ancient_castle", os.path.join("maps", "ancient_castle.json")
+        )
+
+        # Get current map (initially world map)
+        self.world_map = self.dungeon_manager.get_current_map()
 
         # Initialize camera
         self.camera = Camera(self.world_map.width, self.world_map.height)
@@ -53,26 +64,7 @@ class Game:
         self._add_starting_items()
 
         # Spawn monsters from map data
-        self.monsters = []
-        monster_spawns = self.world_map.get_entity_spawns("monsters")
-        for spawn in monster_spawns:
-            monster_type = spawn.get("type", "banshee")
-            # Find matching monster class
-            monster_class = None
-            for cls in ALL_MONSTER_CLASSES:
-                if cls.MONSTER_TYPE == monster_type:
-                    monster_class = cls
-                    break
-            if monster_class is None:
-                monster_class = random.choice(ALL_MONSTER_CLASSES)
-            monster = monster_class(spawn["x"], spawn["y"])
-            self.monsters.append(monster)
-
-        # If no monsters in map, spawn one randomly
-        if not self.monsters:
-            monster_class = random.choice(ALL_MONSTER_CLASSES)
-            monster = monster_class(spawn_x + 5, spawn_y)
-            self.monsters.append(monster)
+        self._spawn_monsters()
 
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
@@ -97,6 +89,30 @@ class Game:
 
         # Spawn chests in the dungeon
         self._spawn_chests()
+
+    def _spawn_monsters(self):
+        """Spawn monsters from current map data."""
+        self.monsters = []
+        monster_spawns = self.world_map.get_entity_spawns("monsters")
+        for spawn in monster_spawns:
+            monster_type = spawn.get("type", "banshee")
+            # Find matching monster class
+            monster_class = None
+            for cls in ALL_MONSTER_CLASSES:
+                if cls.MONSTER_TYPE == monster_type:
+                    monster_class = cls
+                    break
+            if monster_class is None:
+                monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn["x"], spawn["y"])
+            self.monsters.append(monster)
+
+        # If no monsters in map, spawn one randomly
+        if not self.monsters:
+            spawn_x, spawn_y = self.world_map.spawn_point
+            monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn_x + 5, spawn_y)
+            self.monsters.append(monster)
 
     def _add_sample_items(self):
         """Add sample items to the warrior's inventory for testing."""
@@ -278,28 +294,19 @@ class Game:
 
     def restart(self):
         """Restart the game."""
+        # Reset to world map
+        self.dungeon_manager.current_map_id = "world"
+        self.dungeon_manager.return_location = None
+        self.world_map = self.dungeon_manager.get_current_map()
+
+        # Update camera for new map
+        self.camera = Camera(self.world_map.width, self.world_map.height)
+
         spawn_x, spawn_y = self.world_map.spawn_point
         self.warrior = Warrior(spawn_x, spawn_y)
 
         # Respawn monsters from map data
-        self.monsters = []
-        monster_spawns = self.world_map.get_entity_spawns("monsters")
-        for spawn in monster_spawns:
-            monster_type = spawn.get("type", "banshee")
-            monster_class = None
-            for cls in ALL_MONSTER_CLASSES:
-                if cls.MONSTER_TYPE == monster_type:
-                    monster_class = cls
-                    break
-            if monster_class is None:
-                monster_class = random.choice(ALL_MONSTER_CLASSES)
-            monster = monster_class(spawn["x"], spawn["y"])
-            self.monsters.append(monster)
-
-        if not self.monsters:
-            monster_class = random.choice(ALL_MONSTER_CLASSES)
-            monster = monster_class(spawn_x + 5, spawn_y)
-            self.monsters.append(monster)
+        self._spawn_monsters()
 
         self.state = config.STATE_PLAYING
         self.waiting_for_player_input = True
@@ -358,6 +365,9 @@ class Game:
 
         self.warrior.execute_turn(nearest_monster, self.world_map)
 
+        # Check for dungeon entrance/exit after warrior moves
+        self._check_dungeon_transition()
+
         # Check for chest collision after warrior moves
         self._check_chest_collision()
 
@@ -375,6 +385,62 @@ class Game:
 
         # Wait for next player input
         self.waiting_for_player_input = True
+
+    def _check_dungeon_transition(self):
+        """Check if player is entering or exiting a dungeon."""
+        player_x = self.warrior.grid_x
+        player_y = self.warrior.grid_y
+
+        # Check if exiting dungeon
+        if self.dungeon_manager.check_for_exit(player_x, player_y):
+            return_pos = self.dungeon_manager.exit_dungeon()
+            if return_pos:
+                # Update map reference
+                self.world_map = self.dungeon_manager.get_current_map()
+
+                # Update camera for new map
+                self.camera = Camera(self.world_map.width, self.world_map.height)
+
+                # Move player to return location
+                self.warrior.grid_x, self.warrior.grid_y = return_pos
+
+                # Respawn monsters and chests for world map
+                self._spawn_monsters()
+                self._spawn_chests()
+                self.ground_items = []
+
+                self._show_message("You return to the world map.")
+                return
+
+        # Check if entering dungeon
+        dungeon_id = self.dungeon_manager.get_dungeon_at_position(player_x, player_y)
+        if dungeon_id:
+            # Enter the dungeon
+            spawn_x, spawn_y = self.dungeon_manager.enter_dungeon(
+                dungeon_id, player_x, player_y
+            )
+
+            # Update map reference
+            self.world_map = self.dungeon_manager.get_current_map()
+
+            # Update camera for new map
+            self.camera = Camera(self.world_map.width, self.world_map.height)
+
+            # Move player to dungeon spawn
+            self.warrior.grid_x = spawn_x
+            self.warrior.grid_y = spawn_y
+
+            # Spawn monsters and chests for dungeon
+            self._spawn_monsters()
+            self._spawn_chests()
+            self.ground_items = []
+
+            # Get dungeon name for message
+            for spawn in self.dungeon_manager.world_map.get_entity_spawns("dungeons"):
+                if spawn.get("id") == dungeon_id:
+                    dungeon_name = spawn.get("name", "dungeon")
+                    self._show_message(f"You enter the {dungeon_name}!")
+                    break
 
     def _check_chest_collision(self):
         """Check if warrior stepped on a chest and open it."""
