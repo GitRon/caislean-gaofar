@@ -24,9 +24,12 @@ class TestGame:
         # Assert
         assert game.state == config.STATE_PLAYING
         assert game.warrior is not None
-        assert game.monster is not None
+        assert game.monsters is not None
+        assert len(game.monsters) > 0
         assert game.combat_system is not None
         assert game.inventory_ui is not None
+        assert game.world_map is not None
+        assert game.camera is not None
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")

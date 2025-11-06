@@ -74,12 +74,13 @@ class Warrior(Entity):
         """Queue an attack action for the next turn."""
         self.pending_action = ("attack",)
 
-    def execute_turn(self, target: "Entity" = None) -> bool:
+    def execute_turn(self, target: "Entity" = None, world_map=None) -> bool:
         """
         Execute the queued action for this turn.
 
         Args:
             target: Target entity for attack actions
+            world_map: Optional WorldMap object for movement validation
 
         Returns:
             True if an action was executed, False otherwise
@@ -91,7 +92,7 @@ class Warrior(Entity):
 
         if action_type == "move":
             _, dx, dy = self.pending_action
-            self.move(dx, dy)
+            self.move(dx, dy, world_map)
             self.pending_action = None
             return True
         elif action_type == "attack":
