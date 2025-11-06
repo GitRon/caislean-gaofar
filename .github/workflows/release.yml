@@ -1,0 +1,91 @@
+name: Build and Release Windows Executable
+
+# Trigger on version tags (e.g., v1.0.0, v1.1.0)
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-release:
+    name: Build Windows Executable
+    runs-on: windows-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Python 3.13
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # 3. Install uv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      # 4. Install dependencies using uv with lock file
+      - name: Install dependencies
+        run: |
+          uv sync --frozen
+
+      # 5. Install PyInstaller
+      - name: Install PyInstaller
+        run: |
+          uv pip install --system pyinstaller
+
+      # 6. Build Windows executable
+      - name: Build executable
+        run: |
+          pyinstaller --onefile --windowed --name="CaisleanGaofar" main.py
+
+      # 7. Get version from tag
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      # 8. Create GitHub Release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Caislean Gaofar ${{ steps.version.outputs.version }}
+          body: |
+            ## Caislean Gaofar ${{ steps.version.outputs.version }}
+
+            Windows standalone executable for Caislean Gaofar - A PyGame action RPG inspired by "Castle of the Winds".
+
+            ### Installation
+            1. Download `CaisleanGaofar.exe` from the assets below
+            2. Run the executable - no Python installation required!
+
+            ### What's New
+            See the [commit history](https://github.com/${{ github.repository }}/commits/${{ github.ref_name }}) for changes in this release.
+
+            ---
+            **Note**: Windows Defender or other antivirus software may flag PyInstaller executables as suspicious. This is a false positive - the executable is safe to run.
+          draft: false
+          prerelease: false
+
+      # 9. Upload Release Asset
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/CaisleanGaofar.exe
+          asset_name: CaisleanGaofar.exe
+          asset_content_type: application/octet-stream
