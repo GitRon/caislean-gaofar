@@ -643,21 +643,34 @@ class Game:
     def _add_starting_items(self):
         """Add starting items (health potions and gold) to warrior inventory."""
         # Add 3 health potions
-        for _ in range(3):
-            health_potion = Item(
-                name="Health Potion",
-                item_type=ItemType.CONSUMABLE,
-                description="Restores 30 HP",
-                health_bonus=30,
-            )
-            self.warrior.inventory.add_item(health_potion)
+        health_potion1 = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
+        )
+        health_potion2 = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
+        )
+        health_potion3 = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
+        )
+        self.warrior.inventory.add_item(health_potion1)
+        self.warrior.inventory.add_item(health_potion2)
+        self.warrior.inventory.add_item(health_potion3)
 
-        # Add gold (100 gold stored in health_bonus field)
+        # Add starting gold as currency item
         gold_item = Item(
             name="Gold Coins",
             item_type=ItemType.MISC,
             description="Gold currency",
-            health_bonus=100,
+            gold_value=100,
         )
         self.warrior.inventory.add_item(gold_item)
 

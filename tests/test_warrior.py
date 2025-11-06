@@ -455,7 +455,7 @@ class TestWarrior:
         """Test counting gold from a single gold item"""
         # Arrange
         warrior = Warrior(5, 5)
-        gold_item = Item("Gold Coins", ItemType.MISC, "Currency", health_bonus=100)
+        gold_item = Item("Gold Coins", ItemType.MISC, "Currency", gold_value=100)
         warrior.inventory.add_item(gold_item)
 
         # Act
@@ -468,8 +468,8 @@ class TestWarrior:
         """Test counting gold from multiple gold items"""
         # Arrange
         warrior = Warrior(5, 5)
-        gold1 = Item("Gold Coins", ItemType.MISC, "Currency", health_bonus=50)
-        gold2 = Item("Gold Pouch", ItemType.MISC, "Currency", health_bonus=30)
+        gold1 = Item("Gold Coins", ItemType.MISC, "Currency", gold_value=50)
+        gold2 = Item("Gold Pouch", ItemType.MISC, "Currency", gold_value=30)
         warrior.inventory.add_item(gold1)
         warrior.inventory.add_item(gold2)
 
@@ -480,11 +480,11 @@ class TestWarrior:
         assert gold == 80
 
     def test_count_gold_ignores_non_gold_items(self):
-        """Test that count_gold ignores non-gold MISC items"""
+        """Test that count_gold ignores items without gold_value"""
         # Arrange
         warrior = Warrior(5, 5)
-        gold_item = Item("Gold Coins", ItemType.MISC, "Currency", health_bonus=50)
-        misc_item = Item("Key", ItemType.MISC, "Opens doors", health_bonus=0)
+        gold_item = Item("Gold Coins", ItemType.MISC, "Currency", gold_value=50)
+        misc_item = Item("Key", ItemType.MISC, "Opens doors")
         warrior.inventory.add_item(gold_item)
         warrior.inventory.add_item(misc_item)
 

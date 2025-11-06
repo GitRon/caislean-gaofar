@@ -48,13 +48,12 @@ class Warrior(Entity):
         Count gold coins in inventory.
 
         Returns:
-            Total gold value from all gold-related items
+            Total gold value from all items with gold_value > 0
         """
         gold = 0
         for item in self.inventory.backpack_slots:
-            if item and item.item_type == ItemType.MISC and "gold" in item.name.lower():
-                # Each gold item represents its health_bonus value as gold amount
-                gold += item.health_bonus if item.health_bonus > 0 else 1
+            if item and item.gold_value > 0:
+                gold += item.gold_value
         return gold
 
     def use_health_potion(self) -> bool:

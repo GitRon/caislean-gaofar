@@ -94,6 +94,12 @@ class HUD:
         # Draw currency panel
         self._draw_currency_panel(screen, warrior)
 
+        # Draw attack panel
+        self._draw_attack_panel(screen, warrior)
+
+        # Draw defense panel
+        self._draw_defense_panel(screen, warrior)
+
         # Draw critical health warning if needed
         if warrior.health / warrior.max_health <= self.critical_health_threshold:
             self._draw_critical_health_warning(screen)
@@ -314,6 +320,99 @@ class HUD:
         gold_amount = warrior.count_gold()
         gold_text = font_gold.render(f"{gold_amount}", True, self.text_color)
         screen.blit(gold_text, (panel_x + 60, panel_y + 26))
+
+    def _draw_attack_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the attack stat panel with sword icon.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below gold, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 60
+        panel_x = self.x + 10
+        panel_y = self.y + 250
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw sword icon
+        icon_x = panel_x + 20
+        icon_y = panel_y + 15
+
+        # Sword blade (vertical line)
+        pygame.draw.line(
+            screen,
+            (192, 192, 192),  # Silver
+            (icon_x, icon_y),
+            (icon_x, icon_y + 25),
+            3,
+        )
+        # Sword crossguard (horizontal line)
+        pygame.draw.line(
+            screen, (139, 69, 19), (icon_x - 8, icon_y + 8), (icon_x + 8, icon_y + 8), 3
+        )
+        # Sword pommel (small circle)
+        pygame.draw.circle(screen, (139, 69, 19), (icon_x, icon_y + 28), 4)
+
+        # Draw attack value
+        font_title = pygame.font.Font(None, 24)
+        title_text = font_title.render("Attack", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 8))
+
+        font_stat = pygame.font.Font(None, 36)
+        attack_value = warrior.get_effective_attack_damage()
+        stat_text = font_stat.render(f"{attack_value}", True, self.text_color)
+        screen.blit(stat_text, (panel_x + 60, panel_y + 26))
+
+    def _draw_defense_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the defense stat panel with armor icon.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below attack, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 60
+        panel_x = self.x + 10
+        panel_y = self.y + 320
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw armor icon (stylized shield)
+        icon_center_x = panel_x + 20
+        icon_center_y = panel_y + 23
+
+        # Shield body (rounded rectangle shape using polygon)
+        shield_points = [
+            (icon_center_x, icon_center_y - 15),  # Top
+            (icon_center_x + 12, icon_center_y - 10),  # Top right
+            (icon_center_x + 12, icon_center_y + 10),  # Bottom right
+            (icon_center_x, icon_center_y + 18),  # Bottom point
+            (icon_center_x - 12, icon_center_y + 10),  # Bottom left
+            (icon_center_x - 12, icon_center_y - 10),  # Top left
+        ]
+        pygame.draw.polygon(screen, (128, 128, 128), shield_points)  # Gray shield
+        pygame.draw.polygon(screen, (64, 64, 64), shield_points, 2)  # Dark border
+
+        # Draw defense value
+        font_title = pygame.font.Font(None, 24)
+        title_text = font_title.render("Defense", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 8))
+
+        font_stat = pygame.font.Font(None, 36)
+        defense_value = warrior.inventory.get_total_defense_bonus()
+        stat_text = font_stat.render(f"{defense_value}", True, self.text_color)
+        screen.blit(stat_text, (panel_x + 60, panel_y + 26))
 
     def _draw_critical_health_warning(self, screen: pygame.Surface):
         """
