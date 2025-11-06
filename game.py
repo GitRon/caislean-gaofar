@@ -84,9 +84,6 @@ class Game:
         self.message_timer = 0
         self.message_duration = 3000  # milliseconds to show message
 
-        # Add sample items to warrior's inventory
-        self._add_sample_items()
-
         # Spawn chests in the dungeon
         self._spawn_chests()
 
@@ -113,34 +110,6 @@ class Game:
             monster_class = random.choice(ALL_MONSTER_CLASSES)
             monster = monster_class(spawn_x + 5, spawn_y)
             self.monsters.append(monster)
-
-    def _add_sample_items(self):
-        """Add sample items to the warrior's inventory for testing."""
-        # Create sample items
-        iron_sword = Item(
-            "Iron Sword", ItemType.WEAPON, "A basic sword", attack_bonus=10
-        )
-        steel_sword = Item(
-            "Steel Sword", ItemType.WEAPON, "A stronger sword", attack_bonus=20
-        )
-        leather_armor = Item(
-            "Leather Armor",
-            ItemType.ARMOR,
-            "Basic protection",
-            defense_bonus=5,
-            health_bonus=20,
-        )
-        health_potion = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores health", health_bonus=30
-        )
-        gold_coin = Item("Gold Coin", ItemType.MISC, "Shiny currency")
-
-        # Add items to inventory
-        self.warrior.inventory.add_item(iron_sword)  # Goes to weapon slot
-        self.warrior.inventory.add_item(leather_armor)  # Goes to armor slot
-        self.warrior.inventory.add_item(steel_sword)  # Goes to backpack
-        self.warrior.inventory.add_item(health_potion)  # Goes to backpack
-        self.warrior.inventory.add_item(gold_coin)  # Goes to backpack
 
     def drop_item(self, item: Item, grid_x: int, grid_y: int):
         """
@@ -315,12 +284,14 @@ class Game:
         # Respawn monsters from map data
         self._spawn_monsters()
 
+        # Add starting items to new warrior
+        self._add_starting_items()
+
         self.state = config.STATE_PLAYING
         self.waiting_for_player_input = True
         self.ground_items = []  # Clear ground items
         self.message = ""
         self.message_timer = 0
-        self._add_sample_items()
         self._spawn_chests()
 
     def update(self, dt: float):
@@ -702,32 +673,26 @@ class Game:
         self.screen.blit(text_surface, text_rect)
 
     def _add_starting_items(self):
-        """Add starting items (health potions and gold) to warrior inventory."""
-        # Add 3 health potions
-        health_potion1 = Item(
-            name="Health Potion",
-            item_type=ItemType.CONSUMABLE,
-            description="Restores 30 HP",
-            health_bonus=30,
+        """Add starting equipment to warrior inventory."""
+        # Create starting equipment
+        short_sword = Item(
+            name="Short Sword",
+            item_type=ItemType.WEAPON,
+            description="A basic short sword",
+            attack_bonus=3,
         )
-        health_potion2 = Item(
-            name="Health Potion",
-            item_type=ItemType.CONSUMABLE,
-            description="Restores 30 HP",
-            health_bonus=30,
+        woolen_tunic = Item(
+            name="Woolen Tunic",
+            item_type=ItemType.ARMOR,
+            description="A simple woolen tunic",
+            defense_bonus=1,
         )
-        health_potion3 = Item(
-            name="Health Potion",
-            item_type=ItemType.CONSUMABLE,
-            description="Restores 30 HP",
-            health_bonus=30,
-        )
-        self.warrior.inventory.add_item(health_potion1)
-        self.warrior.inventory.add_item(health_potion2)
-        self.warrior.inventory.add_item(health_potion3)
 
-        # Add starting gold as currency (not an inventory item)
-        self.warrior.add_gold(100)
+        # Equip starting items (they'll auto-equip to appropriate slots)
+        self.warrior.inventory.add_item(short_sword)
+        self.warrior.inventory.add_item(woolen_tunic)
+
+        # Player starts with 0 gold (default)
 
     def run(self):
         """Main game loop."""

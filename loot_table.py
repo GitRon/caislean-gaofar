@@ -63,9 +63,9 @@ def create_consumable(name: str, health_bonus: int) -> Item:
     )
 
 
-def create_misc_item(name: str, description: str) -> Item:
+def create_misc_item(name: str, description: str, gold_value: int = 0) -> Item:
     """Create a misc item."""
-    return Item(name, ItemType.MISC, description)
+    return Item(name, ItemType.MISC, description, gold_value=gold_value)
 
 
 # Monster-specific loot tables
@@ -83,7 +83,7 @@ LOOT_TABLES = {
     "leprechaun": LootTable(
         [
             (create_common_weapon("Lucky Shillelagh", attack_bonus=12), 0.4),
-            (create_misc_item("Gold Coin", "A shiny golden coin"), 0.8),
+            (create_misc_item("Gold Coin", "A shiny golden coin", gold_value=1), 0.8),
             (create_misc_item("Four-Leaf Clover", "Brings good fortune"), 0.3),
         ]
     ),
