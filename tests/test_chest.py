@@ -153,39 +153,62 @@ class TestChest:
 
     def test_generate_random_item_returns_weapon_type(self):
         """Test _generate_random_item can return weapon type items"""
-        # Arrange & Act
-        # Run multiple times to increase chance of getting a weapon
-        items = [Chest._generate_random_item() for _ in range(50)]
+        # Arrange
+        weapon_item = Item(
+            "Iron Sword", ItemType.WEAPON, "A basic sword", attack_bonus=10
+        )
+
+        # Act
+        with mock.patch("random.choice", return_value=weapon_item):
+            item = Chest._generate_random_item()
 
         # Assert
-        weapon_items = [item for item in items if item.item_type == ItemType.WEAPON]
-        assert len(weapon_items) > 0
+        assert item.item_type == ItemType.WEAPON
+        assert item == weapon_item
 
     def test_generate_random_item_returns_armor_type(self):
         """Test _generate_random_item can return armor type items"""
-        # Arrange & Act
-        items = [Chest._generate_random_item() for _ in range(50)]
+        # Arrange
+        armor_item = Item(
+            "Leather Armor",
+            ItemType.ARMOR,
+            "Basic protection",
+            defense_bonus=5,
+            health_bonus=10,
+        )
+
+        # Act
+        with mock.patch("random.choice", return_value=armor_item):
+            item = Chest._generate_random_item()
 
         # Assert
-        armor_items = [item for item in items if item.item_type == ItemType.ARMOR]
-        assert len(armor_items) > 0
+        assert item.item_type == ItemType.ARMOR
+        assert item == armor_item
 
     def test_generate_random_item_returns_consumable_type(self):
         """Test _generate_random_item can return consumable type items"""
-        # Arrange & Act
-        items = [Chest._generate_random_item() for _ in range(50)]
+        # Arrange
+        consumable_item = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores 50 HP", health_bonus=50
+        )
+
+        # Act
+        with mock.patch("random.choice", return_value=consumable_item):
+            item = Chest._generate_random_item()
 
         # Assert
-        consumable_items = [
-            item for item in items if item.item_type == ItemType.CONSUMABLE
-        ]
-        assert len(consumable_items) > 0
+        assert item.item_type == ItemType.CONSUMABLE
+        assert item == consumable_item
 
     def test_generate_random_item_returns_misc_type(self):
         """Test _generate_random_item can return misc type items"""
-        # Arrange & Act
-        items = [Chest._generate_random_item() for _ in range(50)]
+        # Arrange
+        misc_item = Item("Gold Coin", ItemType.MISC, "A shiny coin")
+
+        # Act
+        with mock.patch("random.choice", return_value=misc_item):
+            item = Chest._generate_random_item()
 
         # Assert
-        misc_items = [item for item in items if item.item_type == ItemType.MISC]
-        assert len(misc_items) > 0
+        assert item.item_type == ItemType.MISC
+        assert item == misc_item
