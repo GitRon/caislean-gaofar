@@ -16,6 +16,13 @@ DARK_RED = (139, 0, 0)
 DARK_GREEN = (0, 100, 0)
 GRAY = (128, 128, 128)
 YELLOW = (255, 255, 0)
+BROWN = (139, 69, 19)  # Chest color
+GOLD = (255, 215, 0)  # Ground item color
+
+# Color aliases for readability
+COLOR_WHITE = WHITE
+COLOR_GROUND_ITEM = GOLD
+COLOR_CHEST = BROWN
 
 # Grid settings
 TILE_SIZE = 50  # Size of each grid tile

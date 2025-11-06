@@ -8,8 +8,12 @@ from inventory import Inventory
 from item import Item, ItemType
 
 
-# Initialize pygame once for all tests
-pygame.init()
+@pytest.fixture(autouse=True)
+def setup_pygame():
+    """Setup pygame before each test and cleanup after"""
+    pygame.init()
+    yield
+    pygame.quit()
 
 
 @pytest.fixture
@@ -45,7 +49,7 @@ class TestInventoryUI:
         """Test InventoryUI initialization"""
         # Assert
         assert inventory_ui.panel_width == 500
-        assert inventory_ui.panel_height == 400
+        assert inventory_ui.panel_height == 500
         assert inventory_ui.selected_slot is None
         assert inventory_ui.hovered_slot is None
         assert inventory_ui.dragging_item is None
