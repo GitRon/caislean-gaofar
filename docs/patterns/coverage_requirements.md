@@ -47,19 +47,33 @@ pytest --cov=. --cov-report=term --cov-branch --cov-fail-under=100 tests/
 
 The GitHub Actions pipeline (`qa.yml`) enforces coverage requirements:
 
-1. **Runs all tests** with branch coverage enabled
-2. **Fails the build** if coverage falls below 100%
-3. **Generates coverage reports** for review
-4. **Uploads to Codecov** (optional integration)
+1. **Uses uv** for reproducible dependency installation from `uv.lock`
+2. **Runs all tests** with branch coverage enabled
+3. **Fails the build** if coverage falls below 100%
+4. **Generates coverage reports** for review
+5. **Uploads to Codecov** (optional integration)
 
 ### Pipeline Configuration
 
 ```yaml
+# Install dependencies from lock file
+- name: Install uv
+  uses: astral-sh/setup-uv@v4
+  with:
+    enable-cache: true
+    cache-dependency-glob: "uv.lock"
+
+- name: Install dependencies
+  run: uv sync --frozen
+
+# Run tests with coverage
 - name: Run tests with coverage
   run: |
     pytest --cov=. --cov-report=term-missing --cov-report=xml \
       --cov-branch --cov-fail-under=100 tests/ -v
 ```
+
+The `--frozen` flag ensures dependencies exactly match `uv.lock`, providing reproducible builds.
 
 ## Coverage Configuration
 

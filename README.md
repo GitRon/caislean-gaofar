@@ -4,17 +4,25 @@ PyGame inspired by Castle of the Winds
 ## Getting Started
 
 ### Running the Game
+
 ```bash
+# Install dependencies
+uv sync
+
+# Run the game
 python main.py
 ```
 
-The project uses `uv` for dependency management (Python 3.13+) with pygame as the only dependency.
+The project uses `uv` for dependency management (Python 3.13+). Dependencies are locked in `uv.lock` for reproducible builds.
 
 ### Testing
 
 This project maintains **100% branch coverage** on all core logic modules.
 
 ```bash
+# Install dependencies (including test dependencies)
+uv sync
+
 # Run all tests
 pytest
 
