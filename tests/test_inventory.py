@@ -1,6 +1,5 @@
 """Tests for inventory.py - Inventory class"""
 
-import pytest
 from inventory import Inventory
 from item import Item, ItemType
 

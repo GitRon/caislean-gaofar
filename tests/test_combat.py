@@ -1,12 +1,11 @@
 """Tests for combat.py - CombatSystem class"""
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import pygame
 from combat import CombatSystem
 from entity import Entity
 from warrior import Warrior
-import config
 
 
 @pytest.fixture
@@ -138,7 +137,9 @@ class TestCombatSystem:
         assert mock_screen.blit.called
 
     @patch("pygame.font.Font")
-    def test_draw_combat_ui_with_monster_description(self, mock_font_class, mock_screen):
+    def test_draw_combat_ui_with_monster_description(
+        self, mock_font_class, mock_screen
+    ):
         """Test drawing combat UI with monster description"""
         # Arrange
         mock_font_class.return_value = Mock()

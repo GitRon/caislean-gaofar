@@ -1,7 +1,7 @@
 """Tests for monsters/base_monster.py - BaseMonster class"""
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import pygame
 from monsters.base_monster import BaseMonster
 from entity import Entity
@@ -320,8 +320,10 @@ class TestBaseMonster:
         monster = MonsterSubclass(5, 5)
         screen = pygame.display.set_mode((800, 600))
         mock_renderer = Mock()
-        
-        with patch.dict("monsters.base_monster.MONSTER_RENDERERS", {"test_monster": mock_renderer}):
+
+        with patch.dict(
+            "monsters.base_monster.MONSTER_RENDERERS", {"test_monster": mock_renderer}
+        ):
             # Act
             monster.draw(screen)
 

@@ -1,7 +1,6 @@
 """Tests for game.py - Game class"""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 import pygame
 from game import Game
 import config

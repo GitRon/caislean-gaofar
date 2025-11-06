@@ -1,7 +1,7 @@
 """Tests for inventory_ui.py - InventoryUI class"""
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import pygame
 from inventory_ui import InventoryUI
 from inventory import Inventory

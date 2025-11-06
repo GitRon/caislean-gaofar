@@ -1,6 +1,5 @@
 """Tests for grid.py - Grid class"""
 
-import pytest
 from grid import Grid
 import config
 

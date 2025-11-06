@@ -1,7 +1,7 @@
 """Tests for entity.py - Entity base class"""
 
 import pytest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 import pygame
 from entity import Entity
 import config

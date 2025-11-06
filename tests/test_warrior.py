@@ -330,4 +330,3 @@ class TestWarrior:
 
         # Assert
         assert result is False
-

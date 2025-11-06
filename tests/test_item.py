@@ -1,6 +1,5 @@
 """Tests for item.py - Item class and ItemType enum"""
 
-import pytest
 from item import Item, ItemType
 
 
