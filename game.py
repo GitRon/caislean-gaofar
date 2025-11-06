@@ -184,8 +184,15 @@ class Game:
         # Find item at this position
         for ground_item in self.ground_items:
             if ground_item.grid_x == grid_x and ground_item.grid_y == grid_y:
-                # Try to add to inventory
-                if self.warrior.inventory.add_item(ground_item.item):
+                # Check if it's a gold item (has gold_value > 0)
+                if ground_item.item.gold_value > 0:
+                    # Add gold to currency instead of inventory
+                    self.warrior.add_gold(ground_item.item.gold_value)
+                    self.ground_items.remove(ground_item)
+                    self._show_message(f"Picked up {ground_item.item.gold_value} gold!")
+                    return True
+                # Try to add regular item to inventory
+                elif self.warrior.inventory.add_item(ground_item.item):
                     self.ground_items.remove(ground_item)
                     self._show_message(f"Picked up {ground_item.item.name}!")
                     return True
@@ -472,8 +479,14 @@ class Game:
                 ground_item.grid_x == self.warrior.grid_x
                 and ground_item.grid_y == self.warrior.grid_y
             ):
-                # Try to add item to inventory
-                if self.warrior.inventory.add_item(ground_item.item):
+                # Check if it's a gold item (has gold_value > 0)
+                if ground_item.item.gold_value > 0:
+                    # Add gold to currency instead of inventory
+                    self.warrior.add_gold(ground_item.item.gold_value)
+                    self.ground_items.remove(ground_item)
+                    self._show_message(f"Picked up {ground_item.item.gold_value} gold!")
+                # Try to add regular item to inventory
+                elif self.warrior.inventory.add_item(ground_item.item):
                     # Successfully added
                     self.ground_items.remove(ground_item)
                     self._show_message(f"Picked up {ground_item.item.name}!")
@@ -713,14 +726,8 @@ class Game:
         self.warrior.inventory.add_item(health_potion2)
         self.warrior.inventory.add_item(health_potion3)
 
-        # Add starting gold as currency item
-        gold_item = Item(
-            name="Gold Coins",
-            item_type=ItemType.MISC,
-            description="Gold currency",
-            gold_value=100,
-        )
-        self.warrior.inventory.add_item(gold_item)
+        # Add starting gold as currency (not an inventory item)
+        self.warrior.add_gold(100)
 
     def run(self):
         """Main game loop."""

@@ -328,7 +328,7 @@ class TestWarrior:
         assert hasattr(warrior, "inventory")
         assert warrior.inventory.weapon_slot is None
         assert warrior.inventory.armor_slot is None
-        assert warrior.inventory.backpack_slots == [None, None, None, None, None]
+        assert warrior.inventory.backpack_slots == [None] * 13
 
     def test_execute_turn_unknown_action_type(self):
         """Test execute_turn with unknown action type returns False"""
@@ -452,7 +452,7 @@ class TestWarrior:
         assert count == 3
 
     def test_count_gold_empty(self):
-        """Test counting gold when none is in inventory"""
+        """Test counting gold when none has been added"""
         # Arrange
         warrior = Warrior(5, 5)
 
@@ -462,45 +462,53 @@ class TestWarrior:
         # Assert
         assert gold == 0
 
-    def test_count_gold_single_item(self):
-        """Test counting gold from a single gold item"""
+    def test_add_gold(self):
+        """Test adding gold to warrior's currency"""
         # Arrange
         warrior = Warrior(5, 5)
-        gold_item = Item("Gold Coins", ItemType.MISC, "Currency", gold_value=100)
-        warrior.inventory.add_item(gold_item)
 
         # Act
+        warrior.add_gold(100)
         gold = warrior.count_gold()
 
         # Assert
         assert gold == 100
 
-    def test_count_gold_multiple_items(self):
-        """Test counting gold from multiple gold items"""
+    def test_add_gold_multiple_times(self):
+        """Test adding gold multiple times accumulates"""
         # Arrange
         warrior = Warrior(5, 5)
-        gold1 = Item("Gold Coins", ItemType.MISC, "Currency", gold_value=50)
-        gold2 = Item("Gold Pouch", ItemType.MISC, "Currency", gold_value=30)
-        warrior.inventory.add_item(gold1)
-        warrior.inventory.add_item(gold2)
 
         # Act
+        warrior.add_gold(50)
+        warrior.add_gold(30)
         gold = warrior.count_gold()
 
         # Assert
         assert gold == 80
 
-    def test_count_gold_ignores_non_gold_items(self):
-        """Test that count_gold ignores items without gold_value"""
+    def test_remove_gold_success(self):
+        """Test removing gold when enough is available"""
         # Arrange
         warrior = Warrior(5, 5)
-        gold_item = Item("Gold Coins", ItemType.MISC, "Currency", gold_value=50)
-        misc_item = Item("Key", ItemType.MISC, "Opens doors")
-        warrior.inventory.add_item(gold_item)
-        warrior.inventory.add_item(misc_item)
+        warrior.add_gold(100)
 
         # Act
-        gold = warrior.count_gold()
+        success = warrior.remove_gold(50)
 
         # Assert
-        assert gold == 50
+        assert success is True
+        assert warrior.count_gold() == 50
+
+    def test_remove_gold_failure(self):
+        """Test removing gold when not enough is available"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.add_gold(30)
+
+        # Act
+        success = warrior.remove_gold(50)
+
+        # Assert
+        assert success is False
+        assert warrior.count_gold() == 30
