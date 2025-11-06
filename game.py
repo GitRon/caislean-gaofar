@@ -242,7 +242,7 @@ class Game:
                         self.hud.trigger_potion_glow()
                         self._show_message("Used health potion! +30 HP")
                     else:
-                        if self.warrior.health_potions <= 0:
+                        if self.warrior.count_health_potions() <= 0:
                             self._show_message("No health potions remaining!")
                         else:
                             self._show_message("Health is already full!")
