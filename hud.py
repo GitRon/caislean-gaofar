@@ -46,13 +46,11 @@ class HUD:
         # Smooth health bar animation
         if self.displayed_health < warrior.health:
             self.displayed_health = min(
-                self.displayed_health + self.animation_speed * dt * 100,
-                warrior.health
+                self.displayed_health + self.animation_speed * dt * 100, warrior.health
             )
         elif self.displayed_health > warrior.health:
             self.displayed_health = max(
-                self.displayed_health - self.animation_speed * dt * 100,
-                warrior.health
+                self.displayed_health - self.animation_speed * dt * 100, warrior.health
             )
 
         # Update potion glow timer
@@ -175,18 +173,16 @@ class HUD:
         # Draw numerical health display
         font_health = pygame.font.Font(None, 28)
         health_text = font_health.render(
-            f"{int(warrior.health)}/{warrior.max_health} HP",
-            True,
-            self.text_color
+            f"{int(warrior.health)}/{warrior.max_health} HP", True, self.text_color
         )
         # Center text on health bar
-        text_rect = health_text.get_rect(center=(bar_x + bar_width // 2, bar_y + bar_height // 2))
+        text_rect = health_text.get_rect(
+            center=(bar_x + bar_width // 2, bar_y + bar_height // 2)
+        )
 
         # Add text shadow for better readability
         shadow_text = font_health.render(
-            f"{int(warrior.health)}/{warrior.max_health} HP",
-            True,
-            (0, 0, 0)
+            f"{int(warrior.health)}/{warrior.max_health} HP", True, (0, 0, 0)
         )
         shadow_rect = text_rect.copy()
         shadow_rect.x += 2
@@ -229,7 +225,7 @@ class HUD:
                 glow_surface,
                 (100, 255, 100),
                 (icon_size // 2 + 5, icon_size // 2 + 5),
-                icon_size // 2 + 5
+                icon_size // 2 + 5,
             )
             screen.blit(glow_surface, (icon_x - 5, icon_y - 5))
 
@@ -253,7 +249,9 @@ class HUD:
 
         # Draw count (large and prominent)
         font_count = pygame.font.Font(None, 42)
-        count_text = font_count.render(f"x {warrior.health_potions}", True, self.text_color)
+        count_text = font_count.render(
+            f"x {warrior.health_potions}", True, self.text_color
+        )
         screen.blit(count_text, (panel_x + 70, panel_y + 30))
 
         # Draw usage hint
@@ -286,11 +284,17 @@ class HUD:
         coin_radius = 15
 
         # Outer gold circle
-        pygame.draw.circle(screen, self.ornate_gold, (coin_center_x, coin_center_y), coin_radius)
+        pygame.draw.circle(
+            screen, self.ornate_gold, (coin_center_x, coin_center_y), coin_radius
+        )
         # Inner darker circle for depth
-        pygame.draw.circle(screen, (184, 134, 11), (coin_center_x, coin_center_y), coin_radius - 3)
+        pygame.draw.circle(
+            screen, (184, 134, 11), (coin_center_x, coin_center_y), coin_radius - 3
+        )
         # Center decoration
-        pygame.draw.circle(screen, self.ornate_gold, (coin_center_x, coin_center_y), coin_radius - 6)
+        pygame.draw.circle(
+            screen, self.ornate_gold, (coin_center_x, coin_center_y), coin_radius - 6
+        )
 
         # Draw gold amount
         font_title = pygame.font.Font(None, 24)
@@ -320,18 +324,28 @@ class HUD:
         # Top
         pygame.draw.rect(overlay, (139, 0, 0), (0, 0, config.SCREEN_WIDTH, 50))
         # Bottom
-        pygame.draw.rect(overlay, (139, 0, 0), (0, config.SCREEN_HEIGHT - 50, config.SCREEN_WIDTH, 50))
+        pygame.draw.rect(
+            overlay,
+            (139, 0, 0),
+            (0, config.SCREEN_HEIGHT - 50, config.SCREEN_WIDTH, 50),
+        )
         # Left
         pygame.draw.rect(overlay, (139, 0, 0), (0, 0, 50, config.SCREEN_HEIGHT))
         # Right
-        pygame.draw.rect(overlay, (139, 0, 0), (config.SCREEN_WIDTH - 50, 0, 50, config.SCREEN_HEIGHT))
+        pygame.draw.rect(
+            overlay,
+            (139, 0, 0),
+            (config.SCREEN_WIDTH - 50, 0, 50, config.SCREEN_HEIGHT),
+        )
 
         screen.blit(overlay, (0, 0))
 
         # Draw warning text (pulsing)
         if int(self.critical_health_timer / 500) % 2 == 0:
             font_warning = pygame.font.Font(None, 32)
-            warning_text = font_warning.render("LOW HEALTH!", True, self.health_critical)
+            warning_text = font_warning.render(
+                "LOW HEALTH!", True, self.health_critical
+            )
             warning_rect = warning_text.get_rect(
                 center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT - 30)
             )

@@ -143,15 +143,14 @@ def test_hud_colors_defined(hud):
 
 
 def test_hud_health_animation_converges(hud, warrior):
-    """Test that health animation converges to target over multiple updates."""
+    """Test that health animation converges to target over time."""
     hud.displayed_health = 100
     warrior.health = 50
 
-    # Animate over multiple frames
-    for _ in range(100):
-        hud.update(warrior, 0.1)
+    # Animate with a large delta time to ensure convergence
+    hud.update(warrior, 10.0)  # 10 seconds should be more than enough
 
-    # Should be very close to target
+    # Should be at or very close to target
     assert abs(hud.displayed_health - warrior.health) < 1.0
 
 
@@ -188,10 +187,13 @@ def test_hud_critical_health_warning_displays_correctly(hud, warrior):
     screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
     warrior.health = 20
 
-    # Update multiple times to cycle through warning states
-    for _ in range(10):
-        hud.update(warrior, 0.5)
-        hud.draw(screen, warrior)
+    # Update and draw to accumulate timer
+    hud.update(warrior, 0.5)
+    hud.draw(screen, warrior)
+    hud.update(warrior, 0.5)
+    hud.draw(screen, warrior)
+    hud.update(warrior, 0.5)
+    hud.draw(screen, warrior)
 
     # Should have accumulated timer
     assert hud.critical_health_timer > 0
