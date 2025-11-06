@@ -448,9 +448,7 @@ class Game:
             if self.camera.is_visible(ground_item.grid_x, ground_item.grid_y):
                 original_x = ground_item.grid_x
                 original_y = ground_item.grid_y
-                screen_x, screen_y = self.camera.world_to_screen(
-                    original_x, original_y
-                )
+                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
                 ground_item.grid_x = screen_x
                 ground_item.grid_y = screen_y
                 ground_item.draw(self.screen)
