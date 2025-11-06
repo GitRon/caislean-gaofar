@@ -36,15 +36,15 @@ jobs:
         run: |
           uv sync --frozen
 
-      # 5. Install PyInstaller
+      # 5. Install PyInstaller in uv environment
       - name: Install PyInstaller
         run: |
-          uv pip install --system pyinstaller
+          uv pip install pyinstaller
 
       # 6. Build Windows executable
       - name: Build executable
         run: |
-          pyinstaller --onefile --windowed --name="CaisleanGaofar" main.py
+          uv run pyinstaller --onefile --windowed --name="CaisleanGaofar" main.py
 
       # 7. Create GitHub Release and Upload Asset
       - name: Create Release and Upload Asset
