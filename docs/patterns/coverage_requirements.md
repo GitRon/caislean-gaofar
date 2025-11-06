@@ -166,15 +166,6 @@ def debug_function():  # pragma: no cover
     print("Debug output")
 ```
 
-## Metrics
-
-Current coverage status:
-
-- **Total Tests**: 264
-- **Core Module Coverage**: 100% (branch coverage)
-- **Overall Coverage**: ~46% (including UI code)
-- **Pipeline**: ✅ Enforced on all PRs
-
 ## References
 
 - [Testing Strategy](./testing_strategy.md)

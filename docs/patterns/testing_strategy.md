@@ -7,8 +7,11 @@ This project uses **PyTest exclusively** for unit testing. This document establi
 ## Core Testing Rules
 
 ### Structure & Organization
-- Test packages mirror production code structure
-- One test file covers a single testee (typically a Python class)
+- **Test file structure must mirror production code structure**
+  - For `module.py` → create `tests/test_module.py`
+  - For `package/submodule.py` → create `tests/package/test_submodule.py`
+  - Maintain identical directory hierarchy between production and test code
+- One test file covers a single testee (typically a Python class or module)
 - Create new packages when structural conflicts arise
 - Always include `__init__.py` files in new test packages
 
