@@ -67,7 +67,9 @@
     "monsters": [
       {"x": 35, "y": 15, "type": "banshee"},
       {"x": 20, "y": 8, "type": "leprechaun"},
-      {"x": 15, "y": 25, "type": "pooka"}
+      {"x": 15, "y": 28, "type": "pooka"},
+      {"x": 32, "y": 10, "type": "merrow"},
+      {"x": 25, "y": 22, "type": "clurichaun"}
     ],
     "chests": [
       {"x": 10, "y": 6},
