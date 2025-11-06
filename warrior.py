@@ -91,28 +91,196 @@ class Warrior(Entity):
         return False
 
     def draw(self, screen: pygame.Surface):
-        """Draw the warrior with special styling."""
-        # Draw the entity
-        super().draw(screen)
+        """Draw the warrior as a human player character."""
+        # Define colors for the human character
+        SKIN_COLOR = (255, 220, 177)  # Flesh tone
+        ARMOR_COLOR = (70, 130, 180)  # Steel blue armor
+        HAIR_COLOR = (101, 67, 33)  # Brown hair
+        BOOT_COLOR = (60, 60, 60)  # Dark gray boots
+        SWORD_COLOR = (192, 192, 192)  # Silver sword
+        SWORD_HANDLE = (139, 69, 19)  # Brown handle
 
-        # Draw a cross pattern to make it look like a warrior
         center_x = self.x + self.size // 2
         center_y = self.y + self.size // 2
 
-        # Vertical line
-        pygame.draw.line(
+        # Calculate scaled dimensions based on tile size
+        scale = self.size / 50  # Base scale on 50px tiles
+
+        # Draw legs (behind body)
+        leg_width = int(6 * scale)
+        leg_height = int(14 * scale)
+        leg_offset = int(4 * scale)
+        # Left leg
+        pygame.draw.rect(
             screen,
-            config.WHITE,
-            (center_x, self.y + 5),
-            (center_x, self.y + self.size - 5),
-            2,
+            ARMOR_COLOR,
+            (
+                center_x - leg_offset - leg_width,
+                center_y + int(6 * scale),
+                leg_width,
+                leg_height,
+            ),
+        )
+        # Right leg
+        pygame.draw.rect(
+            screen,
+            ARMOR_COLOR,
+            (center_x + leg_offset, center_y + int(6 * scale), leg_width, leg_height),
         )
 
-        # Horizontal line
-        pygame.draw.line(
+        # Draw boots
+        boot_height = int(4 * scale)
+        # Left boot
+        pygame.draw.rect(
             screen,
-            config.WHITE,
-            (self.x + 5, center_y),
-            (self.x + self.size - 5, center_y),
-            2,
+            BOOT_COLOR,
+            (
+                center_x - leg_offset - leg_width,
+                center_y + int(6 * scale) + leg_height - boot_height,
+                leg_width,
+                boot_height,
+            ),
         )
+        # Right boot
+        pygame.draw.rect(
+            screen,
+            BOOT_COLOR,
+            (
+                center_x + leg_offset,
+                center_y + int(6 * scale) + leg_height - boot_height,
+                leg_width,
+                boot_height,
+            ),
+        )
+
+        # Draw body (torso with armor)
+        body_width = int(16 * scale)
+        body_height = int(18 * scale)
+        pygame.draw.rect(
+            screen,
+            ARMOR_COLOR,
+            (
+                center_x - body_width // 2,
+                center_y - int(4 * scale),
+                body_width,
+                body_height,
+            ),
+        )
+
+        # Draw armor detail (chest plate accent)
+        pygame.draw.rect(
+            screen,
+            (100, 150, 200),  # Lighter blue accent
+            (
+                center_x - body_width // 2 + 2,
+                center_y - int(2 * scale),
+                body_width - 4,
+                int(8 * scale),
+            ),
+            1,
+        )
+
+        # Draw arms
+        arm_width = int(5 * scale)
+        arm_height = int(16 * scale)
+        # Left arm
+        pygame.draw.rect(
+            screen,
+            ARMOR_COLOR,
+            (
+                center_x - body_width // 2 - arm_width,
+                center_y - int(2 * scale),
+                arm_width,
+                arm_height,
+            ),
+        )
+        # Right arm (holding sword)
+        pygame.draw.rect(
+            screen,
+            ARMOR_COLOR,
+            (
+                center_x + body_width // 2,
+                center_y - int(2 * scale),
+                arm_width,
+                arm_height,
+            ),
+        )
+
+        # Draw sword in right hand
+        sword_width = int(3 * scale)
+        sword_length = int(18 * scale)
+        sword_x = center_x + body_width // 2 + arm_width // 2 - sword_width // 2
+        sword_y = center_y + int(8 * scale)
+        # Sword blade
+        pygame.draw.rect(
+            screen, SWORD_COLOR, (sword_x, sword_y, sword_width, sword_length)
+        )
+        # Sword handle
+        pygame.draw.rect(
+            screen,
+            SWORD_HANDLE,
+            (sword_x - 1, sword_y - int(4 * scale), sword_width + 2, int(4 * scale)),
+        )
+        # Sword guard
+        pygame.draw.rect(
+            screen,
+            SWORD_HANDLE,
+            (sword_x - int(3 * scale), sword_y - 1, sword_width + int(6 * scale), 2),
+        )
+
+        # Draw head
+        head_radius = int(8 * scale)
+        pygame.draw.circle(
+            screen, SKIN_COLOR, (center_x, center_y - int(12 * scale)), head_radius
+        )
+
+        # Draw hair
+        hair_width = int(12 * scale)
+        hair_height = int(6 * scale)
+        pygame.draw.ellipse(
+            screen,
+            HAIR_COLOR,
+            (
+                center_x - hair_width // 2,
+                center_y - int(18 * scale),
+                hair_width,
+                hair_height,
+            ),
+        )
+
+        # Draw face details
+        eye_radius = int(2 * scale)
+        eye_y = center_y - int(13 * scale)
+        # Left eye
+        pygame.draw.circle(
+            screen, (255, 255, 255), (center_x - int(3 * scale), eye_y), eye_radius
+        )
+        pygame.draw.circle(
+            screen, (0, 0, 0), (center_x - int(3 * scale), eye_y), int(1 * scale)
+        )
+        # Right eye
+        pygame.draw.circle(
+            screen, (255, 255, 255), (center_x + int(3 * scale), eye_y), eye_radius
+        )
+        pygame.draw.circle(
+            screen, (0, 0, 0), (center_x + int(3 * scale), eye_y), int(1 * scale)
+        )
+
+        # Draw smile
+        smile_width = int(6 * scale)
+        pygame.draw.arc(
+            screen,
+            (0, 0, 0),
+            (
+                center_x - smile_width // 2,
+                center_y - int(12 * scale),
+                smile_width,
+                int(6 * scale),
+            ),
+            3.14,
+            2 * 3.14,
+            1,
+        )
+
+        # Draw health bar on top
+        self.draw_health_bar(screen)
