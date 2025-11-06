@@ -381,3 +381,35 @@ class TestEntity:
 
         # Act & Assert (should not raise exception)
         entity.update()
+
+    def test_move_with_world_map_passable(self):
+        """Test moving with world_map parameter to passable terrain"""
+        # Arrange
+        entity = Entity(5, 5, 50, (255, 0, 0), 100, 1, 10, 2)
+        mock_world_map = Mock()
+        mock_world_map.is_passable.return_value = True
+
+        # Act
+        result = entity.move(1, 0, mock_world_map)
+
+        # Assert
+        assert result is True
+        assert entity.grid_x == 6
+        assert entity.grid_y == 5
+        mock_world_map.is_passable.assert_called_once_with(6, 5)
+
+    def test_move_with_world_map_blocked(self):
+        """Test moving with world_map parameter to blocked terrain"""
+        # Arrange
+        entity = Entity(5, 5, 50, (255, 0, 0), 100, 1, 10, 2)
+        mock_world_map = Mock()
+        mock_world_map.is_passable.return_value = False
+
+        # Act
+        result = entity.move(1, 0, mock_world_map)
+
+        # Assert
+        assert result is False
+        assert entity.grid_x == 5
+        assert entity.grid_y == 5
+        mock_world_map.is_passable.assert_called_once_with(6, 5)

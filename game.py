@@ -2,12 +2,15 @@
 
 import pygame
 import random
+import os
 from warrior import Warrior
 from monsters import ALL_MONSTER_CLASSES
 from combat import CombatSystem
 from inventory_ui import InventoryUI
 from ui_button import Button
 from item import Item, ItemType
+from world_map import WorldMap
+from camera import Camera
 from chest import Chest
 from ground_item import GroundItem
 from loot_table import get_loot_for_monster
@@ -17,8 +20,13 @@ import config
 class Game:
     """Main game class that manages the game loop and state."""
 
-    def __init__(self):
-        """Initialize the game."""
+    def __init__(self, map_file: str = None):
+        """
+        Initialize the game.
+
+        Args:
+            map_file: Optional path to map JSON file. If None, uses default map.
+        """
         pygame.init()
         self.screen = pygame.display.set_mode(
             (config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
@@ -28,11 +36,41 @@ class Game:
         self.running = True
         self.state = config.STATE_PLAYING
 
-        # Initialize game objects with grid coordinates
-        self.warrior = Warrior(2, config.GRID_HEIGHT // 2)
-        # Randomly select a monster class for variety
-        monster_class = random.choice(ALL_MONSTER_CLASSES)
-        self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
+        # Load world map
+        self.world_map = WorldMap()
+        if map_file is None:
+            map_file = os.path.join("maps", "sample_map.json")
+        self.world_map.load_from_file(map_file)
+
+        # Initialize camera
+        self.camera = Camera(self.world_map.width, self.world_map.height)
+
+        # Initialize game objects at spawn point
+        spawn_x, spawn_y = self.world_map.spawn_point
+        self.warrior = Warrior(spawn_x, spawn_y)
+
+        # Spawn monsters from map data
+        self.monsters = []
+        monster_spawns = self.world_map.get_entity_spawns("monsters")
+        for spawn in monster_spawns:
+            monster_type = spawn.get("type", "banshee")
+            # Find matching monster class
+            monster_class = None
+            for cls in ALL_MONSTER_CLASSES:
+                if cls.MONSTER_TYPE == monster_type:
+                    monster_class = cls
+                    break
+            if monster_class is None:
+                monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn["x"], spawn["y"])
+            self.monsters.append(monster)
+
+        # If no monsters in map, spawn one randomly
+        if not self.monsters:
+            monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn_x + 5, spawn_y)
+            self.monsters.append(monster)
+
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
 
@@ -147,28 +185,34 @@ class Game:
         return False
 
     def _spawn_chests(self):
-        """Spawn chests at random locations in the dungeon."""
+        """Spawn chests from map data or at random locations."""
         # Clear existing chests
         self.chests = []
 
-        # Define positions where chests can spawn (avoid spawning on player or monster)
-        # For now, manually place some chests at good locations
-        chest_positions = [
-            (5, 3),  # Top middle area
-            (10, 2),  # Top right area
-            (7, 5),  # Center
-            (3, 8),  # Bottom left
-            (12, 9),  # Bottom right
-            (8, 10),  # Bottom center
-        ]
+        # Try to spawn chests from map data
+        chest_spawns = self.world_map.get_entity_spawns("chests")
+        if chest_spawns:
+            for spawn in chest_spawns:
+                chest = Chest(spawn["x"], spawn["y"])
+                self.chests.append(chest)
+        else:
+            # Fallback: Define positions where chests can spawn
+            chest_positions = [
+                (5, 3),  # Top middle area
+                (10, 2),  # Top right area
+                (7, 5),  # Center
+                (3, 8),  # Bottom left
+                (12, 9),  # Bottom right
+                (8, 10),  # Bottom center
+            ]
 
-        # Randomly select 3-5 positions for chests
-        num_chests = random.randint(3, 5)
-        selected_positions = random.sample(chest_positions, num_chests)
+            # Randomly select 3-5 positions for chests
+            num_chests = random.randint(3, 5)
+            selected_positions = random.sample(chest_positions, num_chests)
 
-        for grid_x, grid_y in selected_positions:
-            chest = Chest(grid_x, grid_y)
-            self.chests.append(chest)
+            for grid_x, grid_y in selected_positions:
+                chest = Chest(grid_x, grid_y)
+                self.chests.append(chest)
 
     def handle_events(self):
         """Handle pygame events."""
@@ -234,10 +278,29 @@ class Game:
 
     def restart(self):
         """Restart the game."""
-        self.warrior = Warrior(2, config.GRID_HEIGHT // 2)
-        # Randomly select a new monster class on restart
-        monster_class = random.choice(ALL_MONSTER_CLASSES)
-        self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
+        spawn_x, spawn_y = self.world_map.spawn_point
+        self.warrior = Warrior(spawn_x, spawn_y)
+
+        # Respawn monsters from map data
+        self.monsters = []
+        monster_spawns = self.world_map.get_entity_spawns("monsters")
+        for spawn in monster_spawns:
+            monster_type = spawn.get("type", "banshee")
+            monster_class = None
+            for cls in ALL_MONSTER_CLASSES:
+                if cls.MONSTER_TYPE == monster_type:
+                    monster_class = cls
+                    break
+            if monster_class is None:
+                monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn["x"], spawn["y"])
+            self.monsters.append(monster)
+
+        if not self.monsters:
+            monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn_x + 5, spawn_y)
+            self.monsters.append(monster)
+
         self.state = config.STATE_PLAYING
         self.waiting_for_player_input = True
         self.ground_items = []  # Clear ground items
@@ -267,24 +330,30 @@ class Game:
         if not self.waiting_for_player_input:
             self.process_turn()
 
+        # Update camera to follow player
+        self.camera.update(self.warrior.grid_x, self.warrior.grid_y)
+
         # Check game over conditions
         if not self.warrior.is_alive:
             self.state = config.STATE_GAME_OVER
-        # Note: Game no longer auto-ends when monster is defeated
-        # Players can continue exploring and managing inventory
+        elif all(not monster.is_alive for monster in self.monsters):
+            self.state = config.STATE_VICTORY
 
     def process_turn(self):
         """Process one complete turn (hero then monsters)."""
-        # Track if monster was alive before turn
-        monster_was_alive = self.monster.is_alive
-
         # Hero turn
         self.warrior.on_turn_start()
-        self.warrior.execute_turn(self.monster)
+        # Find nearest monster for targeting
+        nearest_monster = None
+        min_distance = float("inf")
+        for monster in self.monsters:
+            if monster.is_alive:
+                distance = self.warrior.grid_distance_to(monster)
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_monster = monster
 
-        # Check if monster died during hero's turn and drop loot
-        if monster_was_alive and not self.monster.is_alive:
-            self._drop_monster_loot()
+        self.warrior.execute_turn(nearest_monster, self.world_map)
 
         # Check for chest collision after warrior moves
         self._check_chest_collision()
@@ -292,23 +361,17 @@ class Game:
         # Check for ground item pickup after warrior moves
         self._check_ground_item_pickup()
 
+        # Check for monster deaths and drop loot (after warrior attacks)
+        self._check_monster_deaths()
+
         # Monster turns
-        if self.monster.is_alive:
-            self.monster.on_turn_start()
-            self.monster.execute_turn(self.warrior)
+        for monster in self.monsters:
+            if monster.is_alive:
+                monster.on_turn_start()
+                monster.execute_turn(self.warrior, self.world_map)
 
         # Wait for next player input
         self.waiting_for_player_input = True
-
-    def _drop_monster_loot(self):
-        """Drop loot from defeated monster."""
-        if hasattr(self.monster, "monster_type"):
-            loot_item = get_loot_for_monster(self.monster.monster_type)
-            if loot_item:
-                self.drop_item(loot_item, self.monster.grid_x, self.monster.grid_y)
-                self._show_message(
-                    f"The {self.monster.monster_type.replace('_', ' ')} dropped a {loot_item.name}!"
-                )
 
     def _check_chest_collision(self):
         """Check if warrior stepped on a chest and open it."""
@@ -349,6 +412,25 @@ class Game:
                     # Inventory full
                     self._show_message("Inventory is full!")
 
+    def _check_monster_deaths(self):
+        """Check for dead monsters and drop their loot."""
+        for monster in self.monsters[:]:  # Iterate over copy to allow removal
+            if not monster.is_alive:
+                # Use loot_table system to generate loot
+                loot_item = get_loot_for_monster(monster.monster_type)
+
+                if loot_item:
+                    # Create ground item at monster location
+                    self.drop_item(loot_item, monster.grid_x, monster.grid_y)
+
+                    # Show message
+                    self._show_message(
+                        f"The {monster.monster_type.replace('_', ' ')} drops a {loot_item.name}!"
+                    )
+
+                # Remove dead monster from list so loot only drops once
+                self.monsters.remove(monster)
+
     def _show_message(self, message: str):
         """Show a message to the player."""
         self.message = message
@@ -359,26 +441,27 @@ class Game:
         self.screen.fill(config.BLACK)
 
         if self.state == config.STATE_PLAYING:
-            # Draw world objects (chests and ground items) first (behind entities)
-            for chest in self.chests:
-                chest.draw(self.screen)
+            # Draw world map
+            self.world_map.draw(
+                self.screen,
+                self.camera.x,
+                self.camera.y,
+                self.camera.viewport_width,
+                self.camera.viewport_height,
+            )
 
-            for ground_item in self.ground_items:
-                ground_item.draw(self.screen)
+            # Draw world objects (chests and ground items) with camera offset
+            self._draw_world_objects_with_camera()
 
-            # Draw attack range indicator (only if monster is alive)
-            if self.monster.is_alive:
-                self.combat_system.draw_attack_range_indicator(
-                    self.screen, self.warrior, self.monster
+            # Draw entities with camera offset
+            self._draw_entities_with_camera()
+
+            # Draw combat UI (find nearest monster)
+            nearest_monster = self._get_nearest_alive_monster()
+            if nearest_monster:
+                self.combat_system.draw_combat_ui(
+                    self.screen, self.warrior, nearest_monster
                 )
-
-            # Draw entities
-            self.warrior.draw(self.screen)
-            if self.monster.is_alive:
-                self.monster.draw(self.screen)
-
-            # Draw combat UI
-            self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
 
             # Draw message if active
             if self.message:
@@ -389,21 +472,20 @@ class Game:
 
         elif self.state == config.STATE_INVENTORY:
             # Draw the game in the background
-            for chest in self.chests:
-                chest.draw(self.screen)
-
-            for ground_item in self.ground_items:
-                ground_item.draw(self.screen)
-
-            if self.monster.is_alive:
-                self.combat_system.draw_attack_range_indicator(
-                    self.screen, self.warrior, self.monster
+            self.world_map.draw(
+                self.screen,
+                self.camera.x,
+                self.camera.y,
+                self.camera.viewport_width,
+                self.camera.viewport_height,
+            )
+            self._draw_world_objects_with_camera()
+            self._draw_entities_with_camera()
+            nearest_monster = self._get_nearest_alive_monster()
+            if nearest_monster:
+                self.combat_system.draw_combat_ui(
+                    self.screen, self.warrior, nearest_monster
                 )
-
-            self.warrior.draw(self.screen)
-            if self.monster.is_alive:
-                self.monster.draw(self.screen)
-            self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
 
             # Draw inventory overlay on top
             self.inventory_ui.draw(self.screen, self.warrior.inventory)
@@ -415,6 +497,72 @@ class Game:
             self.draw_game_over_screen("GAME OVER!", config.RED)
 
         pygame.display.flip()
+
+    def _get_nearest_alive_monster(self):
+        """Get the nearest alive monster to the warrior."""
+        nearest_monster = None
+        min_distance = float("inf")
+        for monster in self.monsters:
+            if monster.is_alive:
+                distance = self.warrior.grid_distance_to(monster)
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_monster = monster
+        return nearest_monster
+
+    def _draw_world_objects_with_camera(self):
+        """Draw chests and ground items with camera offset applied."""
+        # Draw chests
+        for chest in self.chests:
+            if self.camera.is_visible(chest.grid_x, chest.grid_y):
+                original_x = chest.grid_x
+                original_y = chest.grid_y
+                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+                chest.grid_x = screen_x
+                chest.grid_y = screen_y
+                chest.draw(self.screen)
+                chest.grid_x = original_x
+                chest.grid_y = original_y
+
+        # Draw ground items
+        for ground_item in self.ground_items:
+            if self.camera.is_visible(ground_item.grid_x, ground_item.grid_y):
+                original_x = ground_item.grid_x
+                original_y = ground_item.grid_y
+                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+                ground_item.grid_x = screen_x
+                ground_item.grid_y = screen_y
+                ground_item.draw(self.screen)
+                ground_item.grid_x = original_x
+                ground_item.grid_y = original_y
+
+    def _draw_entities_with_camera(self):
+        """Draw all entities with camera offset applied."""
+        # Temporarily adjust entity positions for drawing
+        # Draw warrior
+        if self.camera.is_visible(self.warrior.grid_x, self.warrior.grid_y):
+            original_x = self.warrior.grid_x
+            original_y = self.warrior.grid_y
+            screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+            self.warrior.grid_x = screen_x
+            self.warrior.grid_y = screen_y
+            self.warrior.draw(self.screen)
+            self.warrior.grid_x = original_x
+            self.warrior.grid_y = original_y
+
+        # Draw monsters
+        for monster in self.monsters:
+            if monster.is_alive and self.camera.is_visible(
+                monster.grid_x, monster.grid_y
+            ):
+                original_x = monster.grid_x
+                original_y = monster.grid_y
+                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+                monster.grid_x = screen_x
+                monster.grid_y = screen_y
+                monster.draw(self.screen)
+                monster.grid_x = original_x
+                monster.grid_y = original_y
 
     def draw_game_over_screen(self, message: str, color: tuple):
         """
