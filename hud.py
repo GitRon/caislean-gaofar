@@ -100,6 +100,9 @@ class HUD:
         # Draw defense panel
         self._draw_defense_panel(screen, warrior)
 
+        # Draw inventory panel
+        self._draw_inventory_panel(screen)
+
         # Draw critical health warning if needed
         if warrior.health / warrior.max_health <= self.critical_health_threshold:
             self._draw_critical_health_warning(screen)
@@ -413,6 +416,59 @@ class HUD:
         defense_value = warrior.inventory.get_total_defense_bonus()
         stat_text = font_stat.render(f"{defense_value}", True, self.text_color)
         screen.blit(stat_text, (panel_x + 60, panel_y + 26))
+
+    def _draw_inventory_panel(self, screen: pygame.Surface):
+        """
+        Draw the inventory panel with icon and hotkey hint.
+
+        Args:
+            screen: Pygame surface to draw on
+        """
+        # Panel dimensions and position (below defense, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 70
+        panel_x = self.x + 10
+        panel_y = self.y + 390
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw backpack/bag icon
+        icon_x = panel_x + 15
+        icon_y = panel_y + 15
+
+        # Backpack body (rounded rectangle)
+        bag_rect = pygame.Rect(icon_x + 5, icon_y + 8, 30, 25)
+        pygame.draw.rect(screen, (101, 67, 33), bag_rect)  # Brown bag
+        pygame.draw.rect(screen, (65, 43, 21), bag_rect, 2)  # Dark border
+
+        # Backpack flap (top part)
+        flap_rect = pygame.Rect(icon_x + 5, icon_y + 3, 30, 10)
+        pygame.draw.rect(screen, (139, 90, 43), flap_rect)  # Lighter brown
+        pygame.draw.rect(screen, (65, 43, 21), flap_rect, 2)  # Dark border
+
+        # Backpack straps
+        pygame.draw.line(
+            screen, (65, 43, 21), (icon_x + 12, icon_y), (icon_x + 12, icon_y + 8), 3
+        )
+        pygame.draw.line(
+            screen, (65, 43, 21), (icon_x + 28, icon_y), (icon_x + 28, icon_y + 8), 3
+        )
+
+        # Buckle/clasp
+        pygame.draw.circle(screen, self.ornate_gold, (icon_x + 20, icon_y + 15), 3)
+
+        # Draw title
+        font_title = pygame.font.Font(None, 20)
+        title_text = font_title.render("Inventory", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 15))
+
+        # Draw usage hint
+        font_hint = pygame.font.Font(None, 16)
+        hint_text = font_hint.render("Press I", True, config.GRAY)
+        screen.blit(hint_text, (panel_x + 60, panel_y + 38))
 
     def _draw_critical_health_warning(self, screen: pygame.Surface):
         """
