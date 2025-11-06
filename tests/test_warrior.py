@@ -36,6 +36,8 @@ class TestWarrior:
         assert warrior.base_attack_damage == config.WARRIOR_ATTACK_DAMAGE
         assert warrior.inventory is not None
         assert warrior.pending_action is None
+        assert warrior.gold == 100
+        assert warrior.health_potions == 3
 
     def test_get_effective_attack_damage_no_bonuses(self):
         """Test effective attack damage with no inventory bonuses"""
@@ -330,3 +332,63 @@ class TestWarrior:
 
         # Assert
         assert result is False
+
+    def test_use_health_potion_success(self):
+        """Test using health potion successfully restores health"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.health = 50
+        initial_potions = warrior.health_potions
+
+        # Act
+        result = warrior.use_health_potion()
+
+        # Assert
+        assert result is True
+        assert warrior.health == 80  # 50 + 30
+        assert warrior.health_potions == initial_potions - 1
+
+    def test_use_health_potion_caps_at_max_health(self):
+        """Test using health potion doesn't exceed max health"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.health = 90
+        initial_potions = warrior.health_potions
+
+        # Act
+        result = warrior.use_health_potion()
+
+        # Assert
+        assert result is True
+        assert warrior.health == warrior.max_health
+        assert warrior.health_potions == initial_potions - 1
+
+    def test_use_health_potion_no_potions_left(self):
+        """Test using health potion fails when none available"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.health = 50
+        warrior.health_potions = 0
+
+        # Act
+        result = warrior.use_health_potion()
+
+        # Assert
+        assert result is False
+        assert warrior.health == 50
+        assert warrior.health_potions == 0
+
+    def test_use_health_potion_at_full_health(self):
+        """Test using health potion fails when at full health"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.health = warrior.max_health
+        initial_potions = warrior.health_potions
+
+        # Act
+        result = warrior.use_health_potion()
+
+        # Assert
+        assert result is False
+        assert warrior.health == warrior.max_health
+        assert warrior.health_potions == initial_potions

@@ -11,6 +11,7 @@ from item import Item, ItemType
 from chest import Chest
 from ground_item import GroundItem
 from loot_table import get_loot_for_monster
+from hud import HUD
 import config
 
 
@@ -35,6 +36,7 @@ class Game:
         self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
+        self.hud = HUD()
 
         # Create UI button for inventory
         button_width = 100
@@ -202,6 +204,16 @@ class Game:
                     self.pickup_item_at_position(
                         self.warrior.grid_x, self.warrior.grid_y
                     )
+                # Handle health potion usage (instant, doesn't consume a turn)
+                elif event.key == pygame.K_p and self.state == config.STATE_PLAYING:
+                    if self.warrior.use_health_potion():
+                        self.hud.trigger_potion_glow()
+                        self._show_message("Used health potion! +30 HP")
+                    else:
+                        if self.warrior.health_potions <= 0:
+                            self._show_message("No health potions remaining!")
+                        else:
+                            self._show_message("Health is already full!")
                 # Handle turn-based movement input
                 elif (
                     self.state == config.STATE_PLAYING and self.waiting_for_player_input
@@ -258,6 +270,9 @@ class Game:
             self.message_timer -= self.clock.get_time()
             if self.message_timer <= 0:
                 self.message = ""
+
+        # Update HUD (always update for animations)
+        self.hud.update(self.warrior, dt)
 
         # Only update game logic when actively playing
         if self.state != config.STATE_PLAYING:
@@ -379,6 +394,9 @@ class Game:
 
             # Draw combat UI
             self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
+
+            # Draw HUD (player stats, potions, gold)
+            self.hud.draw(self.screen, self.warrior)
 
             # Draw message if active
             if self.message:

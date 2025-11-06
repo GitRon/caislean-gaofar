@@ -24,10 +24,26 @@ class Warrior(Entity):
         self.inventory = Inventory()
         self.base_attack_damage = config.WARRIOR_ATTACK_DAMAGE
         self.pending_action = None  # Store pending action for this turn
+        self.gold = 100  # Starting gold amount
+        self.health_potions = 3  # Starting health potions
 
     def get_effective_attack_damage(self) -> int:
         """Get total attack damage including inventory bonuses."""
         return self.base_attack_damage + self.inventory.get_total_attack_bonus()
+
+    def use_health_potion(self) -> bool:
+        """
+        Use a health potion to restore health.
+
+        Returns:
+            True if potion was used successfully, False if no potions available
+        """
+        if self.health_potions > 0 and self.health < self.max_health:
+            self.health_potions -= 1
+            heal_amount = 30  # Standard heal amount
+            self.health = min(self.max_health, self.health + heal_amount)
+            return True
+        return False
 
     def attack(self, target: "Entity") -> bool:
         """
