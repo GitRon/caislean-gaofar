@@ -10,6 +10,7 @@ from ui_button import Button
 from item import Item, ItemType
 from chest import Chest
 from ground_item import GroundItem
+from loot_table import get_loot_for_monster
 import config
 
 
@@ -92,6 +93,59 @@ class Game:
         self.warrior.inventory.add_item(health_potion)  # Goes to backpack
         self.warrior.inventory.add_item(gold_coin)  # Goes to backpack
 
+    def drop_item(self, item: Item, grid_x: int, grid_y: int):
+        """
+        Drop an item on the ground at specified grid coordinates.
+
+        Args:
+            item: The item to drop
+            grid_x: Grid x position
+            grid_y: Grid y position
+        """
+        ground_item = GroundItem(item, grid_x, grid_y)
+        self.ground_items.append(ground_item)
+
+    def get_item_at_position(self, grid_x: int, grid_y: int):
+        """
+        Get the item at a specific position.
+
+        Args:
+            grid_x: Grid x position
+            grid_y: Grid y position
+
+        Returns:
+            GroundItem if found, None otherwise
+        """
+        for ground_item in self.ground_items:
+            if ground_item.grid_x == grid_x and ground_item.grid_y == grid_y:
+                return ground_item
+        return None
+
+    def pickup_item_at_position(self, grid_x: int, grid_y: int) -> bool:
+        """
+        Try to pick up an item at the specified grid position.
+
+        Args:
+            grid_x: Grid x position
+            grid_y: Grid y position
+
+        Returns:
+            True if an item was picked up, False otherwise
+        """
+        # Find item at this position
+        for ground_item in self.ground_items:
+            if ground_item.grid_x == grid_x and ground_item.grid_y == grid_y:
+                # Try to add to inventory
+                if self.warrior.inventory.add_item(ground_item.item):
+                    self.ground_items.remove(ground_item)
+                    self._show_message(f"Picked up {ground_item.item.name}!")
+                    return True
+                else:
+                    # Inventory full
+                    self._show_message("Inventory is full!")
+                    return False
+        return False
+
     def _spawn_chests(self):
         """Spawn chests at random locations in the dungeon."""
         # Clear existing chests
@@ -143,6 +197,11 @@ class Game:
                         self.state = config.STATE_INVENTORY
                     else:
                         self.state = config.STATE_PLAYING
+                # Handle pickup (instant, doesn't consume a turn)
+                elif event.key == pygame.K_g and self.state == config.STATE_PLAYING:
+                    self.pickup_item_at_position(
+                        self.warrior.grid_x, self.warrior.grid_y
+                    )
                 # Handle turn-based movement input
                 elif (
                     self.state == config.STATE_PLAYING and self.waiting_for_player_input
@@ -171,7 +230,7 @@ class Game:
 
             # Handle inventory input when inventory is open
             if self.state == config.STATE_INVENTORY:
-                self.inventory_ui.handle_input(event, self.warrior.inventory)
+                self.inventory_ui.handle_input(event, self.warrior.inventory, self)
 
     def restart(self):
         """Restart the game."""
@@ -181,11 +240,11 @@ class Game:
         self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
         self.state = config.STATE_PLAYING
         self.waiting_for_player_input = True
-        self._add_sample_items()
-        self._spawn_chests()
-        self.ground_items = []
+        self.ground_items = []  # Clear ground items
         self.message = ""
         self.message_timer = 0
+        self._add_sample_items()
+        self._spawn_chests()
 
     def update(self, dt: float):
         """
@@ -211,14 +270,21 @@ class Game:
         # Check game over conditions
         if not self.warrior.is_alive:
             self.state = config.STATE_GAME_OVER
-        elif not self.monster.is_alive:
-            self.state = config.STATE_VICTORY
+        # Note: Game no longer auto-ends when monster is defeated
+        # Players can continue exploring and managing inventory
 
     def process_turn(self):
         """Process one complete turn (hero then monsters)."""
+        # Track if monster was alive before turn
+        monster_was_alive = self.monster.is_alive
+
         # Hero turn
         self.warrior.on_turn_start()
         self.warrior.execute_turn(self.monster)
+
+        # Check if monster died during hero's turn and drop loot
+        if monster_was_alive and not self.monster.is_alive:
+            self._drop_monster_loot()
 
         # Check for chest collision after warrior moves
         self._check_chest_collision()
@@ -233,6 +299,16 @@ class Game:
 
         # Wait for next player input
         self.waiting_for_player_input = True
+
+    def _drop_monster_loot(self):
+        """Drop loot from defeated monster."""
+        if hasattr(self.monster, "monster_type"):
+            loot_item = get_loot_for_monster(self.monster.monster_type)
+            if loot_item:
+                self.drop_item(loot_item, self.monster.grid_x, self.monster.grid_y)
+                self._show_message(
+                    f"The {self.monster.monster_type.replace('_', ' ')} dropped a {loot_item.name}!"
+                )
 
     def _check_chest_collision(self):
         """Check if warrior stepped on a chest and open it."""
@@ -290,14 +366,16 @@ class Game:
             for ground_item in self.ground_items:
                 ground_item.draw(self.screen)
 
-            # Draw attack range indicator
-            self.combat_system.draw_attack_range_indicator(
-                self.screen, self.warrior, self.monster
-            )
+            # Draw attack range indicator (only if monster is alive)
+            if self.monster.is_alive:
+                self.combat_system.draw_attack_range_indicator(
+                    self.screen, self.warrior, self.monster
+                )
 
             # Draw entities
             self.warrior.draw(self.screen)
-            self.monster.draw(self.screen)
+            if self.monster.is_alive:
+                self.monster.draw(self.screen)
 
             # Draw combat UI
             self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
@@ -317,11 +395,14 @@ class Game:
             for ground_item in self.ground_items:
                 ground_item.draw(self.screen)
 
-            self.combat_system.draw_attack_range_indicator(
-                self.screen, self.warrior, self.monster
-            )
+            if self.monster.is_alive:
+                self.combat_system.draw_attack_range_indicator(
+                    self.screen, self.warrior, self.monster
+                )
+
             self.warrior.draw(self.screen)
-            self.monster.draw(self.screen)
+            if self.monster.is_alive:
+                self.monster.draw(self.screen)
             self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
 
             # Draw inventory overlay on top
