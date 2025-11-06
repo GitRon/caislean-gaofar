@@ -6,6 +6,14 @@ import pygame
 from ui_button import Button
 
 
+@pytest.fixture(autouse=True)
+def setup_pygame():
+    """Setup pygame before each test and cleanup after"""
+    pygame.init()
+    yield
+    pygame.quit()
+
+
 @pytest.fixture
 def mock_screen():
     """Create a mock pygame surface"""
