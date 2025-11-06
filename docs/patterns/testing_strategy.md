@@ -20,7 +20,7 @@ This project uses **PyTest exclusively** for unit testing. This document establi
 - **Simplicity**: Keep tests straightforward and comprehensible
 
 ### Exception Testing
-Tests must "assert the error message and not just the exception class." This applies universally—never test exceptions without validating the actual error message.
+Tests must assert the error message and not just the exception class. This applies universally—never test exceptions without validating the actual error message.
 
 ### Mocking Guidelines
 - Minimize mocking for first-party code; happy-path tests are preferable
