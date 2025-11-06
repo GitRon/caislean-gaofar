@@ -369,10 +369,8 @@ class Game:
                     f"The {monster.__class__.__name__} drops a {item.name}!"
                 )
 
-                # Remove dead monster from list (optional - keeps list clean)
-                # Note: We could also keep them for visual/gameplay reasons
-                # For now, removing them since is_alive=False prevents further updates
-                # self.monsters.remove(monster)
+                # Remove dead monster from list so loot only drops once
+                self.monsters.remove(monster)
 
     def _generate_monster_loot(self) -> Item:
         """
