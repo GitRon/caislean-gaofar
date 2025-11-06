@@ -73,6 +73,7 @@ class CombatSystem:
             "Controls:",
             "WASD/Arrows - Move",
             "SPACE - Attack",
+            "G - Pick up item",
             "I - Inventory",
         ]
 

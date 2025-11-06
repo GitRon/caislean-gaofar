@@ -13,6 +13,7 @@ from world_map import WorldMap
 from camera import Camera
 from chest import Chest
 from ground_item import GroundItem
+from loot_table import get_loot_for_monster
 import config
 
 
@@ -130,6 +131,59 @@ class Game:
         self.warrior.inventory.add_item(health_potion)  # Goes to backpack
         self.warrior.inventory.add_item(gold_coin)  # Goes to backpack
 
+    def drop_item(self, item: Item, grid_x: int, grid_y: int):
+        """
+        Drop an item on the ground at specified grid coordinates.
+
+        Args:
+            item: The item to drop
+            grid_x: Grid x position
+            grid_y: Grid y position
+        """
+        ground_item = GroundItem(item, grid_x, grid_y)
+        self.ground_items.append(ground_item)
+
+    def get_item_at_position(self, grid_x: int, grid_y: int):
+        """
+        Get the item at a specific position.
+
+        Args:
+            grid_x: Grid x position
+            grid_y: Grid y position
+
+        Returns:
+            GroundItem if found, None otherwise
+        """
+        for ground_item in self.ground_items:
+            if ground_item.grid_x == grid_x and ground_item.grid_y == grid_y:
+                return ground_item
+        return None
+
+    def pickup_item_at_position(self, grid_x: int, grid_y: int) -> bool:
+        """
+        Try to pick up an item at the specified grid position.
+
+        Args:
+            grid_x: Grid x position
+            grid_y: Grid y position
+
+        Returns:
+            True if an item was picked up, False otherwise
+        """
+        # Find item at this position
+        for ground_item in self.ground_items:
+            if ground_item.grid_x == grid_x and ground_item.grid_y == grid_y:
+                # Try to add to inventory
+                if self.warrior.inventory.add_item(ground_item.item):
+                    self.ground_items.remove(ground_item)
+                    self._show_message(f"Picked up {ground_item.item.name}!")
+                    return True
+                else:
+                    # Inventory full
+                    self._show_message("Inventory is full!")
+                    return False
+        return False
+
     def _spawn_chests(self):
         """Spawn chests from map data or at random locations."""
         # Clear existing chests
@@ -187,6 +241,11 @@ class Game:
                         self.state = config.STATE_INVENTORY
                     else:
                         self.state = config.STATE_PLAYING
+                # Handle pickup (instant, doesn't consume a turn)
+                elif event.key == pygame.K_g and self.state == config.STATE_PLAYING:
+                    self.pickup_item_at_position(
+                        self.warrior.grid_x, self.warrior.grid_y
+                    )
                 # Handle turn-based movement input
                 elif (
                     self.state == config.STATE_PLAYING and self.waiting_for_player_input
@@ -215,7 +274,7 @@ class Game:
 
             # Handle inventory input when inventory is open
             if self.state == config.STATE_INVENTORY:
-                self.inventory_ui.handle_input(event, self.warrior.inventory)
+                self.inventory_ui.handle_input(event, self.warrior.inventory, self)
 
     def restart(self):
         """Restart the game."""
@@ -244,11 +303,11 @@ class Game:
 
         self.state = config.STATE_PLAYING
         self.waiting_for_player_input = True
-        self._add_sample_items()
-        self._spawn_chests()
-        self.ground_items = []
+        self.ground_items = []  # Clear ground items
         self.message = ""
         self.message_timer = 0
+        self._add_sample_items()
+        self._spawn_chests()
 
     def update(self, dt: float):
         """
@@ -357,79 +416,20 @@ class Game:
         """Check for dead monsters and drop their loot."""
         for monster in self.monsters[:]:  # Iterate over copy to allow removal
             if not monster.is_alive:
-                # Generate loot item
-                item = self._generate_monster_loot()
+                # Use loot_table system to generate loot
+                loot_item = get_loot_for_monster(monster.monster_type)
 
-                # Create ground item at monster location
-                ground_item = GroundItem(item, monster.grid_x, monster.grid_y)
-                self.ground_items.append(ground_item)
+                if loot_item:
+                    # Create ground item at monster location
+                    self.drop_item(loot_item, monster.grid_x, monster.grid_y)
 
-                # Show message
-                self._show_message(
-                    f"The {monster.__class__.__name__} drops a {item.name}!"
-                )
+                    # Show message
+                    self._show_message(
+                        f"The {monster.monster_type.replace('_', ' ')} drops a {loot_item.name}!"
+                    )
 
                 # Remove dead monster from list so loot only drops once
                 self.monsters.remove(monster)
-
-    def _generate_monster_loot(self) -> Item:
-        """
-        Generate a random loot item for defeated monsters.
-
-        Returns:
-            A randomly selected Item from the monster loot pool
-        """
-        # Define the loot pool for monster drops
-        loot_pool = [
-            # Common drops
-            Item("Gold Coin", ItemType.MISC, "A shiny coin"),
-            Item("Gold Coin", ItemType.MISC, "A shiny coin"),
-            Item("Gold Coin", ItemType.MISC, "A shiny coin"),
-            Item(
-                "Minor Health Potion",
-                ItemType.CONSUMABLE,
-                "Restores 25 HP",
-                health_bonus=25,
-            ),
-            Item(
-                "Minor Health Potion",
-                ItemType.CONSUMABLE,
-                "Restores 25 HP",
-                health_bonus=25,
-            ),
-            # Uncommon drops
-            Item(
-                "Health Potion", ItemType.CONSUMABLE, "Restores 50 HP", health_bonus=50
-            ),
-            Item("Dagger", ItemType.WEAPON, "A quick blade", attack_bonus=8),
-            Item(
-                "Leather Armor",
-                ItemType.ARMOR,
-                "Basic protection",
-                defense_bonus=5,
-                health_bonus=10,
-            ),
-            # Rare drops
-            Item("Iron Sword", ItemType.WEAPON, "A basic sword", attack_bonus=10),
-            Item("Shield", ItemType.ARMOR, "A sturdy shield", defense_bonus=8),
-            Item(
-                "Greater Health Potion",
-                ItemType.CONSUMABLE,
-                "Restores 100 HP",
-                health_bonus=100,
-            ),
-            # Very rare drops
-            Item("Steel Sword", ItemType.WEAPON, "A stronger sword", attack_bonus=20),
-            Item(
-                "Chain Mail",
-                ItemType.ARMOR,
-                "Metal armor",
-                defense_bonus=10,
-                health_bonus=20,
-            ),
-        ]
-
-        return random.choice(loot_pool)
 
     def _show_message(self, message: str):
         """Show a message to the player."""
