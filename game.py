@@ -302,6 +302,9 @@ class Game:
         # Check for ground item pickup after warrior moves
         self._check_ground_item_pickup()
 
+        # Check for monster deaths and drop loot (after warrior attacks)
+        self._check_monster_deaths()
+
         # Monster turns
         for monster in self.monsters:
             if monster.is_alive:
@@ -349,6 +352,86 @@ class Game:
                 else:
                     # Inventory full
                     self._show_message("Inventory is full!")
+
+    def _check_monster_deaths(self):
+        """Check for dead monsters and drop their loot."""
+        for monster in self.monsters[:]:  # Iterate over copy to allow removal
+            if not monster.is_alive:
+                # Generate loot item
+                item = self._generate_monster_loot()
+
+                # Create ground item at monster location
+                ground_item = GroundItem(item, monster.grid_x, monster.grid_y)
+                self.ground_items.append(ground_item)
+
+                # Show message
+                self._show_message(
+                    f"The {monster.__class__.__name__} drops a {item.name}!"
+                )
+
+                # Remove dead monster from list (optional - keeps list clean)
+                # Note: We could also keep them for visual/gameplay reasons
+                # For now, removing them since is_alive=False prevents further updates
+                # self.monsters.remove(monster)
+
+    def _generate_monster_loot(self) -> Item:
+        """
+        Generate a random loot item for defeated monsters.
+
+        Returns:
+            A randomly selected Item from the monster loot pool
+        """
+        # Define the loot pool for monster drops
+        loot_pool = [
+            # Common drops
+            Item("Gold Coin", ItemType.MISC, "A shiny coin"),
+            Item("Gold Coin", ItemType.MISC, "A shiny coin"),
+            Item("Gold Coin", ItemType.MISC, "A shiny coin"),
+            Item(
+                "Minor Health Potion",
+                ItemType.CONSUMABLE,
+                "Restores 25 HP",
+                health_bonus=25,
+            ),
+            Item(
+                "Minor Health Potion",
+                ItemType.CONSUMABLE,
+                "Restores 25 HP",
+                health_bonus=25,
+            ),
+            # Uncommon drops
+            Item(
+                "Health Potion", ItemType.CONSUMABLE, "Restores 50 HP", health_bonus=50
+            ),
+            Item("Dagger", ItemType.WEAPON, "A quick blade", attack_bonus=8),
+            Item(
+                "Leather Armor",
+                ItemType.ARMOR,
+                "Basic protection",
+                defense_bonus=5,
+                health_bonus=10,
+            ),
+            # Rare drops
+            Item("Iron Sword", ItemType.WEAPON, "A basic sword", attack_bonus=10),
+            Item("Shield", ItemType.ARMOR, "A sturdy shield", defense_bonus=8),
+            Item(
+                "Greater Health Potion",
+                ItemType.CONSUMABLE,
+                "Restores 100 HP",
+                health_bonus=100,
+            ),
+            # Very rare drops
+            Item("Steel Sword", ItemType.WEAPON, "A stronger sword", attack_bonus=20),
+            Item(
+                "Chain Mail",
+                ItemType.ARMOR,
+                "Metal armor",
+                defense_bonus=10,
+                health_bonus=20,
+            ),
+        ]
+
+        return random.choice(loot_pool)
 
     def _show_message(self, message: str):
         """Show a message to the player."""
