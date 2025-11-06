@@ -2,20 +2,28 @@
 
 import pygame
 import random
+import os
 from warrior import Warrior
 from monsters import ALL_MONSTER_CLASSES
 from combat import CombatSystem
 from inventory_ui import InventoryUI
 from ui_button import Button
 from item import Item, ItemType
+from world_map import WorldMap
+from camera import Camera
 import config
 
 
 class Game:
     """Main game class that manages the game loop and state."""
 
-    def __init__(self):
-        """Initialize the game."""
+    def __init__(self, map_file: str = None):
+        """
+        Initialize the game.
+
+        Args:
+            map_file: Optional path to map JSON file. If None, uses default map.
+        """
         pygame.init()
         self.screen = pygame.display.set_mode(
             (config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
@@ -25,11 +33,41 @@ class Game:
         self.running = True
         self.state = config.STATE_PLAYING
 
-        # Initialize game objects with grid coordinates
-        self.warrior = Warrior(2, config.GRID_HEIGHT // 2)
-        # Randomly select a monster class for variety
-        monster_class = random.choice(ALL_MONSTER_CLASSES)
-        self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
+        # Load world map
+        self.world_map = WorldMap()
+        if map_file is None:
+            map_file = os.path.join("maps", "sample_map.json")
+        self.world_map.load_from_file(map_file)
+
+        # Initialize camera
+        self.camera = Camera(self.world_map.width, self.world_map.height)
+
+        # Initialize game objects at spawn point
+        spawn_x, spawn_y = self.world_map.spawn_point
+        self.warrior = Warrior(spawn_x, spawn_y)
+
+        # Spawn monsters from map data
+        self.monsters = []
+        monster_spawns = self.world_map.get_entity_spawns("monsters")
+        for spawn in monster_spawns:
+            monster_type = spawn.get("type", "banshee")
+            # Find matching monster class
+            monster_class = None
+            for cls in ALL_MONSTER_CLASSES:
+                if cls.MONSTER_TYPE == monster_type:
+                    monster_class = cls
+                    break
+            if monster_class is None:
+                monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn["x"], spawn["y"])
+            self.monsters.append(monster)
+
+        # If no monsters in map, spawn one randomly
+        if not self.monsters:
+            monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn_x + 5, spawn_y)
+            self.monsters.append(monster)
+
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
 
@@ -137,10 +175,29 @@ class Game:
 
     def restart(self):
         """Restart the game."""
-        self.warrior = Warrior(2, config.GRID_HEIGHT // 2)
-        # Randomly select a new monster class on restart
-        monster_class = random.choice(ALL_MONSTER_CLASSES)
-        self.monster = monster_class(config.GRID_WIDTH - 3, config.GRID_HEIGHT // 2)
+        spawn_x, spawn_y = self.world_map.spawn_point
+        self.warrior = Warrior(spawn_x, spawn_y)
+
+        # Respawn monsters from map data
+        self.monsters = []
+        monster_spawns = self.world_map.get_entity_spawns("monsters")
+        for spawn in monster_spawns:
+            monster_type = spawn.get("type", "banshee")
+            monster_class = None
+            for cls in ALL_MONSTER_CLASSES:
+                if cls.MONSTER_TYPE == monster_type:
+                    monster_class = cls
+                    break
+            if monster_class is None:
+                monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn["x"], spawn["y"])
+            self.monsters.append(monster)
+
+        if not self.monsters:
+            monster_class = random.choice(ALL_MONSTER_CLASSES)
+            monster = monster_class(spawn_x + 5, spawn_y)
+            self.monsters.append(monster)
+
         self.state = config.STATE_PLAYING
         self.waiting_for_player_input = True
         self._add_sample_items()
@@ -160,22 +217,36 @@ class Game:
         if not self.waiting_for_player_input:
             self.process_turn()
 
+        # Update camera to follow player
+        self.camera.update(self.warrior.grid_x, self.warrior.grid_y)
+
         # Check game over conditions
         if not self.warrior.is_alive:
             self.state = config.STATE_GAME_OVER
-        elif not self.monster.is_alive:
+        elif all(not monster.is_alive for monster in self.monsters):
             self.state = config.STATE_VICTORY
 
     def process_turn(self):
         """Process one complete turn (hero then monsters)."""
         # Hero turn
         self.warrior.on_turn_start()
-        self.warrior.execute_turn(self.monster)
+        # Find nearest monster for targeting
+        nearest_monster = None
+        min_distance = float("inf")
+        for monster in self.monsters:
+            if monster.is_alive:
+                distance = self.warrior.grid_distance_to(monster)
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_monster = monster
+
+        self.warrior.execute_turn(nearest_monster, self.world_map)
 
         # Monster turns
-        if self.monster.is_alive:
-            self.monster.on_turn_start()
-            self.monster.execute_turn(self.warrior)
+        for monster in self.monsters:
+            if monster.is_alive:
+                monster.on_turn_start()
+                monster.execute_turn(self.warrior, self.world_map)
 
         # Wait for next player input
         self.waiting_for_player_input = True
@@ -185,29 +256,43 @@ class Game:
         self.screen.fill(config.BLACK)
 
         if self.state == config.STATE_PLAYING:
-            # Draw attack range indicator
-            self.combat_system.draw_attack_range_indicator(
-                self.screen, self.warrior, self.monster
+            # Draw world map
+            self.world_map.draw(
+                self.screen,
+                self.camera.x,
+                self.camera.y,
+                self.camera.viewport_width,
+                self.camera.viewport_height,
             )
 
-            # Draw entities
-            self.warrior.draw(self.screen)
-            self.monster.draw(self.screen)
+            # Draw entities with camera offset
+            self._draw_entities_with_camera()
 
-            # Draw combat UI
-            self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
+            # Draw combat UI (find nearest monster)
+            nearest_monster = self._get_nearest_alive_monster()
+            if nearest_monster:
+                self.combat_system.draw_combat_ui(
+                    self.screen, self.warrior, nearest_monster
+                )
 
             # Draw inventory button
             self.inventory_button.draw(self.screen)
 
         elif self.state == config.STATE_INVENTORY:
             # Draw the game in the background
-            self.combat_system.draw_attack_range_indicator(
-                self.screen, self.warrior, self.monster
+            self.world_map.draw(
+                self.screen,
+                self.camera.x,
+                self.camera.y,
+                self.camera.viewport_width,
+                self.camera.viewport_height,
             )
-            self.warrior.draw(self.screen)
-            self.monster.draw(self.screen)
-            self.combat_system.draw_combat_ui(self.screen, self.warrior, self.monster)
+            self._draw_entities_with_camera()
+            nearest_monster = self._get_nearest_alive_monster()
+            if nearest_monster:
+                self.combat_system.draw_combat_ui(
+                    self.screen, self.warrior, nearest_monster
+                )
 
             # Draw inventory overlay on top
             self.inventory_ui.draw(self.screen, self.warrior.inventory)
@@ -219,6 +304,46 @@ class Game:
             self.draw_game_over_screen("GAME OVER!", config.RED)
 
         pygame.display.flip()
+
+    def _get_nearest_alive_monster(self):
+        """Get the nearest alive monster to the warrior."""
+        nearest_monster = None
+        min_distance = float("inf")
+        for monster in self.monsters:
+            if monster.is_alive:
+                distance = self.warrior.grid_distance_to(monster)
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_monster = monster
+        return nearest_monster
+
+    def _draw_entities_with_camera(self):
+        """Draw all entities with camera offset applied."""
+        # Temporarily adjust entity positions for drawing
+        # Draw warrior
+        if self.camera.is_visible(self.warrior.grid_x, self.warrior.grid_y):
+            original_x = self.warrior.grid_x
+            original_y = self.warrior.grid_y
+            screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+            self.warrior.grid_x = screen_x
+            self.warrior.grid_y = screen_y
+            self.warrior.draw(self.screen)
+            self.warrior.grid_x = original_x
+            self.warrior.grid_y = original_y
+
+        # Draw monsters
+        for monster in self.monsters:
+            if monster.is_alive and self.camera.is_visible(
+                monster.grid_x, monster.grid_y
+            ):
+                original_x = monster.grid_x
+                original_y = monster.grid_y
+                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+                monster.grid_x = screen_x
+                monster.grid_y = screen_y
+                monster.draw(self.screen)
+                monster.grid_x = original_x
+                monster.grid_y = original_y
 
     def draw_game_over_screen(self, message: str, color: tuple):
         """

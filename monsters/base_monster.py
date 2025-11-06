@@ -53,7 +53,7 @@ class BaseMonster(Entity):
         self.description = self.DESCRIPTION
         self.frame_count = 0  # For animation
 
-    def execute_turn(self, target: Entity):
+    def execute_turn(self, target: Entity, world_map=None):
         """
         Execute one turn of monster AI behavior.
 
@@ -62,6 +62,7 @@ class BaseMonster(Entity):
 
         Args:
             target: The entity to chase/attack (usually the warrior)
+            world_map: Optional WorldMap object for movement validation
         """
         if not self.is_alive or not target.is_alive:
             return
@@ -76,9 +77,9 @@ class BaseMonster(Entity):
                 self.attack(target)
             else:
                 # Move towards target
-                self._move_towards_target(target)
+                self._move_towards_target(target, world_map)
 
-    def _move_towards_target(self, target: Entity):
+    def _move_towards_target(self, target: Entity, world_map=None):
         """
         Move one tile towards the target.
 
@@ -87,6 +88,7 @@ class BaseMonster(Entity):
 
         Args:
             target: The entity to move towards
+            world_map: Optional WorldMap object for movement validation
         """
         dx = 0
         dy = 0
@@ -104,14 +106,14 @@ class BaseMonster(Entity):
         # Try to move (prioritize direction with larger distance)
         if abs(target.grid_x - self.grid_x) > abs(target.grid_y - self.grid_y):
             # Prioritize horizontal movement
-            if dx != 0 and not self.move(dx, 0):
+            if dx != 0 and not self.move(dx, 0, world_map):
                 # If blocked, try vertical
-                self.move(0, dy)
+                self.move(0, dy, world_map)
         else:
             # Prioritize vertical movement
-            if dy != 0 and not self.move(0, dy):
+            if dy != 0 and not self.move(0, dy, world_map):
                 # If blocked, try horizontal
-                self.move(dx, 0)
+                self.move(dx, 0, world_map)
 
     def draw(self, screen: pygame.Surface):
         """Draw the monster using its specific renderer."""

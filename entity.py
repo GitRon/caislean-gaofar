@@ -94,13 +94,14 @@ class Entity:
             self.health = 0
             self.is_alive = False
 
-    def move(self, dx: int, dy: int) -> bool:
+    def move(self, dx: int, dy: int, world_map=None) -> bool:
         """
         Move the entity by delta grid tiles.
 
         Args:
             dx: Delta x in tiles
             dy: Delta y in tiles
+            world_map: Optional WorldMap object for terrain-based movement validation
 
         Returns:
             True if move was successful, False if blocked
@@ -109,10 +110,18 @@ class Entity:
         new_grid_y = self.grid_y + dy
 
         # Check if new position is valid
-        if Grid.is_valid_position(new_grid_x, new_grid_y):
-            self.grid_x = new_grid_x
-            self.grid_y = new_grid_y
-            return True
+        if world_map:
+            # Use world map for validation (checks bounds and terrain passability)
+            if world_map.is_passable(new_grid_x, new_grid_y):
+                self.grid_x = new_grid_x
+                self.grid_y = new_grid_y
+                return True
+        else:
+            # Fallback to grid validation for backward compatibility
+            if Grid.is_valid_position(new_grid_x, new_grid_y):
+                self.grid_x = new_grid_x
+                self.grid_y = new_grid_y
+                return True
         return False
 
     def draw(self, screen: pygame.Surface):
