@@ -5,6 +5,46 @@ description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
     "pygame>=2.6.1",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v"
+]
+
+[tool.coverage.run]
+source = ["."]
+branch = true
+omit = [
+    "tests/*",
+    "main.py",
+    ".venv/*",
+    "venv/*",
+    # UI/Rendering code excluded from 100% requirement
+    "game.py",
+    "inventory_ui.py",
+    "monster_renderer.py",
+]
+
+[tool.coverage.report]
+# Enforce 100% branch coverage on core logic modules
+fail_under = 100
+precision = 2
+skip_covered = false
+skip_empty = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
 ]
 
 [tool.boa-restrictor]
