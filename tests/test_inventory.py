@@ -15,7 +15,7 @@ class TestInventory:
         # Assert
         assert inventory.weapon_slot is None
         assert inventory.armor_slot is None
-        assert inventory.backpack_slots == [None, None, None]
+        assert inventory.backpack_slots == [None, None, None, None, None]
 
     def test_add_item_weapon_to_empty_weapon_slot(self):
         """Test adding weapon to empty weapon slot"""
@@ -129,8 +129,10 @@ class TestInventory:
             Item("Item1", ItemType.MISC),
             Item("Item2", ItemType.MISC),
             Item("Item3", ItemType.MISC),
+            Item("Item4", ItemType.MISC),
+            Item("Item5", ItemType.MISC),
         ]
-        new_item = Item("Item4", ItemType.MISC)
+        new_item = Item("Item6", ItemType.MISC)
 
         # Act
         result = inventory.add_item(new_item)
@@ -230,6 +232,34 @@ class TestInventory:
         assert removed_item == item
         assert inventory.backpack_slots[2] is None
 
+    def test_remove_item_from_backpack_slot_3(self):
+        """Test removing item from backpack slot 3"""
+        # Arrange
+        inventory = Inventory()
+        item = Item("Item", ItemType.MISC)
+        inventory.backpack_slots[3] = item
+
+        # Act
+        removed_item = inventory.remove_item_from_slot("backpack", 3)
+
+        # Assert
+        assert removed_item == item
+        assert inventory.backpack_slots[3] is None
+
+    def test_remove_item_from_backpack_slot_4(self):
+        """Test removing item from backpack slot 4"""
+        # Arrange
+        inventory = Inventory()
+        item = Item("Item", ItemType.MISC)
+        inventory.backpack_slots[4] = item
+
+        # Act
+        removed_item = inventory.remove_item_from_slot("backpack", 4)
+
+        # Assert
+        assert removed_item == item
+        assert inventory.backpack_slots[4] is None
+
     def test_remove_item_from_empty_backpack_slot(self):
         """Test removing item from empty backpack slot"""
         # Arrange
@@ -258,7 +288,7 @@ class TestInventory:
         inventory = Inventory()
 
         # Act
-        removed_item = inventory.remove_item_from_slot("backpack", 3)
+        removed_item = inventory.remove_item_from_slot("backpack", 5)
 
         # Assert
         assert removed_item is None
@@ -394,7 +424,7 @@ class TestInventory:
         inventory = Inventory()
 
         # Act
-        result = inventory.equip_from_backpack(3)
+        result = inventory.equip_from_backpack(5)
 
         # Assert
         assert result is False
