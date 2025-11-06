@@ -1,6 +1,5 @@
 """Tests for camera.py - Camera system"""
 
-import pytest
 from camera import Camera
 import config
 

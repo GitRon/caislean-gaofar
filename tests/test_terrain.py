@@ -31,9 +31,9 @@ class TestTerrainType:
         )
 
         # Act & Assert
-        terrain_dict = {terrain1: "grass", terrain2: "wall"}
-        assert terrain_dict[terrain1] == "grass"
-        assert terrain_dict[terrain2] == "wall"
+        terrain_map = {terrain1: "grass", terrain2: "wall"}
+        assert terrain_map[terrain1] == "grass"
+        assert terrain_map[terrain2] == "wall"
 
 
 class TestTerrainManager:

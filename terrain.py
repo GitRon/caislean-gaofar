@@ -2,10 +2,9 @@
 
 from typing import Tuple, Dict
 from dataclasses import dataclass
-import json
 
 
-@dataclass
+@dataclass(kw_only=True)
 class TerrainType:
     """Defines properties of a terrain type."""
 

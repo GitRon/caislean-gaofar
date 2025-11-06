@@ -362,7 +362,9 @@ class TestWorldMap:
         world_map = WorldMap()
         data = {
             "metadata": {"width": 3, "height": 3, "tile_size": 50},
-            "legend": {".": {"name": "meadow", "passable": True, "color": [50, 220, 50]}},
+            "legend": {
+                ".": {"name": "meadow", "passable": True, "color": [50, 220, 50]}
+            },
             "tiles": ["...", "...", "..."],
             "spawn_point": {"x": 1, "y": 1},
         }

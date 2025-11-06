@@ -140,7 +140,12 @@ class WorldMap:
         return self.terrain_manager.get_terrain(terrain_char)
 
     def draw(
-        self, screen: pygame.Surface, camera_x: int, camera_y: int, viewport_width: int, viewport_height: int
+        self,
+        screen: pygame.Surface,
+        camera_x: int,
+        camera_y: int,
+        viewport_width: int,
+        viewport_height: int,
     ) -> None:
         """
         Draw visible portion of the map.
