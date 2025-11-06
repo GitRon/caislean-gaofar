@@ -52,6 +52,5 @@ MONSTER_ATTACK_COOLDOWN = 1  # turns between attacks
 
 # Game states
 STATE_PLAYING = "playing"
-STATE_VICTORY = "victory"
 STATE_GAME_OVER = "game_over"
 STATE_INVENTORY = "inventory"
