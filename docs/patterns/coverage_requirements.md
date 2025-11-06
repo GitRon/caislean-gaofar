@@ -32,16 +32,21 @@ The following files are excluded from the 100% coverage requirement as they cont
 ## Running Coverage Locally
 
 ```bash
+# Install dependencies first
+uv sync
+
 # Run tests with coverage report
-pytest --cov=. --cov-report=term-missing --cov-branch tests/
+uv run pytest --cov=. --cov-report=term-missing --cov-branch tests/
 
 # Generate HTML coverage report
-pytest --cov=. --cov-report=html --cov-branch tests/
+uv run pytest --cov=. --cov-report=html --cov-branch tests/
 # Then open htmlcov/index.html in a browser
 
 # Check if coverage passes (will fail if < 100%)
-pytest --cov=. --cov-report=term --cov-branch --cov-fail-under=100 tests/
+uv run pytest --cov=. --cov-report=term --cov-branch --cov-fail-under=100 tests/
 ```
+
+**Note**: Use `uv run` to execute commands in the uv-managed virtual environment.
 
 ## CI/CD Pipeline
 
@@ -66,14 +71,17 @@ The GitHub Actions pipeline (`qa.yml`) enforces coverage requirements:
 - name: Install dependencies
   run: uv sync --frozen
 
-# Run tests with coverage
+# Run tests with coverage (using uv run)
 - name: Run tests with coverage
   run: |
-    pytest --cov=. --cov-report=term-missing --cov-report=xml \
+    uv run pytest --cov=. --cov-report=term-missing --cov-report=xml \
       --cov-branch --cov-fail-under=100 tests/ -v
 ```
 
-The `--frozen` flag ensures dependencies exactly match `uv.lock`, providing reproducible builds.
+**Key Points**:
+- The `--frozen` flag ensures dependencies exactly match `uv.lock`
+- `uv run` executes commands in the uv-managed virtual environment
+- This provides reproducible builds across all environments
 
 ## Coverage Configuration
 

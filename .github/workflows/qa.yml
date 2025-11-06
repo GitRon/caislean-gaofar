@@ -115,7 +115,7 @@ jobs:
       # 5. Run tests with branch coverage
       - name: Run tests with coverage
         run: |
-          pytest --cov=. --cov-report=term-missing --cov-report=xml --cov-branch --cov-fail-under=100 \
+          uv run pytest --cov=. --cov-report=term-missing --cov-report=xml --cov-branch --cov-fail-under=100 \
             --cov-config=pyproject.toml tests/ -v
 
       # 6. Upload coverage report
@@ -132,10 +132,15 @@ jobs:
       - name: Coverage Badge
         if: always()
         run: |
-          COVERAGE=$(python -m coverage report --omit="tests/*,main.py" | grep TOTAL | awk '{print $4}' | sed 's/%//')
+          COVERAGE=$(uv run python -m coverage report --omit="tests/*,main.py" | grep TOTAL | awk '{print $NF}' | sed 's/%//')
           echo "Coverage: ${COVERAGE}%"
 
-          if [ $(echo "$COVERAGE >= 100" | bc -l) -eq 1 ]; then
+          if [ -z "$COVERAGE" ]; then
+            echo "❌ Failed to get coverage data"
+            exit 1
+          fi
+
+          if (( $(echo "$COVERAGE >= 100" | bc -l) )); then
             echo "✅ 100% branch coverage achieved!"
           else
             echo "❌ Coverage is ${COVERAGE}%, expected 100%"

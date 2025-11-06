@@ -24,14 +24,16 @@ This project maintains **100% branch coverage** on all core logic modules.
 uv sync
 
 # Run all tests
-pytest
+uv run pytest
 
 # Run tests with coverage report
-pytest --cov=. --cov-report=term-missing --cov-branch tests/
+uv run pytest --cov=. --cov-report=term-missing --cov-branch tests/
 
 # Generate HTML coverage report
-pytest --cov=. --cov-report=html --cov-branch tests/
+uv run pytest --cov=. --cov-report=html --cov-branch tests/
 ```
+
+**Note**: Use `uv run` to execute commands in the uv-managed environment.
 
 See [Coverage Requirements](docs/patterns/coverage_requirements.md) for detailed information.
 
