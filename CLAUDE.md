@@ -20,7 +20,7 @@ The project uses `uv` for dependency management (Python 3.13+) with pygame as th
 **IMPORTANT**: When creating new branches for development, follow this naming convention:
 
 ```
-<prefix>#<ticket-id>-<description>
+<prefix>/#<ticket-id>-<description>
 ```
 
 **Prefix options**:
@@ -29,17 +29,18 @@ The project uses `uv` for dependency management (Python 3.13+) with pygame as th
 - `bugfix` - For bug fixes
 
 **Format rules**:
-- Use `#` followed by the ticket/issue ID
-- Follow with a descriptive name of the feature/issue
+- Use a forward slash (`/`) after the prefix
+- Follow with `#` and the ticket/issue ID
+- Add a descriptive name of the feature/issue
 - Replace all whitespaces with hyphens (`-`)
 - Use lowercase for consistency
 
 **Examples**:
 ```
-feature#12-mouse-driven-inventory
-bugfix#23-monster-chase-behavior
-refactor#45-combat-system-cleanup
-feature#8-loot-system
+feature/#12-mouse-driven-inventory
+bugfix/#23-monster-chase-behavior
+refactor/#45-combat-system-cleanup
+feature/#8-loot-system
 ```
 
 ## Architecture
