@@ -25,6 +25,7 @@ class Warrior(Entity):
         self.inventory = Inventory()
         self.base_attack_damage = config.WARRIOR_ATTACK_DAMAGE
         self.pending_action = None  # Store pending action for this turn
+        self.gold = 0  # Track gold as separate currency
 
     def get_effective_attack_damage(self) -> int:
         """Get total attack damage including inventory bonuses."""
@@ -45,16 +46,36 @@ class Warrior(Entity):
 
     def count_gold(self) -> int:
         """
-        Count gold coins in inventory.
+        Get current gold amount.
 
         Returns:
-            Total gold value from all items with gold_value > 0
+            Current gold currency amount
         """
-        gold = 0
-        for item in self.inventory.backpack_slots:
-            if item and item.gold_value > 0:
-                gold += item.gold_value
-        return gold
+        return self.gold
+
+    def add_gold(self, amount: int):
+        """
+        Add gold to the warrior's currency.
+
+        Args:
+            amount: Amount of gold to add
+        """
+        self.gold += amount
+
+    def remove_gold(self, amount: int) -> bool:
+        """
+        Remove gold from the warrior's currency.
+
+        Args:
+            amount: Amount of gold to remove
+
+        Returns:
+            True if successful, False if not enough gold
+        """
+        if self.gold >= amount:
+            self.gold -= amount
+            return True
+        return False
 
     def use_health_potion(self) -> bool:
         """

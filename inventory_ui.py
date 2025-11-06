@@ -151,23 +151,14 @@ class InventoryUI:
         label = self.font.render("BACKPACK", True, self.text_color)
         screen.blit(label, (panel_x + self.padding, start_y - 25))
 
-        # Draw 5 backpack slots (first row: 3 slots, second row: 2 slots)
-        for i in range(5):
-            if i < 3:
-                # First row
-                slot_x = (
-                    panel_x + self.padding + i * (self.slot_size + self.slot_margin)
-                )
-                slot_y = start_y
-            else:
-                # Second row (centered)
-                slot_x = (
-                    panel_x
-                    + self.padding
-                    + (i - 3) * (self.slot_size + self.slot_margin)
-                    + (self.slot_size + self.slot_margin) // 2
-                )
-                slot_y = start_y + self.slot_size + self.slot_margin
+        # Draw 13 backpack slots in a 5x3 grid (5 cols, 3 rows, last row has 3 slots)
+        slots_per_row = 5
+        for i in range(13):
+            row = i // slots_per_row
+            col = i % slots_per_row
+
+            slot_x = panel_x + self.padding + col * (self.slot_size + self.slot_margin)
+            slot_y = start_y + row * (self.slot_size + self.slot_margin)
 
             is_selected = self.selected_slot == ("backpack", i)
             is_hovered = self.hovered_slot == ("backpack", i)
@@ -299,27 +290,33 @@ class InventoryUI:
 
         # Keep keyboard support for accessibility
         elif event.type == pygame.KEYDOWN:
-            # Select slots with number keys
+            # Select slots with number keys (1-9 for first 9 backpack slots)
             if event.key == pygame.K_1:
-                self.selected_slot = ("weapon", 0)
-                return True
-            elif event.key == pygame.K_2:
-                self.selected_slot = ("armor", 0)
-                return True
-            elif event.key == pygame.K_3:
                 self.selected_slot = ("backpack", 0)
                 return True
-            elif event.key == pygame.K_4:
+            elif event.key == pygame.K_2:
                 self.selected_slot = ("backpack", 1)
                 return True
-            elif event.key == pygame.K_5:
+            elif event.key == pygame.K_3:
                 self.selected_slot = ("backpack", 2)
                 return True
-            elif event.key == pygame.K_6:
+            elif event.key == pygame.K_4:
                 self.selected_slot = ("backpack", 3)
                 return True
-            elif event.key == pygame.K_7:
+            elif event.key == pygame.K_5:
                 self.selected_slot = ("backpack", 4)
+                return True
+            elif event.key == pygame.K_6:
+                self.selected_slot = ("backpack", 5)
+                return True
+            elif event.key == pygame.K_7:
+                self.selected_slot = ("backpack", 6)
+                return True
+            elif event.key == pygame.K_8:
+                self.selected_slot = ("backpack", 7)
+                return True
+            elif event.key == pygame.K_9:
+                self.selected_slot = ("backpack", 8)
                 return True
 
             # Equip item from backpack

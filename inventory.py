@@ -3,12 +3,12 @@ from item import Item, ItemType
 
 
 class Inventory:
-    """Manages inventory slots: weapon, armor, and 5 backpack slots"""
+    """Manages inventory slots: weapon, armor, and 13 backpack slots"""
 
     def __init__(self):
         self.weapon_slot: Optional[Item] = None
         self.armor_slot: Optional[Item] = None
-        self.backpack_slots: list[Optional[Item]] = [None, None, None, None, None]
+        self.backpack_slots: list[Optional[Item]] = [None] * 13
 
     def add_item(self, item: Item) -> bool:
         """
@@ -37,7 +37,7 @@ class Inventory:
         """
         Remove and return an item from a specific slot.
         slot_type can be: 'weapon', 'armor', or 'backpack'
-        slot_index is used for backpack slots (0-4)
+        slot_index is used for backpack slots (0-12)
         """
         if slot_type == "weapon":
             item = self.weapon_slot
@@ -47,7 +47,7 @@ class Inventory:
             item = self.armor_slot
             self.armor_slot = None
             return item
-        elif slot_type == "backpack" and 0 <= slot_index < 5:
+        elif slot_type == "backpack" and 0 <= slot_index < 13:
             item = self.backpack_slots[slot_index]
             self.backpack_slots[slot_index] = None
             return item
@@ -58,7 +58,7 @@ class Inventory:
         Equip an item from backpack to appropriate slot.
         Returns True if successful.
         """
-        if not (0 <= backpack_index < 5):
+        if not (0 <= backpack_index < 13):
             return False
 
         item = self.backpack_slots[backpack_index]

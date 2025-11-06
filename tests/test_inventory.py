@@ -15,7 +15,7 @@ class TestInventory:
         # Assert
         assert inventory.weapon_slot is None
         assert inventory.armor_slot is None
-        assert inventory.backpack_slots == [None, None, None, None, None]
+        assert inventory.backpack_slots == [None] * 13
 
     def test_add_item_weapon_to_empty_weapon_slot(self):
         """Test adding weapon to empty weapon slot"""
@@ -288,7 +288,7 @@ class TestInventory:
         inventory = Inventory()
 
         # Act
-        removed_item = inventory.remove_item_from_slot("backpack", 5)
+        removed_item = inventory.remove_item_from_slot("backpack", 13)
 
         # Assert
         assert removed_item is None
@@ -424,7 +424,7 @@ class TestInventory:
         inventory = Inventory()
 
         # Act
-        result = inventory.equip_from_backpack(5)
+        result = inventory.equip_from_backpack(13)
 
         # Assert
         assert result is False
