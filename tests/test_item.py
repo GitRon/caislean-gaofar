@@ -116,10 +116,10 @@ class TestItem:
         item = Item("Sword", ItemType.WEAPON)
 
         # Act
-        repr_str = repr(item)
+        result = repr(item)
 
         # Assert
-        assert repr_str == "Item(Sword, weapon)"
+        assert result == "Item(Sword, weapon)"
 
     def test_item_repr_armor(self):
         """Test Item __repr__ for armor"""
@@ -127,10 +127,10 @@ class TestItem:
         item = Item("Shield", ItemType.ARMOR)
 
         # Act
-        repr_str = repr(item)
+        result = repr(item)
 
         # Assert
-        assert repr_str == "Item(Shield, armor)"
+        assert result == "Item(Shield, armor)"
 
     def test_item_repr_consumable(self):
         """Test Item __repr__ for consumable"""
@@ -138,10 +138,10 @@ class TestItem:
         item = Item("Potion", ItemType.CONSUMABLE)
 
         # Act
-        repr_str = repr(item)
+        result = repr(item)
 
         # Assert
-        assert repr_str == "Item(Potion, consumable)"
+        assert result == "Item(Potion, consumable)"
 
     def test_item_repr_misc(self):
         """Test Item __repr__ for misc"""
@@ -149,7 +149,7 @@ class TestItem:
         item = Item("Key", ItemType.MISC)
 
         # Act
-        repr_str = repr(item)
+        result = repr(item)
 
         # Assert
-        assert repr_str == "Item(Key, misc)"
+        assert result == "Item(Key, misc)"

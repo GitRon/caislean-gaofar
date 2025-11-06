@@ -45,9 +45,6 @@ class TestAllMonsters:
 
     def test_monster_has_required_attributes(self, monster_class):
         """Test monster has all required class attributes"""
-        # Arrange & Act
-        monster = monster_class(5, 5)
-
         # Assert
         assert hasattr(monster_class, "HEALTH")
         assert hasattr(monster_class, "ATTACK_DAMAGE")
