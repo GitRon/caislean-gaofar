@@ -52,14 +52,13 @@ The game follows a standard game loop pattern:
 3. **Draw** - Render all game objects and UI
 4. **Clock Tick** - Maintain 60 FPS (config.FPS)
 
-### Game States (config.py:35-39)
-The game uses a state machine with four states:
+### Game States (config.py:54-56)
+The game uses a state machine with three states:
 - `STATE_PLAYING` - Active gameplay
 - `STATE_INVENTORY` - Inventory screen overlay
-- `STATE_VICTORY` - Player wins
 - `STATE_GAME_OVER` - Player loses
 
-State transitions occur in game.py:100-104 (death detection) and game.py:60-65 (inventory toggle).
+The game continues indefinitely until the player chooses to exit. State transitions occur in game.py:347-348 (death detection) and game.py:241-249 (inventory toggle).
 
 ### Entity System
 All game characters inherit from the base `Entity` class (entity.py):

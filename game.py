@@ -235,7 +235,7 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
-                elif event.key == pygame.K_r and self.state != config.STATE_PLAYING:
+                elif event.key == pygame.K_r and self.state == config.STATE_GAME_OVER:
                     # Restart game
                     self.restart()
                 elif event.key == pygame.K_i and self.state in [
@@ -346,8 +346,6 @@ class Game:
         # Check game over conditions
         if not self.warrior.is_alive:
             self.state = config.STATE_GAME_OVER
-        elif all(not monster.is_alive for monster in self.monsters):
-            self.state = config.STATE_VICTORY
 
     def process_turn(self):
         """Process one complete turn (hero then monsters)."""
@@ -561,9 +559,6 @@ class Game:
 
             # Draw inventory overlay on top
             self.inventory_ui.draw(self.screen, self.warrior.inventory)
-
-        elif self.state == config.STATE_VICTORY:
-            self.draw_game_over_screen("VICTORY!", config.GREEN)
 
         elif self.state == config.STATE_GAME_OVER:
             self.draw_game_over_screen("GAME OVER!", config.RED)
