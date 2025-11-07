@@ -54,3 +54,15 @@ MONSTER_ATTACK_COOLDOWN = 1  # turns between attacks
 STATE_PLAYING = "playing"
 STATE_GAME_OVER = "game_over"
 STATE_INVENTORY = "inventory"
+STATE_SHOP = "shop"
+
+# Shop settings
+SHOP_BACKGROUND_COLOR = (40, 40, 60)  # Dark blue-gray
+SHOP_BORDER_COLOR = (200, 200, 200)  # Light gray
+SHOP_TEXT_COLOR = WHITE
+SHOP_HIGHLIGHT_COLOR = (100, 100, 150)  # Highlighted item
+SHOP_TAB_COLOR = (60, 60, 100)  # Tab color
+SHOP_TAB_ACTIVE_COLOR = (80, 80, 120)  # Active tab color
+SHOP_BUTTON_COLOR = (70, 130, 70)  # Green button
+SHOP_BUTTON_HOVER_COLOR = (90, 150, 90)  # Lighter green on hover
+SHOP_INSUFFICIENT_FUNDS_COLOR = RED  # Red for insufficient funds
