@@ -38,7 +38,7 @@ class Game:
 
         # Initialize dungeon manager
         if map_file is None:
-            map_file = os.path.join("maps", "sample_map.json")
+            map_file = os.path.join("maps", "overworld.json")
         self.dungeon_manager = DungeonManager(map_file)
         self.dungeon_manager.load_world_map()
 
