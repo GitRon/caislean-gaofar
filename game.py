@@ -682,10 +682,17 @@ class Game:
             description="A simple woolen tunic",
             defense_bonus=1,
         )
+        health_potion = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
+        )
 
         # Equip starting items (they'll auto-equip to appropriate slots)
         self.warrior.inventory.add_item(short_sword)
         self.warrior.inventory.add_item(woolen_tunic)
+        self.warrior.inventory.add_item(health_potion)
 
         # Player starts with 0 gold (default)
 
