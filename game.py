@@ -14,6 +14,7 @@ from ground_item import GroundItem
 from loot_table import get_loot_for_monster
 from hud import HUD
 from dungeon_manager import DungeonManager
+from portal import Portal
 import config
 
 
@@ -78,6 +79,12 @@ class Game:
         # World objects
         self.chests = []
         self.ground_items = []
+
+        # Portal system
+        self.active_portal = None  # Portal in dungeon/world
+        self.return_portal = None  # Portal in shop
+        self.portal_return_location = None  # (map_id, grid_x, grid_y)
+        self.shop_warrior_position = (6, 5)  # Fixed position in shop
 
         # Messages
         self.message = ""
@@ -217,12 +224,19 @@ class Game:
                 elif event.key == pygame.K_i and self.state in [
                     config.STATE_PLAYING,
                     config.STATE_INVENTORY,
+                    config.STATE_SHOP,
                 ]:
                     # Toggle inventory
                     if self.state == config.STATE_PLAYING:
                         self.state = config.STATE_INVENTORY
+                    elif self.state == config.STATE_SHOP:
+                        self.state = config.STATE_INVENTORY
                     else:
-                        self.state = config.STATE_PLAYING
+                        # Return to previous state (playing or shop)
+                        if self.return_portal:
+                            self.state = config.STATE_SHOP
+                        else:
+                            self.state = config.STATE_PLAYING
                 # Handle pickup (instant, doesn't consume a turn)
                 elif event.key == pygame.K_g and self.state == config.STATE_PLAYING:
                     self.pickup_item_at_position(
@@ -238,6 +252,17 @@ class Game:
                             self._show_message("No health potions remaining!")
                         else:
                             self._show_message("Health is already full!")
+                # Handle town portal usage (instant, doesn't consume a turn)
+                elif event.key == pygame.K_t and self.state == config.STATE_PLAYING:
+                    self._use_town_portal()
+                # Handle shop exit
+                elif event.key == pygame.K_ESCAPE and self.state == config.STATE_SHOP:
+                    if self.return_portal:
+                        self._use_return_portal()
+                # Handle return portal usage in shop
+                elif event.key == pygame.K_t and self.state == config.STATE_SHOP:
+                    if self.return_portal:
+                        self._use_return_portal()
                 # Handle turn-based movement input
                 elif (
                     self.state == config.STATE_PLAYING and self.waiting_for_player_input
@@ -270,6 +295,9 @@ class Game:
 
     def restart(self):
         """Restart the game."""
+        # Close any active portals
+        self._close_portals()
+
         # Reset to world map
         self.dungeon_manager.current_map_id = "world"
         self.dungeon_manager.return_location = None
@@ -310,6 +338,12 @@ class Game:
         # Update HUD (always update for animations)
         self.hud.update(self.warrior, dt)
 
+        # Update portal animations
+        if self.active_portal:
+            self.active_portal.update(dt)
+        if self.return_portal:
+            self.return_portal.update(dt)
+
         # Only update game logic when actively playing
         if self.state != config.STATE_PLAYING:
             return
@@ -324,6 +358,8 @@ class Game:
         # Check game over conditions
         if not self.warrior.is_alive:
             self.state = config.STATE_GAME_OVER
+            # Close portals on death
+            self._close_portals()
 
     def process_turn(self):
         """Process one complete turn (hero then monsters)."""
@@ -487,11 +523,80 @@ class Game:
         self.message = message
         self.message_timer = self.message_duration
 
+    def _use_town_portal(self):
+        """Use a town portal to teleport to shop."""
+        if self.warrior.use_town_portal():
+            # Close any existing portals
+            self._close_portals()
+
+            # Save current location
+            current_map_id = self.dungeon_manager.current_map_id
+            self.portal_return_location = (
+                current_map_id,
+                self.warrior.grid_x,
+                self.warrior.grid_y,
+            )
+
+            # Create portal at current location
+            self.active_portal = Portal(self.warrior.grid_x, self.warrior.grid_y, False)
+
+            # Teleport to shop
+            self.state = config.STATE_SHOP
+            self.warrior.grid_x, self.warrior.grid_y = self.shop_warrior_position
+
+            # Create return portal in shop
+            # Place it near the warrior but not on same tile
+            return_portal_x = self.shop_warrior_position[0] + 2
+            return_portal_y = self.shop_warrior_position[1]
+            self.return_portal = Portal(return_portal_x, return_portal_y, True)
+
+            self._show_message("You enter the portal and arrive in town!")
+        else:
+            if self.warrior.count_town_portals() <= 0:
+                self._show_message("No town portals in inventory!")
+            else:
+                self._show_message("Cannot use portal here!")
+
+    def _use_return_portal(self):
+        """Use the return portal to go back to saved location."""
+        if not self.return_portal or not self.portal_return_location:
+            self._show_message("No return portal available!")
+            return
+
+        map_id, grid_x, grid_y = self.portal_return_location
+
+        # Switch to the saved map
+        if map_id != self.dungeon_manager.current_map_id:
+            self.dungeon_manager.current_map_id = map_id
+            self.world_map = self.dungeon_manager.get_current_map()
+            self.camera = Camera(self.world_map.width, self.world_map.height)
+
+        # Return to saved position
+        self.warrior.grid_x = grid_x
+        self.warrior.grid_y = grid_y
+
+        # Return to playing state
+        self.state = config.STATE_PLAYING
+
+        # Close both portals
+        self._close_portals()
+
+        self._show_message("You return through the portal!")
+
+    def _close_portals(self):
+        """Close all active portals."""
+        self.active_portal = None
+        self.return_portal = None
+        self.portal_return_location = None
+
     def draw(self):
         """Draw all game objects."""
         self.screen.fill(config.BLACK)
 
-        if self.state == config.STATE_PLAYING:
+        if self.state == config.STATE_SHOP:
+            # Draw shop screen
+            self._draw_shop_screen()
+        elif self.state == config.STATE_PLAYING:
             # Draw world map
             self.world_map.draw(
                 self.screen,
@@ -503,6 +608,20 @@ class Game:
 
             # Draw world objects (chests and ground items) with camera offset
             self._draw_world_objects_with_camera()
+
+            # Draw active portal if present
+            if self.active_portal:
+                if self.camera.is_visible(
+                    self.active_portal.grid_x, self.active_portal.grid_y
+                ):
+                    original_x = self.active_portal.grid_x
+                    original_y = self.active_portal.grid_y
+                    screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+                    self.active_portal.grid_x = screen_x
+                    self.active_portal.grid_y = screen_y
+                    self.active_portal.draw(self.screen)
+                    self.active_portal.grid_x = original_x
+                    self.active_portal.grid_y = original_y
 
             # Draw entities with camera offset
             self._draw_entities_with_camera()
@@ -667,8 +786,59 @@ class Game:
         # Draw text
         self.screen.blit(text_surface, text_rect)
 
+    def _draw_shop_screen(self):
+        """Draw the shop screen with return portal."""
+        # Draw simple shop background
+        shop_bg_color = (40, 30, 20)  # Dark brown
+        self.screen.fill(shop_bg_color)
+
+        # Draw shop title
+        font_large = pygame.font.Font(None, 64)
+        title_text = font_large.render("Town Shop", True, config.GOLD)
+        title_rect = title_text.get_rect(center=(config.SCREEN_WIDTH // 2, 80))
+        self.screen.blit(title_text, title_rect)
+
+        # Draw shop description
+        font_medium = pygame.font.Font(None, 32)
+        desc_text = font_medium.render(
+            "Safe haven for weary adventurers", True, config.WHITE
+        )
+        desc_rect = desc_text.get_rect(center=(config.SCREEN_WIDTH // 2, 140))
+        self.screen.blit(desc_text, desc_rect)
+
+        # Draw warrior at fixed position
+        self.warrior.draw(self.screen)
+
+        # Draw return portal
+        if self.return_portal:
+            self.return_portal.draw(self.screen)
+
+        # Draw HUD (player stats)
+        self.hud.draw(self.screen, self.warrior)
+
+        # Draw instructions
+        font_small = pygame.font.Font(None, 28)
+        instructions = [
+            "Press 'T' to use the return portal",
+            "Press 'I' for inventory",
+            "Press 'ESC' to return",
+        ]
+        y_offset = 250
+        for instruction in instructions:
+            text = font_small.render(instruction, True, config.WHITE)
+            rect = text.get_rect(center=(config.SCREEN_WIDTH // 2, y_offset))
+            self.screen.blit(text, rect)
+            y_offset += 35
+
+        # Draw message if active
+        if self.message:
+            self._draw_message()
+
     def _add_starting_items(self):
         """Add starting equipment to warrior inventory."""
+        # Import loot table function for town portal
+        from loot_table import create_town_portal
+
         # Create starting equipment
         short_sword = Item(
             name="Short Sword",
@@ -686,6 +856,9 @@ class Game:
         # Equip starting items (they'll auto-equip to appropriate slots)
         self.warrior.inventory.add_item(short_sword)
         self.warrior.inventory.add_item(woolen_tunic)
+
+        # Add a starting town portal for testing
+        self.warrior.inventory.add_item(create_town_portal())
 
         # Player starts with 0 gold (default)
 

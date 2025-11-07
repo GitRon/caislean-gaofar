@@ -30,6 +30,10 @@ COLOR_WHITE = WHITE
 COLOR_GROUND_ITEM = GOLD
 COLOR_CHEST = BROWN
 
+# Portal colors
+PORTAL_COLOR = (138, 43, 226)  # Blue-violet
+PORTAL_GLOW = (186, 85, 211)  # Medium orchid
+
 # Grid settings
 TILE_SIZE = 50  # Size of each grid tile
 GRID_WIDTH = SCREEN_WIDTH // TILE_SIZE  # 16 tiles
@@ -54,3 +58,4 @@ MONSTER_ATTACK_COOLDOWN = 1  # turns between attacks
 STATE_PLAYING = "playing"
 STATE_GAME_OVER = "game_over"
 STATE_INVENTORY = "inventory"
+STATE_SHOP = "shop"
