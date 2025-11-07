@@ -584,3 +584,195 @@ class TestInventory:
 
         # Assert
         assert bonus == 25
+
+    def test_has_space_empty_inventory(self):
+        """Test has_space returns True for empty inventory"""
+        # Arrange
+        inventory = Inventory()
+
+        # Act & Assert
+        assert inventory.has_space() is True
+
+    def test_has_space_full_inventory(self):
+        """Test has_space returns False for full inventory"""
+        # Arrange
+        inventory = Inventory()
+        inventory.weapon_slot = Item("Sword", ItemType.WEAPON)
+        inventory.armor_slot = Item("Shield", ItemType.ARMOR)
+        for i in range(13):
+            inventory.backpack_slots[i] = Item(f"Item{i}", ItemType.MISC)
+
+        # Act & Assert
+        assert inventory.has_space() is False
+
+    def test_contains_item_weapon_slot(self):
+        """Test contains_item returns True for weapon in weapon slot"""
+        # Arrange
+        inventory = Inventory()
+        weapon = Item("Sword", ItemType.WEAPON)
+        inventory.weapon_slot = weapon
+
+        # Act & Assert
+        assert inventory.contains_item(weapon) is True
+
+    def test_contains_item_armor_slot(self):
+        """Test contains_item returns True for armor in armor slot"""
+        # Arrange
+        inventory = Inventory()
+        armor = Item("Shield", ItemType.ARMOR)
+        inventory.armor_slot = armor
+
+        # Act & Assert
+        assert inventory.contains_item(armor) is True
+
+    def test_contains_item_backpack(self):
+        """Test contains_item returns True for item in backpack"""
+        # Arrange
+        inventory = Inventory()
+        item = Item("Potion", ItemType.CONSUMABLE)
+        inventory.backpack_slots[0] = item
+
+        # Act & Assert
+        assert inventory.contains_item(item) is True
+
+    def test_contains_item_not_found(self):
+        """Test contains_item returns False for item not in inventory"""
+        # Arrange
+        inventory = Inventory()
+        item = Item("Potion", ItemType.CONSUMABLE)
+
+        # Act & Assert
+        assert inventory.contains_item(item) is False
+
+    def test_remove_item_weapon_slot(self):
+        """Test remove_item removes weapon from weapon slot"""
+        # Arrange
+        inventory = Inventory()
+        weapon = Item("Sword", ItemType.WEAPON)
+        inventory.weapon_slot = weapon
+
+        # Act
+        result = inventory.remove_item(weapon)
+
+        # Assert
+        assert result is True
+        assert inventory.weapon_slot is None
+
+    def test_remove_item_armor_slot(self):
+        """Test remove_item removes armor from armor slot"""
+        # Arrange
+        inventory = Inventory()
+        armor = Item("Shield", ItemType.ARMOR)
+        inventory.armor_slot = armor
+
+        # Act
+        result = inventory.remove_item(armor)
+
+        # Assert
+        assert result is True
+        assert inventory.armor_slot is None
+
+    def test_remove_item_backpack(self):
+        """Test remove_item removes item from backpack"""
+        # Arrange
+        inventory = Inventory()
+        item = Item("Potion", ItemType.CONSUMABLE)
+        inventory.backpack_slots[2] = item
+
+        # Act
+        result = inventory.remove_item(item)
+
+        # Assert
+        assert result is True
+        assert inventory.backpack_slots[2] is None
+
+    def test_remove_item_not_found(self):
+        """Test remove_item returns False for item not in inventory"""
+        # Arrange
+        inventory = Inventory()
+        item = Item("Potion", ItemType.CONSUMABLE)
+
+        # Act
+        result = inventory.remove_item(item)
+
+        # Assert
+        assert result is False
+
+    def test_get_all_items_empty(self):
+        """Test get_all_items returns empty list for empty inventory"""
+        # Arrange
+        inventory = Inventory()
+
+        # Act
+        items = inventory.get_all_items()
+
+        # Assert
+        assert items == []
+
+    def test_get_all_items_weapon_only(self):
+        """Test get_all_items returns weapon only"""
+        # Arrange
+        inventory = Inventory()
+        weapon = Item("Sword", ItemType.WEAPON)
+        inventory.weapon_slot = weapon
+
+        # Act
+        items = inventory.get_all_items()
+
+        # Assert
+        assert len(items) == 1
+        assert items[0] == weapon
+
+    def test_get_all_items_armor_only(self):
+        """Test get_all_items returns armor only"""
+        # Arrange
+        inventory = Inventory()
+        armor = Item("Shield", ItemType.ARMOR)
+        inventory.armor_slot = armor
+
+        # Act
+        items = inventory.get_all_items()
+
+        # Assert
+        assert len(items) == 1
+        assert items[0] == armor
+
+    def test_get_all_items_backpack_only(self):
+        """Test get_all_items returns backpack items only"""
+        # Arrange
+        inventory = Inventory()
+        item1 = Item("Potion1", ItemType.CONSUMABLE)
+        item2 = Item("Potion2", ItemType.CONSUMABLE)
+        inventory.backpack_slots[0] = item1
+        inventory.backpack_slots[1] = item2
+
+        # Act
+        items = inventory.get_all_items()
+
+        # Assert
+        assert len(items) == 2
+        assert item1 in items
+        assert item2 in items
+
+    def test_get_all_items_all_slots(self):
+        """Test get_all_items returns all items from all slots"""
+        # Arrange
+        inventory = Inventory()
+        weapon = Item("Sword", ItemType.WEAPON)
+        armor = Item("Shield", ItemType.ARMOR)
+        item1 = Item("Potion1", ItemType.CONSUMABLE)
+        item2 = Item("Potion2", ItemType.CONSUMABLE)
+        inventory.weapon_slot = weapon
+        inventory.armor_slot = armor
+        inventory.backpack_slots[0] = item1
+        inventory.backpack_slots[1] = item2
+
+        # Act
+        items = inventory.get_all_items()
+
+        # Assert
+        assert len(items) == 4
+        assert weapon in items
+        assert armor in items
+        assert item1 in items
+        assert item2 in items
