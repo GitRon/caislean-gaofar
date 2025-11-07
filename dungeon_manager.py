@@ -18,7 +18,7 @@ class DungeonManager:
         self.world_map = WorldMap()
         self.dungeon_maps: Dict[str, WorldMap] = {}
         self.current_map_id = "world"
-        self.world_map_path = world_map_path or os.path.join("maps", "sample_map.json")
+        self.world_map_path = world_map_path or os.path.join("maps", "overworld.json")
 
         # Track return location when exiting dungeons
         self.return_location: Optional[Tuple[int, int]] = None
