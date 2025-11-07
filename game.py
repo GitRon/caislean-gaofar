@@ -616,7 +616,9 @@ class Game:
                 ):
                     original_x = self.active_portal.grid_x
                     original_y = self.active_portal.grid_y
-                    screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+                    screen_x, screen_y = self.camera.world_to_screen(
+                        original_x, original_y
+                    )
                     self.active_portal.grid_x = screen_x
                     self.active_portal.grid_y = screen_y
                     self.active_portal.draw(self.screen)
