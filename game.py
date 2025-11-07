@@ -47,7 +47,8 @@ class Game:
             "dark_cave", config.resource_path(os.path.join("maps", "dark_cave.json"))
         )
         self.dungeon_manager.load_dungeon(
-            "ancient_castle", config.resource_path(os.path.join("maps", "ancient_castle.json"))
+            "ancient_castle",
+            config.resource_path(os.path.join("maps", "ancient_castle.json")),
         )
 
         # Get current map (initially world map)

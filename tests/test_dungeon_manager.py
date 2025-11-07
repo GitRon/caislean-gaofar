@@ -207,9 +207,12 @@ class TestDungeonManager:
         manager.load_world_map()
 
         # Load both dungeons
-        manager.load_dungeon("dark_cave", config.resource_path(os.path.join("maps", "dark_cave.json")))
         manager.load_dungeon(
-            "ancient_castle", config.resource_path(os.path.join("maps", "ancient_castle.json"))
+            "dark_cave", config.resource_path(os.path.join("maps", "dark_cave.json"))
+        )
+        manager.load_dungeon(
+            "ancient_castle",
+            config.resource_path(os.path.join("maps", "ancient_castle.json")),
         )
 
         assert len(manager.dungeon_maps) == 2
