@@ -3,6 +3,7 @@
 from typing import Dict, Optional, Tuple
 from world_map import WorldMap
 import os
+import config
 
 
 class DungeonManager:
@@ -18,7 +19,9 @@ class DungeonManager:
         self.world_map = WorldMap()
         self.dungeon_maps: Dict[str, WorldMap] = {}
         self.current_map_id = "world"
-        self.world_map_path = world_map_path or os.path.join("maps", "overworld.json")
+        self.world_map_path = world_map_path or config.resource_path(
+            os.path.join("maps", "overworld.json")
+        )
 
         # Track return location when exiting dungeons
         self.return_location: Optional[Tuple[int, int]] = None

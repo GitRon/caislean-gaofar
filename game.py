@@ -38,16 +38,16 @@ class Game:
 
         # Initialize dungeon manager
         if map_file is None:
-            map_file = os.path.join("maps", "overworld.json")
+            map_file = config.resource_path(os.path.join("maps", "overworld.json"))
         self.dungeon_manager = DungeonManager(map_file)
         self.dungeon_manager.load_world_map()
 
         # Load dungeons
         self.dungeon_manager.load_dungeon(
-            "dark_cave", os.path.join("maps", "dark_cave.json")
+            "dark_cave", config.resource_path(os.path.join("maps", "dark_cave.json"))
         )
         self.dungeon_manager.load_dungeon(
-            "ancient_castle", os.path.join("maps", "ancient_castle.json")
+            "ancient_castle", config.resource_path(os.path.join("maps", "ancient_castle.json"))
         )
 
         # Get current map (initially world map)
