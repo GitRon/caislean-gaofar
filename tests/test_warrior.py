@@ -543,14 +543,19 @@ class TestWarrior:
         """Test counting town portals with multiple portals"""
         # Arrange
         warrior = Warrior(5, 5)
-        for _ in range(3):
-            town_portal = Item(
-                "Town Portal",
-                ItemType.CONSUMABLE,
-                "Opens a portal to town",
-                health_bonus=0,
-            )
-            warrior.inventory.add_item(town_portal)
+        # Add 3 town portals
+        town_portal1 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        town_portal2 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        town_portal3 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        warrior.inventory.add_item(town_portal1)
+        warrior.inventory.add_item(town_portal2)
+        warrior.inventory.add_item(town_portal3)
 
         # Act
         count = warrior.count_town_portals()
@@ -611,14 +616,19 @@ class TestWarrior:
         """Test that using portal removes the first one"""
         # Arrange
         warrior = Warrior(5, 5)
-        for _ in range(3):
-            town_portal = Item(
-                "Town Portal",
-                ItemType.CONSUMABLE,
-                "Opens a portal to town",
-                health_bonus=0,
-            )
-            warrior.inventory.add_item(town_portal)
+        # Add 3 town portals
+        town_portal1 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        town_portal2 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        town_portal3 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        warrior.inventory.add_item(town_portal1)
+        warrior.inventory.add_item(town_portal2)
+        warrior.inventory.add_item(town_portal3)
 
         # Act
         result = warrior.use_town_portal()

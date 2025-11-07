@@ -57,7 +57,6 @@ class TestPortal:
     def test_portal_draw_updates_position(self, screen):
         """Test draw method updates position based on grid coordinates."""
         portal = Portal(2, 3, False)
-        original_x = portal.x
 
         # Change grid position
         portal.grid_x = 5
