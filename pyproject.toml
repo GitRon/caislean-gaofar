@@ -31,6 +31,7 @@ omit = [
     "game.py",
     "inventory_ui.py",
     "monster_renderer.py",
+    "main_menu.py",
 ]
 
 [tool.coverage.report]
