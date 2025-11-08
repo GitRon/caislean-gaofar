@@ -593,7 +593,7 @@ class TestInventory:
         # Act & Assert
         assert inventory.has_space() is True
 
-    def test_has_space_full_inventory(self):
+    def test_has_space_full_inventory(self):  # noqa: PBR008
         """Test has_space returns False for full inventory"""
         # Arrange
         inventory = Inventory()

@@ -122,7 +122,7 @@ class TestShop:
         assert shop.grid_y == 10
         assert len(shop.inventory) > 0
 
-    def test_shop_has_health_potions(self):
+    def test_shop_has_health_potions(self):  # noqa: PBR008
         """Test shop always has health potions (AC5)"""
         # Arrange
         shop = Shop(0, 0)
@@ -141,7 +141,7 @@ class TestShop:
         # Assert
         assert health_potion_found is True
 
-    def test_shop_get_available_items(self):
+    def test_shop_get_available_items(self):  # noqa: PBR008
         """Test getting available items from shop"""
         # Arrange
         shop = Shop(0, 0)
@@ -203,7 +203,7 @@ class TestShop:
         assert success is False
         assert "out of stock" in message
 
-    def test_buy_item_inventory_full(self):
+    def test_buy_item_inventory_full(self):  # noqa: PBR008
         """Test buying item when inventory is full"""
         # Arrange
         shop = Shop(0, 0)
@@ -297,7 +297,7 @@ class TestShop:
         assert "not found" in message.lower()
         assert gold_earned == 0
 
-    def test_sell_item_updates_shop_stock(self):
+    def test_sell_item_updates_shop_stock(self):  # noqa: PBR008
         """Test selling item updates shop stock (AC10)"""
         # Arrange
         shop = Shop(0, 0)
@@ -336,7 +336,7 @@ class TestShop:
             assert len(inventory.get_all_items()) == initial_inventory_size - 1
             assert gold_earned > 0
 
-    def test_sell_item_increases_existing_stock(self):
+    def test_sell_item_increases_existing_stock(self):  # noqa: PBR008
         """Test selling item that's already in stock increases quantity (AC10)"""
         # Arrange
         shop = Shop(0, 0)
