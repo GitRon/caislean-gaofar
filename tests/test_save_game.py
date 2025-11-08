@@ -4,7 +4,6 @@ import os
 import json
 import tempfile
 import shutil
-from pathlib import Path
 import pytest
 from save_game import SaveGame
 from item import Item, ItemType
@@ -222,7 +221,6 @@ def test_save_game_creates_file(temp_save_dir):
     """Test that save_game creates a save file with correct data."""
     from unittest.mock import MagicMock
     from warrior import Warrior
-    from dungeon_manager import DungeonManager
 
     # Create a mock game object
     game = MagicMock()

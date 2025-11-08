@@ -109,9 +109,7 @@ class MainMenu:
 
         # Draw subtitle
         font_small = pygame.font.Font(None, 24)
-        subtitle_text = font_small.render(
-            "An Irish Folklore RPG", True, config.GRAY
-        )
+        subtitle_text = font_small.render("An Irish Folklore RPG", True, config.GRAY)
         subtitle_rect = subtitle_text.get_rect(
             center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 4 + 50)
         )
@@ -145,12 +143,10 @@ class MainMenu:
 
                 # Format save file info
                 timestamp = save_file["timestamp"].split("T")
-                date_str = timestamp[0] if len(timestamp) > 0 else "Unknown"
-                time_str = (
-                    timestamp[1].split(".")[0] if len(timestamp) > 1 else ""
-                )
+                date_part = timestamp[0] if len(timestamp) > 0 else "Unknown"
+                time_part = timestamp[1].split(".")[0] if len(timestamp) > 1 else ""
 
-                save_text = f"{save_file['filename']} - {date_str} {time_str}"
+                save_text = f"{save_file['filename']} - {date_part} {time_part}"
                 save_color = config.YELLOW if is_selected else config.WHITE
 
                 save_render = font_small.render(save_text, True, save_color)

@@ -1,10 +1,10 @@
 """Save game functionality for persisting game state."""
 
+import datetime
 import json
 import os
-from datetime import datetime
-from typing import Optional, Dict, List
 from pathlib import Path
+from typing import Dict, List, Optional
 
 
 class SaveGame:
@@ -125,7 +125,7 @@ class SaveGame:
 
             # Serialize game state
             save_data = {
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.datetime.now().isoformat(),
                 "player": {
                     "grid_x": game.warrior.grid_x,
                     "grid_y": game.warrior.grid_y,
@@ -213,9 +213,7 @@ class SaveGame:
                         {
                             "filename": filename[: -len(SaveGame.SAVE_EXTENSION)],
                             "timestamp": data.get("timestamp", "Unknown"),
-                            "player_health": data.get("player", {}).get(
-                                "health", "?"
-                            ),
+                            "player_health": data.get("player", {}).get("health", "?"),
                             "player_gold": data.get("player", {}).get("gold", 0),
                             "current_map": data.get("current_map_id", "world"),
                         }
