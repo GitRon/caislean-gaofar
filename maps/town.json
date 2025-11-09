@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "name": "Town",
+    "width": 10,
+    "height": 8,
+    "tile_size": 50
+  },
+  "legend": {
+    ".": {
+      "name": "grass",
+      "passable": true,
+      "color": [85, 170, 85]
+    },
+    "#": {
+      "name": "wall",
+      "passable": false,
+      "color": [100, 80, 60]
+    },
+    "S": {
+      "name": "shop",
+      "passable": true,
+      "color": [200, 150, 50]
+    },
+    "<": {
+      "name": "exit",
+      "passable": true,
+      "color": [200, 180, 50]
+    },
+    "=": {
+      "name": "wood_floor",
+      "passable": true,
+      "color": [139, 90, 43]
+    }
+  },
+  "tiles": [
+    "##########",
+    "#........#",
+    "#.####...#",
+    "#.#==S...#",
+    "#.#==....#",
+    "#.####...#",
+    "#........#",
+    "##########"
+  ],
+  "spawn_point": {
+    "x": 6,
+    "y": 5
+  },
+  "entities": [],
+  "dungeons": []
+}

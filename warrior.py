@@ -94,7 +94,25 @@ class Warrior(Entity):
         """
         count = 0
         for item in self.inventory.backpack_slots:
-            if item and item.item_type == ItemType.CONSUMABLE:
+            if (
+                item
+                and item.item_type == ItemType.CONSUMABLE
+                and item.name != "Town Portal"
+                and item.health_bonus > 0
+            ):
+                count += 1
+        return count
+
+    def count_town_portals(self) -> int:
+        """
+        Count town portals in inventory.
+
+        Returns:
+            Number of town portals in inventory
+        """
+        count = 0
+        for item in self.inventory.backpack_slots:
+            if item and item.name == "Town Portal":
                 count += 1
         return count
 
@@ -141,12 +159,33 @@ class Warrior(Entity):
         if self.health >= self.max_health:
             return False
 
-        # Find first health potion in backpack
+        # Find first health potion in backpack (not town portal)
         for i, item in enumerate(self.inventory.backpack_slots):
-            if item and item.item_type == ItemType.CONSUMABLE:
+            if (
+                item
+                and item.item_type == ItemType.CONSUMABLE
+                and item.name != "Town Portal"
+                and item.health_bonus > 0
+            ):
                 # Use the potion
                 heal_amount = item.health_bonus if item.health_bonus > 0 else 30
                 self.health = min(self.max_health, self.health + heal_amount)
+                # Remove from inventory
+                self.inventory.backpack_slots[i] = None
+                return True
+
+        return False
+
+    def use_town_portal(self) -> bool:
+        """
+        Use a town portal from inventory to open a portal.
+
+        Returns:
+            True if portal was used successfully, False if no portals available
+        """
+        # Find first town portal in backpack
+        for i, item in enumerate(self.inventory.backpack_slots):
+            if item and item.name == "Town Portal":
                 # Remove from inventory
                 self.inventory.backpack_slots[i] = None
                 return True
