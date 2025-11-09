@@ -821,10 +821,17 @@ class Game:
             defense_bonus=1,
             gold_value=15,
         )
+        health_potion = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
+        )
 
         # Equip starting items (they'll auto-equip to appropriate slots)
         self.warrior.inventory.add_item(short_sword)
         self.warrior.inventory.add_item(woolen_tunic)
+        self.warrior.inventory.add_item(health_potion)
 
         # Player starts with some gold to buy items
         self.warrior.add_gold(100)
