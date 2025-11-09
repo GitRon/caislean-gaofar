@@ -17,6 +17,7 @@ from loot_table import get_loot_for_monster
 from hud import HUD
 from dungeon_manager import DungeonManager
 from portal import Portal
+from fog_of_war import FogOfWar
 import config
 
 
@@ -70,6 +71,9 @@ class Game:
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
         self.hud = HUD()
+
+        # Initialize fog of war (2 tile visibility radius)
+        self.fog_of_war = FogOfWar(visibility_radius=2)
 
         # Initialize shop (located at specific position on town map)
         # Position matches 'S' in town.json
@@ -456,6 +460,13 @@ class Game:
         # Update camera to follow player
         self.camera.update(self.warrior.grid_x, self.warrior.grid_y)
 
+        # Update fog of war based on player position
+        self.fog_of_war.update_visibility(
+            self.warrior.grid_x,
+            self.warrior.grid_y,
+            self.dungeon_manager.current_map_id,
+        )
+
         # Check if player stepped on return portal (auto-teleport back)
         if self.return_portal and self.portal_cooldown <= 0:
             if (
@@ -833,6 +844,148 @@ class Game:
             pygame.draw.rect(self.screen, config.BLACK, bg_rect)
             self.screen.blit(text, (text_x, text_y))
 
+    def _draw_cave_icon(self, grid_x: int, grid_y: int):
+        """Draw a cave entrance icon at the given grid position."""
+        # Convert grid coordinates to pixel coordinates
+        x = grid_x * config.TILE_SIZE
+        y = grid_y * config.TILE_SIZE
+        size = config.TILE_SIZE
+
+        # Cave colors
+        cave_bg = (60, 50, 40)  # Dark brown background
+        cave_entrance = (20, 15, 10)  # Very dark entrance
+        rock_color = (80, 70, 60)  # Rock color
+
+        # Draw cave background
+        pygame.draw.rect(self.screen, cave_bg, (x, y, size, size))
+
+        # Draw cave entrance (arch shape)
+        entrance_width = int(size * 0.6)
+        entrance_height = int(size * 0.7)
+        entrance_x = x + (size - entrance_width) // 2
+        entrance_y = y + size - entrance_height
+
+        # Draw dark entrance
+        pygame.draw.ellipse(
+            self.screen,
+            cave_entrance,
+            (entrance_x, entrance_y, entrance_width, entrance_height),
+        )
+
+        # Draw rocky edges (triangular stalactites/stalagmites)
+        rock_points = [
+            # Top rocks
+            (x + size // 4, y + size // 3),
+            (x + size // 3, y + size // 2),
+            (x + size // 5, y + size // 2),
+        ]
+        pygame.draw.polygon(self.screen, rock_color, rock_points)
+
+        rock_points2 = [
+            (x + size * 3 // 4, y + size // 3),
+            (x + size * 4 // 5, y + size // 2),
+            (x + size * 2 // 3, y + size // 2),
+        ]
+        pygame.draw.polygon(self.screen, rock_color, rock_points2)
+
+    def _draw_castle_icon(self, grid_x: int, grid_y: int):
+        """Draw a castle entrance icon at the given grid position."""
+        # Convert grid coordinates to pixel coordinates
+        x = grid_x * config.TILE_SIZE
+        y = grid_y * config.TILE_SIZE
+        size = config.TILE_SIZE
+
+        # Castle colors
+        castle_wall = (120, 100, 80)  # Stone grey
+        castle_dark = (80, 70, 60)  # Dark stone
+        door_color = (50, 40, 30)  # Dark wood
+        tower_color = (100, 90, 80)  # Tower stone
+
+        # Draw main castle wall
+        wall_height = int(size * 0.7)
+        pygame.draw.rect(
+            self.screen,
+            castle_wall,
+            (x + size // 6, y + size - wall_height, size * 2 // 3, wall_height),
+        )
+
+        # Draw towers on sides
+        tower_width = size // 5
+        tower_height = int(size * 0.8)
+        # Left tower
+        pygame.draw.rect(
+            self.screen,
+            tower_color,
+            (x, y + size - tower_height, tower_width, tower_height),
+        )
+        # Right tower
+        pygame.draw.rect(
+            self.screen,
+            tower_color,
+            (
+                x + size - tower_width,
+                y + size - tower_height,
+                tower_width,
+                tower_height,
+            ),
+        )
+
+        # Draw battlements (crenellations) on top
+        battlement_size = size // 10
+        for i in range(0, 3):
+            battlement_x = x + size // 6 + i * (size // 5)
+            pygame.draw.rect(
+                self.screen,
+                castle_dark,
+                (
+                    battlement_x,
+                    y + size - wall_height - battlement_size,
+                    battlement_size,
+                    battlement_size,
+                ),
+            )
+
+        # Draw tower battlements
+        pygame.draw.rect(
+            self.screen,
+            castle_dark,
+            (
+                x,
+                y + size - tower_height - battlement_size,
+                tower_width,
+                battlement_size,
+            ),
+        )
+        pygame.draw.rect(
+            self.screen,
+            castle_dark,
+            (
+                x + size - tower_width,
+                y + size - tower_height - battlement_size,
+                tower_width,
+                battlement_size,
+            ),
+        )
+
+        # Draw door
+        door_width = size // 3
+        door_height = int(size * 0.4)
+        door_x = x + size // 2 - door_width // 2
+        door_y = y + size - door_height
+        pygame.draw.rect(
+            self.screen, door_color, (door_x, door_y, door_width, door_height)
+        )
+
+        # Draw door arch
+        pygame.draw.arc(
+            self.screen,
+            castle_dark,
+            (door_x, door_y - door_width // 4, door_width, door_width // 2),
+            0,
+            3.14159,
+            2,
+        )
+
     def draw(self):
         """Draw all game objects."""
         self.screen.fill(config.BLACK)
@@ -845,6 +998,8 @@ class Game:
                 self.camera.y,
                 self.camera.viewport_width,
                 self.camera.viewport_height,
+                self.fog_of_war,
+                self.dungeon_manager.current_map_id,
             )
 
             # Draw world objects (chests and ground items) with camera offset
@@ -911,6 +1066,8 @@ class Game:
                 self.camera.y,
                 self.camera.viewport_width,
                 self.camera.viewport_height,
+                self.fog_of_war,
+                self.dungeon_manager.current_map_id,
             )
             self._draw_world_objects_with_camera()
             self._draw_entities_with_camera()
@@ -949,30 +1106,67 @@ class Game:
         return nearest_monster
 
     def _draw_world_objects_with_camera(self):
-        """Draw chests and ground items with camera offset applied."""
+        """Draw chests, ground items, shop, and dungeon entrances with camera offset applied."""
+        # Check if fog of war is enabled for current map
+        fog_enabled = self.fog_of_war.is_fog_enabled_for_map(
+            self.dungeon_manager.current_map_id
+        )
+
+        # Draw dungeon entrances (only on world map)
+        if self.dungeon_manager.current_map_id == "world":
+            for (
+                dungeon_id,
+                (entrance_x, entrance_y),
+            ) in self.dungeon_manager.dungeon_entrances.items():
+                if self.camera.is_visible(entrance_x, entrance_y):
+                    # Check fog of war visibility
+                    if not fog_enabled or self.fog_of_war.is_visible(
+                        entrance_x, entrance_y
+                    ):
+                        screen_x, screen_y = self.camera.world_to_screen(
+                            entrance_x, entrance_y
+                        )
+                        # Draw cave icon for dark_cave, castle icon for ancient_castle
+                        if "cave" in dungeon_id.lower():
+                            self._draw_cave_icon(screen_x, screen_y)
+                        elif "castle" in dungeon_id.lower():
+                            self._draw_castle_icon(screen_x, screen_y)
+
         # Draw chests
         for chest in self.chests:
             if self.camera.is_visible(chest.grid_x, chest.grid_y):
-                original_x = chest.grid_x
-                original_y = chest.grid_y
-                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
-                chest.grid_x = screen_x
-                chest.grid_y = screen_y
-                chest.draw(self.screen)
-                chest.grid_x = original_x
-                chest.grid_y = original_y
+                # Check fog of war visibility
+                if not fog_enabled or self.fog_of_war.is_visible(
+                    chest.grid_x, chest.grid_y
+                ):
+                    original_x = chest.grid_x
+                    original_y = chest.grid_y
+                    screen_x, screen_y = self.camera.world_to_screen(
+                        original_x, original_y
+                    )
+                    chest.grid_x = screen_x
+                    chest.grid_y = screen_y
+                    chest.draw(self.screen)
+                    chest.grid_x = original_x
+                    chest.grid_y = original_y
 
         # Draw ground items
         for ground_item in self.ground_items:
             if self.camera.is_visible(ground_item.grid_x, ground_item.grid_y):
-                original_x = ground_item.grid_x
-                original_y = ground_item.grid_y
-                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
-                ground_item.grid_x = screen_x
-                ground_item.grid_y = screen_y
-                ground_item.draw(self.screen)
-                ground_item.grid_x = original_x
-                ground_item.grid_y = original_y
+                # Check fog of war visibility
+                if not fog_enabled or self.fog_of_war.is_visible(
+                    ground_item.grid_x, ground_item.grid_y
+                ):
+                    original_x = ground_item.grid_x
+                    original_y = ground_item.grid_y
+                    screen_x, screen_y = self.camera.world_to_screen(
+                        original_x, original_y
+                    )
+                    ground_item.grid_x = screen_x
+                    ground_item.grid_y = screen_y
+                    ground_item.draw(self.screen)
+                    ground_item.grid_x = original_x
+                    ground_item.grid_y = original_y
 
     def _draw_entities_with_camera(self):
         """Draw all entities with camera offset applied."""
