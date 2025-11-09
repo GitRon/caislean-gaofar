@@ -1,5 +1,32 @@
 """Game configuration and constants."""
 
+import sys
+import os
+
+
+def resource_path(relative_path):
+    """
+    Get absolute path to resource, works for dev and for PyInstaller.
+
+    When running as a PyInstaller bundle, resources are extracted to a temp folder
+    accessible via sys._MEIPASS. In development, we use the normal relative path.
+
+    Args:
+        relative_path: Path relative to the project root
+
+    Returns:
+        Absolute path to the resource
+    """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Running in normal Python environment
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 # Screen settings
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
