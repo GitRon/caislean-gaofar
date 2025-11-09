@@ -53,6 +53,9 @@ exclude_lines = [
 # Disable Django-specific rules since this is a pygame project (python-only mode)
 enable_django_rules = false
 
+# Enable ruff noqa support for better integration
+noqa_ruff_support = true
+
 # Disable overly strict Python rules that would require extensive refactoring
 exclude = [
     "PBR001",  # Positional arguments discouraged (too strict for this project)
