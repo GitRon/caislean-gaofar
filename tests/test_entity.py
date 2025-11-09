@@ -413,3 +413,63 @@ class TestEntity:
         assert entity.grid_x == 5
         assert entity.grid_y == 5
         mock_world_map.is_passable.assert_called_once_with(6, 5)
+
+    def test_take_damage_with_defense(self):
+        """Test taking damage with defense reduces damage"""
+        # Arrange
+        entity = Entity(5, 5, 50, (255, 0, 0), 100, 1, 10, 2)
+
+        # Act
+        entity.take_damage(20, defense=5)
+
+        # Assert - Should take 20 - 5 = 15 damage
+        assert entity.health == 85
+        assert entity.is_alive is True
+
+    def test_take_damage_with_high_defense(self):
+        """Test taking damage with high defense still deals minimum 1 damage"""
+        # Arrange
+        entity = Entity(5, 5, 50, (255, 0, 0), 100, 1, 10, 2)
+
+        # Act
+        entity.take_damage(10, defense=50)
+
+        # Assert - Should take at least 1 damage
+        assert entity.health == 99
+        assert entity.is_alive is True
+
+    def test_take_damage_with_defense_equals_damage(self):
+        """Test taking damage when defense equals damage still deals 1 damage"""
+        # Arrange
+        entity = Entity(5, 5, 50, (255, 0, 0), 100, 1, 10, 2)
+
+        # Act
+        entity.take_damage(10, defense=10)
+
+        # Assert - Should take at least 1 damage
+        assert entity.health == 99
+        assert entity.is_alive is True
+
+    def test_take_damage_with_zero_defense(self):
+        """Test taking damage with zero defense (default behavior)"""
+        # Arrange
+        entity = Entity(5, 5, 50, (255, 0, 0), 100, 1, 10, 2)
+
+        # Act
+        entity.take_damage(25, defense=0)
+
+        # Assert - Should take full damage
+        assert entity.health == 75
+        assert entity.is_alive is True
+
+    def test_take_damage_lethal_with_defense(self):
+        """Test taking lethal damage with defense"""
+        # Arrange
+        entity = Entity(5, 5, 50, (255, 0, 0), 100, 1, 10, 2)
+
+        # Act - 200 damage with 50 defense = 150 actual damage
+        entity.take_damage(200, defense=50)
+
+        # Assert
+        assert entity.health == 0
+        assert entity.is_alive is False
