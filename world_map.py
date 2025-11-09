@@ -6,6 +6,12 @@ import pygame
 from terrain import TerrainManager, TerrainType
 import config
 
+# Import TYPE_CHECKING to avoid circular imports
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from fog_of_war import FogOfWar
+
 
 class WorldMap:
     """Manages the game world map including terrain and entities."""
@@ -146,6 +152,8 @@ class WorldMap:
         camera_y: int,
         viewport_width: int,
         viewport_height: int,
+        fog_of_war: Optional["FogOfWar"] = None,
+        map_id: str = "world",
     ) -> None:
         """
         Draw visible portion of the map.
@@ -156,6 +164,8 @@ class WorldMap:
             camera_y: Camera y position in grid coordinates
             viewport_width: Width of viewport in tiles
             viewport_height: Height of viewport in tiles
+            fog_of_war: Optional FogOfWar instance for visibility checking
+            map_id: Identifier for the current map
         """
         # Calculate visible tile range
         start_x = max(0, camera_x)
@@ -163,26 +173,51 @@ class WorldMap:
         end_x = min(self.width, camera_x + viewport_width)
         end_y = min(self.height, camera_y + viewport_height)
 
+        # Check if fog of war is enabled for this map
+        fog_enabled = fog_of_war and fog_of_war.is_fog_enabled_for_map(map_id)
+
         # Draw visible tiles
         for world_y in range(start_y, end_y):
             for world_x in range(start_x, end_x):
+                # Check fog of war visibility
+                if fog_enabled:
+                    # Only draw discovered tiles
+                    if not fog_of_war.is_discovered(world_x, world_y, map_id):
+                        continue
+
                 terrain = self.get_terrain(world_x, world_y)
                 if terrain:
                     # Convert world coordinates to screen coordinates
                     screen_x = (world_x - camera_x) * self.tile_size
                     screen_y = (world_y - camera_y) * self.tile_size
 
+                    # Determine if tile is currently visible or just discovered
+                    is_currently_visible = True
+                    if fog_enabled:
+                        is_currently_visible = fog_of_war.is_visible(world_x, world_y)
+
+                    # Calculate color (darken if not currently visible)
+                    tile_color = terrain.color
+                    if fog_enabled and not is_currently_visible:
+                        # Darken discovered but not visible tiles
+                        tile_color = tuple(int(c * 0.3) for c in terrain.color)
+
                     # Draw tile
                     pygame.draw.rect(
                         screen,
-                        terrain.color,
+                        tile_color,
                         (screen_x, screen_y, self.tile_size, self.tile_size),
                     )
 
                     # Draw grid lines (optional)
+                    grid_color = (50, 50, 50)  # Dark grey for grid lines
+                    if fog_enabled and not is_currently_visible:
+                        # Even darker grid lines for non-visible areas
+                        grid_color = (30, 30, 30)
+
                     pygame.draw.rect(
                         screen,
-                        (50, 50, 50),  # Dark grey for grid lines
+                        grid_color,
                         (screen_x, screen_y, self.tile_size, self.tile_size),
                         1,
                     )
