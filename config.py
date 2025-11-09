@@ -1,5 +1,32 @@
 """Game configuration and constants."""
 
+import sys
+import os
+
+
+def resource_path(relative_path):
+    """
+    Get absolute path to resource, works for dev and for PyInstaller.
+
+    When running as a PyInstaller bundle, resources are extracted to a temp folder
+    accessible via sys._MEIPASS. In development, we use the normal relative path.
+
+    Args:
+        relative_path: Path relative to the project root
+
+    Returns:
+        Absolute path to the resource
+    """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Running in normal Python environment
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 # Screen settings
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -59,3 +86,14 @@ STATE_PLAYING = "playing"
 STATE_GAME_OVER = "game_over"
 STATE_INVENTORY = "inventory"
 STATE_SHOP = "shop"
+
+# Shop settings
+SHOP_BACKGROUND_COLOR = (40, 40, 60)  # Dark blue-gray
+SHOP_BORDER_COLOR = (200, 200, 200)  # Light gray
+SHOP_TEXT_COLOR = WHITE
+SHOP_HIGHLIGHT_COLOR = (100, 100, 150)  # Highlighted item
+SHOP_TAB_COLOR = (60, 60, 100)  # Tab color
+SHOP_TAB_ACTIVE_COLOR = (80, 80, 120)  # Active tab color
+SHOP_BUTTON_COLOR = (70, 130, 70)  # Green button
+SHOP_BUTTON_HOVER_COLOR = (90, 150, 90)  # Lighter green on hover
+SHOP_INSUFFICIENT_FUNDS_COLOR = RED  # Red for insufficient funds

@@ -30,6 +30,7 @@ omit = [
     # UI/Rendering code excluded from 100% requirement
     "game.py",
     "inventory_ui.py",
+    "shop_ui.py",
     "monster_renderer.py",
 ]
 
