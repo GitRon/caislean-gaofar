@@ -91,6 +91,9 @@ class HUD:
         # Draw potion count panel
         self._draw_potion_panel(screen, warrior)
 
+        # Draw town portal panel
+        self._draw_portal_panel(screen, warrior)
+
         # Draw currency panel
         self._draw_currency_panel(screen, warrior)
 
@@ -277,6 +280,57 @@ class HUD:
         hint_text = font_hint.render("Press P", True, config.GRAY)
         screen.blit(hint_text, (panel_x + 130, panel_y + 40))
 
+    def _draw_portal_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the town portal panel with count.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below potions, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 70
+        panel_x = self.x + 10
+        panel_y = self.y + 180
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw portal icon (swirling magic circle)
+        icon_size = 40
+        icon_x = panel_x + 15
+        icon_y = panel_y + 15
+
+        # Draw magical portal effect
+        center_x = icon_x + icon_size // 2
+        center_y = icon_y + icon_size // 2
+
+        # Outer circle (magical energy)
+        pygame.draw.circle(screen, (138, 43, 226), (center_x, center_y), 18, 3)
+        # Middle circle
+        pygame.draw.circle(screen, (186, 85, 211), (center_x, center_y), 12, 2)
+        # Inner core
+        pygame.draw.circle(screen, (255, 255, 255), (center_x, center_y), 6)
+
+        # Draw portal count
+        font_title = pygame.font.Font(None, 20)
+        title_text = font_title.render("Portals", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 10))
+
+        # Draw count (large and prominent)
+        font_count = pygame.font.Font(None, 36)
+        portal_count = warrior.count_town_portals()
+        count_text = font_count.render(f"x {portal_count}", True, self.text_color)
+        screen.blit(count_text, (panel_x + 60, panel_y + 30))
+
+        # Draw usage hint
+        font_hint = pygame.font.Font(None, 16)
+        hint_text = font_hint.render("Press T", True, config.GRAY)
+        screen.blit(hint_text, (panel_x + 130, panel_y + 40))
+
     def _draw_currency_panel(self, screen: pygame.Surface, warrior):
         """
         Draw the currency/gold panel.
@@ -285,11 +339,11 @@ class HUD:
             screen: Pygame surface to draw on
             warrior: The warrior entity
         """
-        # Panel dimensions and position (below potions, relative to HUD)
+        # Panel dimensions and position (below portals, relative to HUD)
         panel_width = self.width - 20
         panel_height = 60
         panel_x = self.x + 10
-        panel_y = self.y + 180
+        panel_y = self.y + 260
 
         # Create panel background
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
@@ -336,7 +390,7 @@ class HUD:
         panel_width = self.width - 20
         panel_height = 60
         panel_x = self.x + 10
-        panel_y = self.y + 250
+        panel_y = self.y + 330
 
         # Create panel background
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
@@ -384,7 +438,7 @@ class HUD:
         panel_width = self.width - 20
         panel_height = 60
         panel_x = self.x + 10
-        panel_y = self.y + 320
+        panel_y = self.y + 400
 
         # Create panel background
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
@@ -428,7 +482,7 @@ class HUD:
         panel_width = self.width - 20
         panel_height = 70
         panel_x = self.x + 10
-        panel_y = self.y + 390
+        panel_y = self.y + 470
 
         # Create panel background
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)

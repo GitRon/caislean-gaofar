@@ -7,6 +7,7 @@ from loot_table import (
     create_common_armor,
     create_consumable,
     create_misc_item,
+    create_town_portal,
     get_loot_for_monster,
     LOOT_TABLES,
 )
@@ -144,6 +145,20 @@ class TestCreateFunctions:
         assert misc.attack_bonus == 0
         assert misc.defense_bonus == 0
         assert misc.health_bonus == 0
+
+    def test_create_town_portal(self):
+        """Test create_town_portal creates town portal with correct properties"""
+        # Arrange & Act
+        portal = create_town_portal()
+
+        # Assert
+        assert portal.name == "Town Portal"
+        assert portal.item_type == ItemType.CONSUMABLE
+        assert "portal" in portal.description.lower()
+        assert "town" in portal.description.lower()
+        assert portal.health_bonus == 0
+        assert portal.attack_bonus == 0
+        assert portal.defense_bonus == 0
 
 
 class TestGetLootForMonster:

@@ -512,3 +512,168 @@ class TestWarrior:
         # Assert
         assert success is False
         assert warrior.count_gold() == 30
+
+    def test_count_town_portals_empty(self):
+        """Test counting town portals when inventory is empty"""
+        # Arrange
+        warrior = Warrior(5, 5)
+
+        # Act
+        count = warrior.count_town_portals()
+
+        # Assert
+        assert count == 0
+
+    def test_count_town_portals_single(self):
+        """Test counting town portals with one portal"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        town_portal = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        warrior.inventory.add_item(town_portal)
+
+        # Act
+        count = warrior.count_town_portals()
+
+        # Assert
+        assert count == 1
+
+    def test_count_town_portals_multiple(self):
+        """Test counting town portals with multiple portals"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        # Add 3 town portals
+        town_portal1 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        town_portal2 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        town_portal3 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        warrior.inventory.add_item(town_portal1)
+        warrior.inventory.add_item(town_portal2)
+        warrior.inventory.add_item(town_portal3)
+
+        # Act
+        count = warrior.count_town_portals()
+
+        # Assert
+        assert count == 3
+
+    def test_count_town_portals_mixed_with_potions(self):
+        """Test counting town portals with health potions in inventory"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        health_potion = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores health", health_bonus=30
+        )
+        town_portal = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        warrior.inventory.add_item(health_potion)
+        warrior.inventory.add_item(town_portal)
+        warrior.inventory.add_item(health_potion)
+
+        # Act
+        portal_count = warrior.count_town_portals()
+        potion_count = warrior.count_health_potions()
+
+        # Assert
+        assert portal_count == 1
+        assert potion_count == 2
+
+    def test_use_town_portal_success(self):
+        """Test using a town portal successfully"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        town_portal = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        warrior.inventory.add_item(town_portal)
+
+        # Act
+        result = warrior.use_town_portal()
+
+        # Assert
+        assert result is True
+        assert warrior.count_town_portals() == 0
+
+    def test_use_town_portal_no_portals(self):
+        """Test using a town portal when none available"""
+        # Arrange
+        warrior = Warrior(5, 5)
+
+        # Act
+        result = warrior.use_town_portal()
+
+        # Assert
+        assert result is False
+
+    def test_use_town_portal_uses_first_portal(self):
+        """Test that using portal removes the first one"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        # Add 3 town portals
+        town_portal1 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        town_portal2 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        town_portal3 = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        warrior.inventory.add_item(town_portal1)
+        warrior.inventory.add_item(town_portal2)
+        warrior.inventory.add_item(town_portal3)
+
+        # Act
+        result = warrior.use_town_portal()
+
+        # Assert
+        assert result is True
+        assert warrior.count_town_portals() == 2
+
+    def test_count_health_potions_excludes_town_portals(self):
+        """Test that health potion count excludes town portals"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        health_potion = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores health", health_bonus=30
+        )
+        town_portal = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        warrior.inventory.add_item(health_potion)
+        warrior.inventory.add_item(town_portal)
+
+        # Act
+        potion_count = warrior.count_health_potions()
+
+        # Assert
+        assert potion_count == 1
+
+    def test_use_health_potion_ignores_town_portals(self):
+        """Test that using health potion doesn't consume town portals"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.health = 50  # Damage warrior
+        health_potion = Item(
+            "Health Potion", ItemType.CONSUMABLE, "Restores health", health_bonus=30
+        )
+        town_portal = Item(
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+        )
+        warrior.inventory.add_item(town_portal)
+        warrior.inventory.add_item(health_potion)
+
+        # Act
+        result = warrior.use_health_potion()
+
+        # Assert
+        assert result is True
+        assert warrior.count_town_portals() == 1  # Portal should remain
+        assert warrior.count_health_potions() == 0  # Potion should be consumed
