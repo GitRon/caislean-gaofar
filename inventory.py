@@ -107,3 +107,74 @@ class Inventory:
         if self.armor_slot:
             bonus += self.armor_slot.health_bonus
         return bonus
+
+    def has_space(self) -> bool:
+        """Check if inventory has space for at least one more item."""
+        # Check if any backpack slot is empty
+        for slot in self.backpack_slots:
+            if slot is None:
+                return True
+        return False
+
+    def contains_item(self, item: Item) -> bool:
+        """
+        Check if inventory contains a specific item instance.
+
+        Args:
+            item: The item to check for
+
+        Returns:
+            True if item is in inventory, False otherwise
+        """
+        # Check weapon slot
+        if self.weapon_slot is item:
+            return True
+        # Check armor slot
+        if self.armor_slot is item:
+            return True
+        # Check backpack slots
+        if item in self.backpack_slots:
+            return True
+        return False
+
+    def remove_item(self, item: Item) -> bool:
+        """
+        Remove a specific item instance from inventory.
+
+        Args:
+            item: The item to remove
+
+        Returns:
+            True if item was removed, False if not found
+        """
+        # Check weapon slot
+        if self.weapon_slot is item:
+            self.weapon_slot = None
+            return True
+        # Check armor slot
+        if self.armor_slot is item:
+            self.armor_slot = None
+            return True
+        # Check backpack slots
+        for i in range(len(self.backpack_slots)):
+            if self.backpack_slots[i] is item:
+                self.backpack_slots[i] = None
+                return True
+        return False
+
+    def get_all_items(self) -> list[Item]:
+        """
+        Get all items in inventory (weapon, armor, and backpack).
+
+        Returns:
+            List of all items in inventory
+        """
+        items = []
+        if self.weapon_slot:
+            items.append(self.weapon_slot)
+        if self.armor_slot:
+            items.append(self.armor_slot)
+        for item in self.backpack_slots:
+            if item:
+                items.append(item)
+        return items
