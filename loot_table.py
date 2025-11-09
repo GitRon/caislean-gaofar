@@ -79,6 +79,16 @@ def create_gold_drop(min_amount: int, max_amount: int) -> Item:
     )
 
 
+def create_town_portal() -> Item:
+    """Create a town portal consumable item."""
+    return Item(
+        "Town Portal",
+        ItemType.CONSUMABLE,
+        "Opens a portal to town. Use with 'T' key.",
+        health_bonus=0,  # Not for healing
+    )
+
+
 # Monster-specific loot tables
 LOOT_TABLES = {
     "banshee": LootTable(
@@ -89,6 +99,7 @@ LOOT_TABLES = {
             ),
             (create_consumable("Tear of Sorrow", health_bonus=25), 0.6),
             (create_gold_drop(1, 5), 0.5),
+            (create_town_portal(), 0.15),  # 15% chance for town portal
         ]
     ),
     "leprechaun": LootTable(
@@ -96,6 +107,7 @@ LOOT_TABLES = {
             (create_common_weapon("Lucky Shillelagh", attack_bonus=12), 0.4),
             (create_gold_drop(5, 15), 0.9),
             (create_misc_item("Four-Leaf Clover", "Brings good fortune"), 0.3),
+            (create_town_portal(), 0.15),
         ]
     ),
     "pooka": LootTable(
@@ -107,6 +119,7 @@ LOOT_TABLES = {
             ),
             (create_consumable("Dark Berry", health_bonus=30), 0.7),
             (create_gold_drop(2, 6), 0.5),
+            (create_town_portal(), 0.15),
         ]
     ),
     "selkie": LootTable(
@@ -119,6 +132,7 @@ LOOT_TABLES = {
             ),
             (create_consumable("Ocean Pearl", health_bonus=40), 0.6),
             (create_gold_drop(2, 7), 0.5),
+            (create_town_portal(), 0.15),
         ]
     ),
     "dullahan": LootTable(
@@ -131,6 +145,7 @@ LOOT_TABLES = {
                 0.3,
             ),
             (create_gold_drop(5, 12), 0.6),
+            (create_town_portal(), 0.15),
         ]
     ),
     "changeling": LootTable(
@@ -138,6 +153,7 @@ LOOT_TABLES = {
             (create_common_weapon("Fae Dagger", attack_bonus=18), 0.35),
             (create_consumable("Glamour Essence", health_bonus=35), 0.65),
             (create_gold_drop(3, 8), 0.5),
+            (create_town_portal(), 0.15),
         ]
     ),
     "clurichaun": LootTable(
@@ -145,6 +161,7 @@ LOOT_TABLES = {
             (create_common_weapon("Drunken Bottle", attack_bonus=14), 0.4),
             (create_consumable("Fine Whiskey", health_bonus=45), 0.75),
             (create_gold_drop(4, 10), 0.65),
+            (create_town_portal(), 0.15),
         ]
     ),
     "merrow": LootTable(
@@ -156,6 +173,7 @@ LOOT_TABLES = {
             (create_common_weapon("Trident Shard", attack_bonus=20), 0.3),
             (create_consumable("Sea Kelp", health_bonus=28), 0.7),
             (create_gold_drop(3, 9), 0.5),
+            (create_town_portal(), 0.15),
         ]
     ),
     "fear_gorta": LootTable(
@@ -166,6 +184,7 @@ LOOT_TABLES = {
                 0.4,
             ),
             (create_gold_drop(1, 4), 0.4),
+            (create_town_portal(), 0.15),
         ]
     ),
     "cat_si": LootTable(
@@ -173,6 +192,7 @@ LOOT_TABLES = {
             (create_common_weapon("Cat's Claw", attack_bonus=16), 0.4),
             (create_common_armor("Fur Mantle", defense_bonus=9, health_bonus=18), 0.35),
             (create_gold_drop(2, 6), 0.5),
+            (create_town_portal(), 0.15),
         ]
     ),
 }

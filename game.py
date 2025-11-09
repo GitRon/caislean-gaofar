@@ -16,6 +16,7 @@ from ground_item import GroundItem
 from loot_table import get_loot_for_monster
 from hud import HUD
 from dungeon_manager import DungeonManager
+from portal import Portal
 import config
 
 
@@ -40,18 +41,18 @@ class Game:
 
         # Initialize dungeon manager
         if map_file is None:
-            map_file = config.resource_path(os.path.join("maps", "overworld.json"))
+            map_file = os.path.join("maps", "overworld.json")
         self.dungeon_manager = DungeonManager(map_file)
         self.dungeon_manager.load_world_map()
 
         # Load dungeons
         self.dungeon_manager.load_dungeon(
-            "dark_cave", config.resource_path(os.path.join("maps", "dark_cave.json"))
+            "dark_cave", os.path.join("maps", "dark_cave.json")
         )
         self.dungeon_manager.load_dungeon(
-            "ancient_castle",
-            config.resource_path(os.path.join("maps", "ancient_castle.json")),
+            "ancient_castle", os.path.join("maps", "ancient_castle.json")
         )
+        self.dungeon_manager.load_dungeon("town", os.path.join("maps", "town.json"))
 
         # Get current map (initially world map)
         self.world_map = self.dungeon_manager.get_current_map()
@@ -70,10 +71,9 @@ class Game:
         self.inventory_ui = InventoryUI()
         self.hud = HUD()
 
-        # Initialize shop (AC11: located at specific position - town area)
-        # Shop is located near spawn point
-        spawn_x, spawn_y = self.world_map.spawn_point
-        self.shop = Shop(spawn_x + 3, spawn_y)  # 3 tiles to the right of spawn
+        # Initialize shop (located at specific position on town map)
+        # Position matches 'S' in town.json
+        self.shop = Shop(grid_x=4, grid_y=3)  # Position in town
         self.shop_ui = ShopUI()
 
         # Turn-based state
@@ -84,6 +84,13 @@ class Game:
         # World objects
         self.chests = []
         self.ground_items = []
+
+        # Portal system
+        self.active_portal = None  # Portal in dungeon/world
+        self.return_portal = None  # Portal in shop
+        self.portal_return_location = None  # (map_id, grid_x, grid_y)
+        self.shop_warrior_position = (6, 5)  # Fixed position in shop
+        self.portal_cooldown = 0  # Prevent instant re-teleportation
 
         # Messages
         self.message = ""
@@ -217,6 +224,10 @@ class Game:
         self.chests = []
         current_map_id = self.dungeon_manager.current_map_id
 
+        # Don't spawn chests in town
+        if self.dungeon_manager.current_map_id == "town":
+            return
+
         # Try to spawn chests from map data
         chest_spawns = self.world_map.get_entity_spawns("chests")
         if chest_spawns:
@@ -282,26 +293,37 @@ class Game:
                 elif event.key == pygame.K_i and self.state in [
                     config.STATE_PLAYING,
                     config.STATE_INVENTORY,
+                    config.STATE_SHOP,
                 ]:
                     # Toggle inventory
                     if self.state == config.STATE_PLAYING:
                         self.state = config.STATE_INVENTORY
+                    elif self.state == config.STATE_SHOP:
+                        self.state = config.STATE_INVENTORY
                     else:
-                        self.state = config.STATE_PLAYING
-                # Handle shop toggle (AC11, AC12)
+                        # Return to previous state (playing or shop)
+                        # Check if we came from shop by checking portal location
+                        if self.return_portal:
+                            self.state = config.STATE_SHOP
+                        else:
+                            self.state = config.STATE_PLAYING
+                # Handle shop toggle (when on town map near shop)
                 elif event.key == pygame.K_s and self.state in [
                     config.STATE_PLAYING,
                     config.STATE_SHOP,
                 ]:
-                    # Toggle shop (only if near shop location)
+                    # Toggle shop (only if on town map near shop location)
                     if self.state == config.STATE_PLAYING:
-                        # Check if player is near shop
-                        if self._is_near_shop():
+                        # Check if player is on town map and near shop
+                        if (
+                            self.dungeon_manager.current_map_id == "town"
+                            and self._is_near_shop()
+                        ):
                             self.state = config.STATE_SHOP
                         else:
                             self._show_message("No shop nearby!")
                     else:
-                        # AC12: Exit shop without penalty
+                        # Exit shop without penalty
                         self.state = config.STATE_PLAYING
                 # Handle pickup (instant, doesn't consume a turn)
                 elif event.key == pygame.K_g and self.state == config.STATE_PLAYING:
@@ -318,6 +340,17 @@ class Game:
                             self._show_message("No health potions remaining!")
                         else:
                             self._show_message("Health is already full!")
+                # Handle town portal usage (instant, doesn't consume a turn)
+                elif event.key == pygame.K_t and self.state == config.STATE_PLAYING:
+                    self._use_town_portal()
+                # Handle shop exit
+                elif event.key == pygame.K_ESCAPE and self.state == config.STATE_SHOP:
+                    if self.return_portal:
+                        self._use_return_portal()
+                # Handle return portal usage in shop
+                elif event.key == pygame.K_t and self.state == config.STATE_SHOP:
+                    if self.return_portal:
+                        self._use_return_portal()
                 # Handle turn-based movement input
                 elif (
                     self.state == config.STATE_PLAYING and self.waiting_for_player_input
@@ -354,6 +387,9 @@ class Game:
 
     def restart(self):
         """Restart the game."""
+        # Close any active portals
+        self._close_portals()
+
         # Reset to world map
         self.dungeon_manager.current_map_id = "world"
         self.dungeon_manager.return_location = None
@@ -396,8 +432,18 @@ class Game:
             if self.message_timer <= 0:
                 self.message = ""
 
+        # Update portal cooldown timer
+        if self.portal_cooldown > 0:
+            self.portal_cooldown -= self.clock.get_time()
+
         # Update HUD (always update for animations)
         self.hud.update(self.warrior, dt)
+
+        # Update portal animations
+        if self.active_portal:
+            self.active_portal.update(dt)
+        if self.return_portal:
+            self.return_portal.update(dt)
 
         # Only update game logic when actively playing
         if self.state != config.STATE_PLAYING:
@@ -410,9 +456,20 @@ class Game:
         # Update camera to follow player
         self.camera.update(self.warrior.grid_x, self.warrior.grid_y)
 
+        # Check if player stepped on return portal (auto-teleport back)
+        if self.return_portal and self.portal_cooldown <= 0:
+            if (
+                self.warrior.grid_x == self.return_portal.grid_x
+                and self.warrior.grid_y == self.return_portal.grid_y
+            ):
+                self._use_return_portal()
+                return
+
         # Check game over conditions
         if not self.warrior.is_alive:
             self.state = config.STATE_GAME_OVER
+            # Close portals on death
+            self._close_portals()
 
     def process_turn(self):
         """Process one complete turn (hero then monsters)."""
@@ -595,9 +652,98 @@ class Game:
         self.message = message
         self.message_timer = self.message_duration
 
+    def _use_town_portal(self):
+        """Use a town portal to teleport to town."""
+        portal_count = self.warrior.count_town_portals()
+
+        if self.warrior.use_town_portal():
+            # Close any existing portals
+            self._close_portals()
+
+            # Save current location
+            current_map_id = self.dungeon_manager.current_map_id
+            self.portal_return_location = (
+                current_map_id,
+                self.warrior.grid_x,
+                self.warrior.grid_y,
+            )
+
+            # Create portal at current location
+            self.active_portal = Portal(self.warrior.grid_x, self.warrior.grid_y, False)
+
+            # Switch to town map
+            self.dungeon_manager.current_map_id = "town"
+            self.world_map = self.dungeon_manager.get_current_map()
+            self.camera = Camera(self.world_map.width, self.world_map.height)
+
+            # Clear chests when entering town
+            self.chests = []
+
+            # Teleport to town spawn point
+            spawn_x, spawn_y = self.world_map.spawn_point
+            # Place player one tile to the right of portal to avoid standing on it
+            self.warrior.grid_x, self.warrior.grid_y = spawn_x + 1, spawn_y
+
+            # Create return portal at spawn location
+            self.return_portal = Portal(spawn_x, spawn_y, True)
+
+            # Stay in playing state (on town map)
+            self.state = config.STATE_PLAYING
+
+            # Set cooldown to prevent instant re-teleportation (500ms)
+            self.portal_cooldown = 500
+
+            self._show_message("You enter the portal and arrive in town!")
+        else:
+            if portal_count <= 0:
+                self._show_message("No town portals in inventory!")
+            else:
+                self._show_message(
+                    f"You have {portal_count} portal(s) but cannot use them here!"
+                )
+
+    def _use_return_portal(self):
+        """Use the return portal to go back to saved location."""
+        if not self.return_portal or not self.portal_return_location:
+            self._show_message("No return portal available!")
+            return
+
+        map_id, grid_x, grid_y = self.portal_return_location
+
+        # Switch to the saved map
+        if map_id != self.dungeon_manager.current_map_id:
+            self.dungeon_manager.current_map_id = map_id
+            self.world_map = self.dungeon_manager.get_current_map()
+            self.camera = Camera(self.world_map.width, self.world_map.height)
+
+            # Respawn chests when returning from town
+            if map_id != "town":
+                self._spawn_chests()
+
+        # Return to saved position
+        self.warrior.grid_x = grid_x
+        self.warrior.grid_y = grid_y
+
+        # Return to playing state
+        self.state = config.STATE_PLAYING
+
+        # Set cooldown to prevent instant re-teleportation (500ms)
+        self.portal_cooldown = 500
+
+        # Close both portals
+        self._close_portals()
+
+        self._show_message("You return through the portal!")
+
+    def _close_portals(self):
+        """Close all active portals."""
+        self.active_portal = None
+        self.return_portal = None
+        self.portal_return_location = None
+
     def _is_near_shop(self) -> bool:
         """
-        Check if player is near the shop (AC11).
+        Check if player is near the shop.
 
         Returns:
             True if player is within 1 tile of shop
@@ -607,136 +753,19 @@ class Game:
         )
         return distance <= 1
 
-    def draw(self):
-        """Draw all game objects."""
-        self.screen.fill(config.BLACK)
+    def _draw_shop_building(self):
+        """Draw the shop building on the town map."""
+        if not self.camera.is_visible(self.shop.grid_x, self.shop.grid_y):
+            return
 
-        if self.state == config.STATE_PLAYING:
-            # Draw world map
-            self.world_map.draw(
-                self.screen,
-                self.camera.x,
-                self.camera.y,
-                self.camera.viewport_width,
-                self.camera.viewport_height,
-            )
+        # Convert shop grid position to screen position
+        screen_x, screen_y = self.camera.world_to_screen(
+            self.shop.grid_x, self.shop.grid_y
+        )
 
-            # Draw world objects (chests and ground items) with camera offset
-            self._draw_world_objects_with_camera()
-
-            # Draw entities with camera offset
-            self._draw_entities_with_camera()
-
-            # Draw combat UI (find nearest monster)
-            nearest_monster = self._get_nearest_alive_monster()
-            if nearest_monster:
-                self.combat_system.draw_combat_ui(
-                    self.screen, self.warrior, nearest_monster
-                )
-
-            # Draw HUD (player stats, potions, gold)
-            self.hud.draw(self.screen, self.warrior)
-
-            # Draw message if active
-            if self.message:
-                self._draw_message()
-
-        elif self.state == config.STATE_INVENTORY:
-            # Draw the game in the background
-            self.world_map.draw(
-                self.screen,
-                self.camera.x,
-                self.camera.y,
-                self.camera.viewport_width,
-                self.camera.viewport_height,
-            )
-            self._draw_world_objects_with_camera()
-            self._draw_entities_with_camera()
-            nearest_monster = self._get_nearest_alive_monster()
-            if nearest_monster:
-                self.combat_system.draw_combat_ui(
-                    self.screen, self.warrior, nearest_monster
-                )
-
-            # Draw HUD (player stats, potions, gold)
-            self.hud.draw(self.screen, self.warrior)
-
-            # Draw inventory overlay on top
-            self.inventory_ui.draw(self.screen, self.warrior.inventory)
-
-        elif self.state == config.STATE_SHOP:
-            # Draw the game in the background
-            self.world_map.draw(
-                self.screen,
-                self.camera.x,
-                self.camera.y,
-                self.camera.viewport_width,
-                self.camera.viewport_height,
-            )
-            self._draw_world_objects_with_camera()
-            self._draw_entities_with_camera()
-
-            # Draw HUD (player stats, potions, gold)
-            self.hud.draw(self.screen, self.warrior)
-
-            # Draw shop overlay on top
-            self.shop_ui.draw(self.screen, self.shop, self.warrior)
-
-        elif self.state == config.STATE_GAME_OVER:
-            self.draw_game_over_screen("GAME OVER!", config.RED)
-
-        pygame.display.flip()
-
-    def _get_nearest_alive_monster(self):
-        """Get the nearest alive monster to the warrior."""
-        nearest_monster = None
-        min_distance = float("inf")
-        for monster in self.monsters:
-            if monster.is_alive:
-                distance = self.warrior.grid_distance_to(monster)
-                if distance < min_distance:
-                    min_distance = distance
-                    nearest_monster = monster
-        return nearest_monster
-
-    def _draw_world_objects_with_camera(self):
-        """Draw chests, ground items, and shop with camera offset applied."""
-        # Draw shop building
-        if self.camera.is_visible(self.shop.grid_x, self.shop.grid_y):
-            screen_x, screen_y = self.camera.world_to_screen(
-                self.shop.grid_x, self.shop.grid_y
-            )
-            self._draw_shop_building(screen_x, screen_y)
-
-        # Draw chests
-        for chest in self.chests:
-            if self.camera.is_visible(chest.grid_x, chest.grid_y):
-                original_x = chest.grid_x
-                original_y = chest.grid_y
-                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
-                chest.grid_x = screen_x
-                chest.grid_y = screen_y
-                chest.draw(self.screen)
-                chest.grid_x = original_x
-                chest.grid_y = original_y
-
-        # Draw ground items
-        for ground_item in self.ground_items:
-            if self.camera.is_visible(ground_item.grid_x, ground_item.grid_y):
-                original_x = ground_item.grid_x
-                original_y = ground_item.grid_y
-                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
-                ground_item.grid_x = screen_x
-                ground_item.grid_y = screen_y
-                ground_item.draw(self.screen)
-                ground_item.grid_x = original_x
-                ground_item.grid_y = original_y
-
-    def _draw_shop_building(self, grid_x: int, grid_y: int):
-        """Draw a shop building at the given grid position."""
         # Convert grid coordinates to pixel coordinates
-        x = grid_x * config.TILE_SIZE
-        y = grid_y * config.TILE_SIZE
+        x = screen_x * config.TILE_SIZE
+        y = screen_y * config.TILE_SIZE
         size = config.TILE_SIZE
 
         # Draw building (brown/tan house)
@@ -791,7 +820,7 @@ class Game:
             self.screen, building_color, (sign_x, sign_y), sign_size - 2, 2
         )
 
-        # "SHOP" text indicator when player is near
+        # "Press S" text indicator when player is near
         if self._is_near_shop():
             font = pygame.font.Font(None, 20)
             text = font.render("Press S", True, config.WHITE)
@@ -801,8 +830,149 @@ class Game:
             bg_rect = pygame.Rect(
                 text_x - 3, text_y - 3, text.get_width() + 6, text.get_height() + 6
             )
-            pygame.draw.rect(self.screen, (0, 0, 0, 200), bg_rect)
+            pygame.draw.rect(self.screen, config.BLACK, bg_rect)
             self.screen.blit(text, (text_x, text_y))
+
+    def draw(self):
+        """Draw all game objects."""
+        self.screen.fill(config.BLACK)
+
+        if self.state == config.STATE_PLAYING:
+            # Draw world map
+            self.world_map.draw(
+                self.screen,
+                self.camera.x,
+                self.camera.y,
+                self.camera.viewport_width,
+                self.camera.viewport_height,
+            )
+
+            # Draw world objects (chests and ground items) with camera offset
+            self._draw_world_objects_with_camera()
+
+            # Draw active portal if present (only when NOT in town)
+            if self.active_portal and self.dungeon_manager.current_map_id != "town":
+                if self.camera.is_visible(
+                    self.active_portal.grid_x, self.active_portal.grid_y
+                ):
+                    original_x = self.active_portal.grid_x
+                    original_y = self.active_portal.grid_y
+                    screen_x, screen_y = self.camera.world_to_screen(
+                        original_x, original_y
+                    )
+                    self.active_portal.grid_x = screen_x
+                    self.active_portal.grid_y = screen_y
+                    self.active_portal.draw(self.screen)
+                    self.active_portal.grid_x = original_x
+                    self.active_portal.grid_y = original_y
+
+            # Draw return portal if present (only when IN town)
+            if self.return_portal and self.dungeon_manager.current_map_id == "town":
+                if self.camera.is_visible(
+                    self.return_portal.grid_x, self.return_portal.grid_y
+                ):
+                    original_x = self.return_portal.grid_x
+                    original_y = self.return_portal.grid_y
+                    screen_x, screen_y = self.camera.world_to_screen(
+                        original_x, original_y
+                    )
+                    self.return_portal.grid_x = screen_x
+                    self.return_portal.grid_y = screen_y
+                    self.return_portal.draw(self.screen)
+                    self.return_portal.grid_x = original_x
+                    self.return_portal.grid_y = original_y
+
+            # Draw shop building if in town
+            if self.dungeon_manager.current_map_id == "town":
+                self._draw_shop_building()
+
+            # Draw entities with camera offset
+            self._draw_entities_with_camera()
+
+            # Draw combat UI (find nearest monster)
+            nearest_monster = self._get_nearest_alive_monster()
+            if nearest_monster:
+                self.combat_system.draw_combat_ui(
+                    self.screen, self.warrior, nearest_monster
+                )
+
+            # Draw HUD (player stats, potions, gold)
+            self.hud.draw(self.screen, self.warrior)
+
+            # Draw message if active
+            if self.message:
+                self._draw_message()
+
+        elif self.state == config.STATE_INVENTORY:
+            # Draw the game in the background
+            self.world_map.draw(
+                self.screen,
+                self.camera.x,
+                self.camera.y,
+                self.camera.viewport_width,
+                self.camera.viewport_height,
+            )
+            self._draw_world_objects_with_camera()
+            self._draw_entities_with_camera()
+            nearest_monster = self._get_nearest_alive_monster()
+            if nearest_monster:
+                self.combat_system.draw_combat_ui(
+                    self.screen, self.warrior, nearest_monster
+                )
+
+            # Draw HUD (player stats, potions, gold)
+            self.hud.draw(self.screen, self.warrior)
+
+            # Draw inventory overlay on top if open
+            if self.state == config.STATE_INVENTORY:
+                self.inventory_ui.draw(self.screen, self.warrior.inventory)
+
+        elif self.state == config.STATE_SHOP:
+            # Draw shop UI
+            self.shop_ui.draw(self.screen, self.shop, self.warrior)
+
+        elif self.state == config.STATE_GAME_OVER:
+            self.draw_game_over_screen("GAME OVER!", config.RED)
+
+        pygame.display.flip()
+
+    def _get_nearest_alive_monster(self):
+        """Get the nearest alive monster to the warrior."""
+        nearest_monster = None
+        min_distance = float("inf")
+        for monster in self.monsters:
+            if monster.is_alive:
+                distance = self.warrior.grid_distance_to(monster)
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_monster = monster
+        return nearest_monster
+
+    def _draw_world_objects_with_camera(self):
+        """Draw chests and ground items with camera offset applied."""
+        # Draw chests
+        for chest in self.chests:
+            if self.camera.is_visible(chest.grid_x, chest.grid_y):
+                original_x = chest.grid_x
+                original_y = chest.grid_y
+                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+                chest.grid_x = screen_x
+                chest.grid_y = screen_y
+                chest.draw(self.screen)
+                chest.grid_x = original_x
+                chest.grid_y = original_y
+
+        # Draw ground items
+        for ground_item in self.ground_items:
+            if self.camera.is_visible(ground_item.grid_x, ground_item.grid_y):
+                original_x = ground_item.grid_x
+                original_y = ground_item.grid_y
+                screen_x, screen_y = self.camera.world_to_screen(original_x, original_y)
+                ground_item.grid_x = screen_x
+                ground_item.grid_y = screen_y
+                ground_item.draw(self.screen)
+                ground_item.grid_x = original_x
+                ground_item.grid_y = original_y
 
     def _draw_entities_with_camera(self):
         """Draw all entities with camera offset applied."""
@@ -886,26 +1056,21 @@ class Game:
 
     def _add_starting_items(self):
         """Add starting equipment to warrior inventory."""
+        # Import loot table function for town portal
+        from loot_table import create_town_portal
+
         # Create starting equipment
         short_sword = Item(
             name="Short Sword",
             item_type=ItemType.WEAPON,
             description="A basic short sword",
             attack_bonus=3,
-            gold_value=20,
         )
         woolen_tunic = Item(
             name="Woolen Tunic",
             item_type=ItemType.ARMOR,
             description="A simple woolen tunic",
             defense_bonus=1,
-            gold_value=15,
-        )
-        health_potion = Item(
-            name="Health Potion",
-            item_type=ItemType.CONSUMABLE,
-            description="Restores 30 HP",
-            health_bonus=30,
         )
         health_potion = Item(
             name="Health Potion",
@@ -918,6 +1083,9 @@ class Game:
         self.warrior.inventory.add_item(short_sword)
         self.warrior.inventory.add_item(woolen_tunic)
         self.warrior.inventory.add_item(health_potion)
+
+        # Add a starting town portal for testing
+        self.warrior.inventory.add_item(create_town_portal())
 
         # Player starts with some gold to buy items
         self.warrior.add_gold(100)

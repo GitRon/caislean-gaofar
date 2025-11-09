@@ -31,7 +31,7 @@ def resource_path(relative_path):
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
-TITLE = "Warrior vs Monster"
+TITLE = "Caislean Gaofar"
 
 # HUD layout settings
 HUD_WIDTH = 200
@@ -56,6 +56,10 @@ GOLD = (255, 215, 0)  # Ground item color
 COLOR_WHITE = WHITE
 COLOR_GROUND_ITEM = GOLD
 COLOR_CHEST = BROWN
+
+# Portal colors
+PORTAL_COLOR = (138, 43, 226)  # Blue-violet
+PORTAL_GLOW = (186, 85, 211)  # Medium orchid
 
 # Grid settings
 TILE_SIZE = 50  # Size of each grid tile
