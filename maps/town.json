@@ -7,9 +7,9 @@
   },
   "legend": {
     ".": {
-      "name": "cobblestone",
+      "name": "grass",
       "passable": true,
-      "color": [120, 120, 130]
+      "color": [85, 170, 85]
     },
     "#": {
       "name": "wall",
