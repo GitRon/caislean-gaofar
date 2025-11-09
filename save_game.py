@@ -40,6 +40,8 @@ class SaveGame:
             "defense_bonus": item.defense_bonus,
             "health_bonus": item.health_bonus,
             "gold_value": item.gold_value,
+            "sell_price": item.sell_price,
+            "unsellable": item.unsellable,
         }
 
     @staticmethod
@@ -66,6 +68,8 @@ class SaveGame:
             defense_bonus=data.get("defense_bonus", 0),
             health_bonus=data.get("health_bonus", 0),
             gold_value=data.get("gold_value", 0),
+            sell_price=data.get("sell_price"),
+            unsellable=data.get("unsellable", False),
         )
 
     @staticmethod
