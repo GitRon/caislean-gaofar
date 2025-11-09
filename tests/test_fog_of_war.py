@@ -1,6 +1,5 @@
 """Tests for the FogOfWar class."""
 
-import pytest
 from fog_of_war import FogOfWar
 
 
