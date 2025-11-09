@@ -391,50 +391,66 @@ class TestWarriorSkills:
     def test_tier_distribution(self):
         """Test that skills are properly distributed across tiers"""
         # Arrange
-        tier_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        all_skills = WARRIOR_SKILLS.values()
 
-        # Act
-        tier_counts = {
-            tier: sum(1 for s in WARRIOR_SKILLS.values() if s.tier == tier)
-            for tier in range(1, 6)
-        }
+        # Act - Count skills per tier explicitly
+        tier1_count = sum(1 for s in all_skills if s.tier == 1)
+        tier2_count = sum(1 for s in all_skills if s.tier == 2)
+        tier3_count = sum(1 for s in all_skills if s.tier == 3)
+        tier4_count = sum(1 for s in all_skills if s.tier == 4)
+        tier5_count = sum(1 for s in all_skills if s.tier == 5)
 
         # Assert - Each tier should have 2 skills (1 active, 1 passive)
-        assert tier_counts[1] == 2, f"Tier 1 should have 2 skills, has {tier_counts[1]}"
-        assert tier_counts[2] == 2, f"Tier 2 should have 2 skills, has {tier_counts[2]}"
-        assert tier_counts[3] == 2, f"Tier 3 should have 2 skills, has {tier_counts[3]}"
-        assert tier_counts[4] == 2, f"Tier 4 should have 2 skills, has {tier_counts[4]}"
-        assert tier_counts[5] == 2, f"Tier 5 should have 2 skills, has {tier_counts[5]}"
+        assert tier1_count == 2, f"Tier 1 should have 2 skills, has {tier1_count}"
+        assert tier2_count == 2, f"Tier 2 should have 2 skills, has {tier2_count}"
+        assert tier3_count == 2, f"Tier 3 should have 2 skills, has {tier3_count}"
+        assert tier4_count == 2, f"Tier 4 should have 2 skills, has {tier4_count}"
+        assert tier5_count == 2, f"Tier 5 should have 2 skills, has {tier5_count}"
 
     def test_skill_types(self):
         """Test that each tier has one active and one passive"""
-        # Helper to count skills by type for a tier
-        def count_skills(tier, skill_type):
-            return sum(
-                1
-                for s in WARRIOR_SKILLS.values()
-                if s.tier == tier and s.skill_type == skill_type
-            )
+        # Get all skills
+        all_skills = WARRIOR_SKILLS.values()
+
+        # Count skills explicitly for tier 1
+        tier1_active = sum(1 for s in all_skills if s.tier == 1 and s.skill_type == SkillType.ACTIVE)
+        tier1_passive = sum(1 for s in all_skills if s.tier == 1 and s.skill_type == SkillType.PASSIVE)
+
+        # Count skills explicitly for tier 2
+        tier2_active = sum(1 for s in all_skills if s.tier == 2 and s.skill_type == SkillType.ACTIVE)
+        tier2_passive = sum(1 for s in all_skills if s.tier == 2 and s.skill_type == SkillType.PASSIVE)
+
+        # Count skills explicitly for tier 3
+        tier3_active = sum(1 for s in all_skills if s.tier == 3 and s.skill_type == SkillType.ACTIVE)
+        tier3_passive = sum(1 for s in all_skills if s.tier == 3 and s.skill_type == SkillType.PASSIVE)
+
+        # Count skills explicitly for tier 4
+        tier4_active = sum(1 for s in all_skills if s.tier == 4 and s.skill_type == SkillType.ACTIVE)
+        tier4_passive = sum(1 for s in all_skills if s.tier == 4 and s.skill_type == SkillType.PASSIVE)
+
+        # Count skills explicitly for tier 5
+        tier5_active = sum(1 for s in all_skills if s.tier == 5 and s.skill_type == SkillType.ACTIVE)
+        tier5_passive = sum(1 for s in all_skills if s.tier == 5 and s.skill_type == SkillType.PASSIVE)
 
         # Assert tier 1
-        assert count_skills(1, SkillType.ACTIVE) == 1, "Tier 1 should have 1 active skill"
-        assert count_skills(1, SkillType.PASSIVE) == 1, "Tier 1 should have 1 passive skill"
+        assert tier1_active == 1, "Tier 1 should have 1 active skill"
+        assert tier1_passive == 1, "Tier 1 should have 1 passive skill"
 
         # Assert tier 2
-        assert count_skills(2, SkillType.ACTIVE) == 1, "Tier 2 should have 1 active skill"
-        assert count_skills(2, SkillType.PASSIVE) == 1, "Tier 2 should have 1 passive skill"
+        assert tier2_active == 1, "Tier 2 should have 1 active skill"
+        assert tier2_passive == 1, "Tier 2 should have 1 passive skill"
 
         # Assert tier 3
-        assert count_skills(3, SkillType.ACTIVE) == 1, "Tier 3 should have 1 active skill"
-        assert count_skills(3, SkillType.PASSIVE) == 1, "Tier 3 should have 1 passive skill"
+        assert tier3_active == 1, "Tier 3 should have 1 active skill"
+        assert tier3_passive == 1, "Tier 3 should have 1 passive skill"
 
         # Assert tier 4
-        assert count_skills(4, SkillType.ACTIVE) == 1, "Tier 4 should have 1 active skill"
-        assert count_skills(4, SkillType.PASSIVE) == 1, "Tier 4 should have 1 passive skill"
+        assert tier4_active == 1, "Tier 4 should have 1 active skill"
+        assert tier4_passive == 1, "Tier 4 should have 1 passive skill"
 
         # Assert tier 5
-        assert count_skills(5, SkillType.ACTIVE) == 1, "Tier 5 should have 1 active skill"
-        assert count_skills(5, SkillType.PASSIVE) == 1, "Tier 5 should have 1 passive skill"
+        assert tier5_active == 1, "Tier 5 should have 1 active skill"
+        assert tier5_passive == 1, "Tier 5 should have 1 passive skill"
 
     def test_active_skills_have_cooldowns(self):
         """Test that all active skills have cooldowns"""
