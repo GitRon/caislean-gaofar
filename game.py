@@ -601,9 +601,10 @@ class Game:
 
             # Teleport to town spawn point
             spawn_x, spawn_y = self.world_map.spawn_point
-            self.warrior.grid_x, self.warrior.grid_y = spawn_x, spawn_y
+            # Place player one tile to the right of portal to avoid standing on it
+            self.warrior.grid_x, self.warrior.grid_y = spawn_x + 1, spawn_y
 
-            # Create return portal at spawn location (player spawns on the portal)
+            # Create return portal at spawn location
             self.return_portal = Portal(spawn_x, spawn_y, True)
 
             # Stay in playing state (on town map)
