@@ -66,9 +66,6 @@ class Game:
         # Add starting items to warrior inventory
         self._add_starting_items()
 
-        # Spawn monsters from map data
-        self._spawn_monsters()
-
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
         self.hud = HUD()
@@ -93,15 +90,37 @@ class Game:
         self.message_timer = 0
         self.message_duration = 3000  # milliseconds to show message
 
-        # Spawn chests in the dungeon
+        # Save game tracking (must be initialized before spawning)
+        self.killed_monsters = []  # List of killed monster data for persistence
+        self.opened_chests = []  # List of opened chest positions for persistence
+
+        # Spawn monsters and chests (uses tracking lists above)
+        self._spawn_monsters()
         self._spawn_chests()
 
     def _spawn_monsters(self):
-        """Spawn monsters from current map data."""
+        """Spawn monsters from current map data, excluding killed monsters."""
         self.monsters = []
+        current_map_id = self.dungeon_manager.current_map_id
         monster_spawns = self.world_map.get_entity_spawns("monsters")
+
         for spawn in monster_spawns:
             monster_type = spawn.get("type", "banshee")
+            monster_x = spawn["x"]
+            monster_y = spawn["y"]
+
+            # Check if this monster was already killed
+            is_killed = any(
+                km["type"] == monster_type
+                and km["x"] == monster_x
+                and km["y"] == monster_y
+                and km["map_id"] == current_map_id
+                for km in self.killed_monsters
+            )
+
+            if is_killed:
+                continue  # Skip this monster, it's dead
+
             # Find matching monster class
             monster_class = None
             for cls in ALL_MONSTER_CLASSES:
@@ -110,15 +129,27 @@ class Game:
                     break
             if monster_class is None:
                 monster_class = random.choice(ALL_MONSTER_CLASSES)
-            monster = monster_class(spawn["x"], spawn["y"])
+            monster = monster_class(monster_x, monster_y)
             self.monsters.append(monster)
 
-        # If no monsters in map, spawn one randomly
-        if not self.monsters:
+        # If no monsters in map, spawn one randomly (only if not killed before)
+        if not self.monsters and not monster_spawns:
             spawn_x, spawn_y = self.world_map.spawn_point
-            monster_class = random.choice(ALL_MONSTER_CLASSES)
-            monster = monster_class(spawn_x + 5, spawn_y)
-            self.monsters.append(monster)
+            default_x = spawn_x + 5
+            default_y = spawn_y
+
+            # Check if default spawn monster was killed
+            is_killed = any(
+                km["x"] == default_x
+                and km["y"] == default_y
+                and km["map_id"] == current_map_id
+                for km in self.killed_monsters
+            )
+
+            if not is_killed:
+                monster_class = random.choice(ALL_MONSTER_CLASSES)
+                monster = monster_class(default_x, default_y)
+                self.monsters.append(monster)
 
     def drop_item(self, item: Item, grid_x: int, grid_y: int):
         """
@@ -181,16 +212,29 @@ class Game:
         return False
 
     def _spawn_chests(self):
-        """Spawn chests from map data or at random locations."""
+        """Spawn chests from map data or at random locations, excluding opened chests."""
         # Clear existing chests
         self.chests = []
+        current_map_id = self.dungeon_manager.current_map_id
 
         # Try to spawn chests from map data
         chest_spawns = self.world_map.get_entity_spawns("chests")
         if chest_spawns:
             for spawn in chest_spawns:
-                chest = Chest(spawn["x"], spawn["y"])
-                self.chests.append(chest)
+                chest_x = spawn["x"]
+                chest_y = spawn["y"]
+
+                # Check if this chest was already opened
+                is_opened = any(
+                    oc["x"] == chest_x
+                    and oc["y"] == chest_y
+                    and oc["map_id"] == current_map_id
+                    for oc in self.opened_chests
+                )
+
+                if not is_opened:
+                    chest = Chest(chest_x, chest_y)
+                    self.chests.append(chest)
         else:
             # Fallback: Define positions where chests can spawn
             chest_positions = [
@@ -207,8 +251,17 @@ class Game:
             selected_positions = random.sample(chest_positions, num_chests)
 
             for grid_x, grid_y in selected_positions:
-                chest = Chest(grid_x, grid_y)
-                self.chests.append(chest)
+                # Check if this chest was already opened
+                is_opened = any(
+                    oc["x"] == grid_x
+                    and oc["y"] == grid_y
+                    and oc["map_id"] == current_map_id
+                    for oc in self.opened_chests
+                )
+
+                if not is_opened:
+                    chest = Chest(grid_x, grid_y)
+                    self.chests.append(chest)
 
     def handle_events(self):
         """Handle pygame events."""
@@ -223,6 +276,9 @@ class Game:
                 elif event.key == pygame.K_r and self.state == config.STATE_GAME_OVER:
                     # Restart game
                     self.restart()
+                elif event.key == pygame.K_F5 and self.state == config.STATE_PLAYING:
+                    # Quick save
+                    self.save_game("quicksave")
                 elif event.key == pygame.K_i and self.state in [
                     config.STATE_PLAYING,
                     config.STATE_INVENTORY,
@@ -320,6 +376,11 @@ class Game:
         self.ground_items = []  # Clear ground items
         self.message = ""
         self.message_timer = 0
+
+        # Reset tracking lists
+        self.killed_monsters = []
+        self.opened_chests = []
+
         self._spawn_chests()
 
     def update(self, dt: float):
@@ -448,6 +509,8 @@ class Game:
 
     def _check_chest_collision(self):
         """Check if warrior stepped on a chest and open it."""
+        current_map_id = self.dungeon_manager.current_map_id
+
         for chest in self.chests[:]:  # Iterate over copy to allow removal
             if (
                 not chest.is_opened
@@ -456,6 +519,11 @@ class Game:
             ):
                 # Open the chest
                 item = chest.open()
+
+                # Track opened chest
+                self.opened_chests.append(
+                    {"x": chest.grid_x, "y": chest.grid_y, "map_id": current_map_id}
+                )
 
                 # Create ground item at chest location
                 ground_item = GroundItem(item, chest.grid_x, chest.grid_y)
@@ -493,8 +561,20 @@ class Game:
 
     def _check_monster_deaths(self):
         """Check for dead monsters and drop their loot."""
+        current_map_id = self.dungeon_manager.current_map_id
+
         for monster in self.monsters[:]:  # Iterate over copy to allow removal
             if not monster.is_alive:
+                # Track killed monster
+                self.killed_monsters.append(
+                    {
+                        "type": monster.monster_type,
+                        "x": monster.grid_x,
+                        "y": monster.grid_y,
+                        "map_id": current_map_id,
+                    }
+                )
+
                 # Use loot_table system to generate loot
                 loot_item = get_loot_for_monster(monster.monster_type)
 
@@ -841,6 +921,77 @@ class Game:
 
         # Player starts with some gold to buy items
         self.warrior.add_gold(100)
+
+    def save_game(self, filename: str = "quicksave") -> bool:
+        """
+        Save the current game state.
+
+        Args:
+            filename: Name of the save file
+
+        Returns:
+            True if save was successful
+        """
+        from save_game import SaveGame
+
+        success = SaveGame.save_game(self, filename)
+        if success:
+            self._show_message(f"Game saved: {filename}")
+        else:
+            self._show_message("Failed to save game")
+        return success
+
+    def load_game_state(self, save_data: dict):
+        """
+        Load game state from save data.
+
+        Args:
+            save_data: Dictionary containing saved game state
+        """
+        from save_game import SaveGame
+        from ground_item import GroundItem
+
+        # Load player state
+        player_data = save_data["player"]
+        self.warrior.grid_x = player_data["grid_x"]
+        self.warrior.grid_y = player_data["grid_y"]
+        self.warrior.health = player_data["health"]
+        self.warrior.max_health = player_data["max_health"]
+        self.warrior.gold = player_data["gold"]
+        self.warrior.inventory = SaveGame.deserialize_inventory(
+            player_data["inventory"]
+        )
+
+        # Load map state
+        self.dungeon_manager.current_map_id = save_data["current_map_id"]
+        self.dungeon_manager.return_location = save_data.get("return_location")
+        self.world_map = self.dungeon_manager.get_current_map()
+
+        # Update camera for loaded map
+        self.camera = Camera(self.world_map.width, self.world_map.height)
+
+        # Load tracking lists
+        self.killed_monsters = save_data.get("killed_monsters", [])
+        self.opened_chests = save_data.get("opened_chests", [])
+
+        # Spawn monsters and chests (will filter out killed/opened ones)
+        self._spawn_monsters()
+        self._spawn_chests()
+
+        # Load ground items for current map
+        current_map_id = self.dungeon_manager.current_map_id
+        self.ground_items = []
+        for gi_data in save_data.get("ground_items", []):
+            if gi_data["map_id"] == current_map_id:
+                item = SaveGame.deserialize_item(gi_data["item"])
+                ground_item = GroundItem(item, gi_data["grid_x"], gi_data["grid_y"])
+                self.ground_items.append(ground_item)
+
+        # Reset game state
+        self.state = config.STATE_PLAYING
+        self.waiting_for_player_input = True
+        self.message = ""
+        self.message_timer = 0
 
     def run(self):
         """Main game loop."""
