@@ -1,6 +1,5 @@
 """Tests for experience.py - Experience system"""
 
-import pytest
 from experience import ExperienceSystem
 
 

@@ -533,7 +533,9 @@ class HUD:
         else:
             current_xp = warrior.experience.current_xp
             next_level_xp = warrior.experience.get_xp_for_next_level()
-            xp_text = font_xp.render(f"{current_xp}/{next_level_xp} XP", True, self.text_color)
+            xp_text = font_xp.render(
+                f"{current_xp}/{next_level_xp} XP", True, self.text_color
+            )
 
         # Center text on XP bar
         text_rect = xp_text.get_rect(
@@ -541,7 +543,8 @@ class HUD:
         )
         # Add shadow
         shadow_text = font_xp.render(
-            "MAX LEVEL" if warrior.experience.is_max_level()
+            "MAX LEVEL"
+            if warrior.experience.is_max_level()
             else f"{warrior.experience.current_xp}/{warrior.experience.get_xp_for_next_level()} XP",
             True,
             (0, 0, 0),
@@ -645,7 +648,7 @@ class HUD:
                 self.ornate_gold,
                 (spine_x, icon_y + 10 + i * 8),
                 (spine_x, icon_y + 15 + i * 8),
-                2
+                2,
             )
 
         # Draw skill points indicator if available

@@ -153,7 +153,9 @@ class SkillUI:
                 icon_radius = 15
                 icon_x = skill_rect.x + 20
                 icon_y = skill_rect.y + 20
-                pygame.draw.circle(screen, skill.icon_color, (icon_x, icon_y), icon_radius)
+                pygame.draw.circle(
+                    screen, skill.icon_color, (icon_x, icon_y), icon_radius
+                )
 
                 # Draw skill name
                 font_skill = pygame.font.Font(None, 18)
@@ -167,7 +169,11 @@ class SkillUI:
 
                 # Draw skill type
                 font_type = pygame.font.Font(None, 14)
-                type_color = (255, 100, 100) if skill.skill_type == SkillType.ACTIVE else (100, 255, 100)
+                type_color = (
+                    (255, 100, 100)
+                    if skill.skill_type == SkillType.ACTIVE
+                    else (100, 255, 100)
+                )
                 type_text = font_type.render(
                     skill.skill_type.value.upper(), True, type_color
                 )

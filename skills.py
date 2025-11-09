@@ -1,7 +1,7 @@
 """Skills system for warrior abilities and progression."""
 
 import pygame
-from typing import Optional, Callable
+from typing import Optional
 from enum import Enum
 
 
