@@ -386,6 +386,15 @@ class Game:
         # Update camera to follow player
         self.camera.update(self.warrior.grid_x, self.warrior.grid_y)
 
+        # Check if player stepped on return portal (auto-teleport back)
+        if self.return_portal:
+            if (
+                self.warrior.grid_x == self.return_portal.grid_x
+                and self.warrior.grid_y == self.return_portal.grid_y
+            ):
+                self._use_return_portal()
+                return
+
         # Check game over conditions
         if not self.warrior.is_alive:
             self.state = config.STATE_GAME_OVER
@@ -580,10 +589,8 @@ class Game:
             spawn_x, spawn_y = self.world_map.spawn_point
             self.warrior.grid_x, self.warrior.grid_y = spawn_x, spawn_y
 
-            # Create return portal near spawn in town
-            return_portal_x = spawn_x + 2
-            return_portal_y = spawn_y
-            self.return_portal = Portal(return_portal_x, return_portal_y, True)
+            # Create return portal at spawn location (player spawns on the portal)
+            self.return_portal = Portal(spawn_x, spawn_y, True)
 
             # Stay in playing state (on town map)
             self.state = config.STATE_PLAYING
