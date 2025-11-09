@@ -182,8 +182,8 @@ class ShopUI:
     ):
         """Draw list of items available for purchase (AC1)."""
         self.item_rects = []
-        item_height = 70
-        list_height = 250
+        item_height = 65
+        list_height = 310
         mouse_pos = pygame.mouse.get_pos()
 
         # Get available items
@@ -247,8 +247,8 @@ class ShopUI:
     ):
         """Draw list of items player can sell (AC6)."""
         self.item_rects = []
-        item_height = 70
-        list_height = 250
+        item_height = 65
+        list_height = 310
         mouse_pos = pygame.mouse.get_pos()
 
         # Get all player items
