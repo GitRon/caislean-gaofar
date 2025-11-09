@@ -1,4 +1,4 @@
-"""Entry point for the Warrior vs Monster game."""
+"""Entry point for the Caislean Gaofar game."""
 
 from game import Game
 

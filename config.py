@@ -31,7 +31,7 @@ def resource_path(relative_path):
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
-TITLE = "Warrior vs Monster"
+TITLE = "Caislean Gaofar"
 
 # HUD layout settings
 HUD_WIDTH = 200

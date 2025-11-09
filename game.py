@@ -75,8 +75,8 @@ class Game:
         self.hud = HUD()
 
         # Initialize shop (located at specific position on town map)
-        # Will be loaded properly when creating town map
-        self.shop = Shop(grid_x=8, grid_y=6)  # Position in town
+        # Position matches 'S' in town.json
+        self.shop = Shop(grid_x=4, grid_y=3)  # Position in town
         self.shop_ui = ShopUI()
 
         # Turn-based state
