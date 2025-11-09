@@ -100,6 +100,9 @@ class HUD:
         # Draw defense panel
         self._draw_defense_panel(screen, warrior)
 
+        # Draw XP panel (below defense)
+        self._draw_xp_panel(screen, warrior)
+
         # Draw inventory panel
         self._draw_inventory_panel(screen)
 
@@ -417,6 +420,81 @@ class HUD:
         stat_text = font_stat.render(f"{defense_value}", True, self.text_color)
         screen.blit(stat_text, (panel_x + 60, panel_y + 26))
 
+    def _draw_xp_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the experience/level panel with progress bar.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below defense, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 70
+        panel_x = self.x + 10
+        panel_y = self.y + 390
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw title with level
+        font_title = pygame.font.Font(None, 24)
+        level_text = font_title.render(
+            f"Level {warrior.experience.current_level}", True, self.ornate_gold
+        )
+        screen.blit(level_text, (panel_x + 10, panel_y + 8))
+
+        # XP bar dimensions
+        bar_width = panel_width - 20
+        bar_height = 20
+        bar_x = panel_x + 10
+        bar_y = panel_y + 35
+
+        # Calculate XP progress
+        xp_progress = warrior.experience.get_xp_progress()
+
+        # Draw XP bar background
+        bar_bg_rect = pygame.Rect(bar_x, bar_y, bar_width, bar_height)
+        pygame.draw.rect(screen, self.wood_border, bar_bg_rect)
+
+        # Draw XP bar fill
+        if xp_progress > 0:
+            fill_width = int(bar_width * xp_progress)
+            bar_fill_rect = pygame.Rect(bar_x, bar_y, fill_width, bar_height)
+            # Gold/yellow color for XP bar
+            pygame.draw.rect(screen, self.ornate_gold, bar_fill_rect)
+
+        # Draw XP bar border
+        pygame.draw.rect(screen, self.ornate_gold, bar_bg_rect, 2)
+
+        # Draw XP text
+        font_xp = pygame.font.Font(None, 18)
+        if warrior.experience.is_max_level():
+            xp_text = font_xp.render("MAX LEVEL", True, self.text_color)
+        else:
+            current_xp = warrior.experience.current_xp
+            next_level_xp = warrior.experience.get_xp_for_next_level()
+            xp_text = font_xp.render(f"{current_xp}/{next_level_xp} XP", True, self.text_color)
+
+        # Center text on XP bar
+        text_rect = xp_text.get_rect(
+            center=(bar_x + bar_width // 2, bar_y + bar_height // 2)
+        )
+        # Add shadow
+        shadow_text = font_xp.render(
+            "MAX LEVEL" if warrior.experience.is_max_level()
+            else f"{warrior.experience.current_xp}/{warrior.experience.get_xp_for_next_level()} XP",
+            True,
+            (0, 0, 0),
+        )
+        shadow_rect = text_rect.copy()
+        shadow_rect.x += 1
+        shadow_rect.y += 1
+        screen.blit(shadow_text, shadow_rect)
+        screen.blit(xp_text, text_rect)
+
     def _draw_inventory_panel(self, screen: pygame.Surface):
         """
         Draw the inventory panel with icon and hotkey hint.
@@ -424,11 +502,11 @@ class HUD:
         Args:
             screen: Pygame surface to draw on
         """
-        # Panel dimensions and position (below defense, relative to HUD)
+        # Panel dimensions and position (below XP, relative to HUD)
         panel_width = self.width - 20
         panel_height = 70
         panel_x = self.x + 10
-        panel_y = self.y + 390
+        panel_y = self.y + 470
 
         # Create panel background
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)

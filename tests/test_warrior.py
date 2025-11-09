@@ -87,7 +87,8 @@ class TestWarrior:
         result = warrior.attack(target)
 
         # Assert
-        assert result is True
+        assert result["success"] is True
+        assert result["damage"] == config.WARRIOR_ATTACK_DAMAGE
         assert target.health == 100 - config.WARRIOR_ATTACK_DAMAGE
         assert warrior.turns_since_last_attack == 0
 
@@ -104,7 +105,8 @@ class TestWarrior:
         result = warrior.attack(target)
 
         # Assert
-        assert result is True
+        assert result["success"] is True
+        assert result["damage"] == config.WARRIOR_ATTACK_DAMAGE + 10
         assert target.health == 100 - (config.WARRIOR_ATTACK_DAMAGE + 10)
 
     def test_attack_fails_when_cooldown_not_ready(self):
@@ -118,7 +120,7 @@ class TestWarrior:
         result = warrior.attack(target)
 
         # Assert
-        assert result is False
+        assert result["success"] is False
         assert target.health == 100
 
     def test_queue_movement(self):
@@ -176,7 +178,7 @@ class TestWarrior:
         result = warrior.execute_turn()
 
         # Assert
-        assert result is False
+        assert result["success"] is False
 
     def test_execute_turn_move_action(self):
         """Test execute_turn with move action"""
@@ -188,7 +190,7 @@ class TestWarrior:
         result = warrior.execute_turn()
 
         # Assert
-        assert result is True
+        assert result["success"] is True
         assert warrior.grid_x == 6
         assert warrior.grid_y == 5
         assert warrior.pending_action is None
@@ -203,7 +205,7 @@ class TestWarrior:
         result = warrior.execute_turn()
 
         # Assert
-        assert result is True
+        assert result["success"] is True
         assert warrior.grid_x == 4
         assert warrior.grid_y == 4
         assert warrior.pending_action is None
@@ -220,7 +222,7 @@ class TestWarrior:
         result = warrior.execute_turn(target)
 
         # Assert
-        assert result is True
+        assert result["success"] is True
         assert target.health < 100
         assert warrior.pending_action is None
 
@@ -236,7 +238,7 @@ class TestWarrior:
         result = warrior.execute_turn(target)
 
         # Assert
-        assert result is True
+        assert result["success"] is True
         assert target.health < 100
         assert warrior.pending_action is None
 
@@ -252,7 +254,7 @@ class TestWarrior:
         result = warrior.execute_turn(target)
 
         # Assert
-        assert result is False
+        assert result["success"] is False
         assert target.health == 100
         assert warrior.pending_action is None
 
@@ -266,7 +268,7 @@ class TestWarrior:
         result = warrior.execute_turn()
 
         # Assert
-        assert result is False
+        assert result["success"] is False
         assert warrior.pending_action is None
 
     def test_execute_turn_attack_cooldown_not_ready(self):
@@ -281,7 +283,7 @@ class TestWarrior:
         result = warrior.execute_turn(target)
 
         # Assert
-        assert result is False
+        assert result["success"] is False
         assert target.health == 100
         assert warrior.pending_action is None
 
@@ -340,7 +342,7 @@ class TestWarrior:
         result = warrior.execute_turn()
 
         # Assert
-        assert result is False
+        assert result["success"] is False
 
     def test_use_health_potion_success(self):
         """Test using health potion successfully restores health"""

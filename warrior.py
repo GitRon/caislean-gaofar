@@ -4,6 +4,8 @@ import pygame
 from entity import Entity
 from inventory import Inventory
 from item import ItemType
+from experience import ExperienceSystem
+from skills import SkillManager, SkillType
 import config
 
 
@@ -26,10 +28,62 @@ class Warrior(Entity):
         self.base_attack_damage = config.WARRIOR_ATTACK_DAMAGE
         self.pending_action = None  # Store pending action for this turn
         self.gold = 0  # Track gold as separate currency
+        self.experience = ExperienceSystem()  # Experience and leveling system
+        self.skills = SkillManager()  # Skill management
 
     def get_effective_attack_damage(self) -> int:
-        """Get total attack damage including inventory bonuses."""
-        return self.base_attack_damage + self.inventory.get_total_attack_bonus()
+        """Get total attack damage including inventory and skill bonuses."""
+        base_damage = self.base_attack_damage + self.inventory.get_total_attack_bonus()
+
+        # Apply Berserker Rage passive (Tier 4): +25% attack when below 50% health
+        if self.skills.has_passive_skill("berserker_rage"):
+            if self.health < self.max_health * 0.5:
+                base_damage = int(base_damage * 1.25)
+
+        return base_damage
+
+    def get_crit_chance(self) -> float:
+        """
+        Get critical hit chance.
+
+        Returns:
+            Crit chance from 0.0 to 1.0
+        """
+        crit_chance = 0.0
+
+        # Battle Hardened passive (Tier 1): +10% crit when health > 75%
+        if self.skills.has_passive_skill("battle_hardened"):
+            if self.health > self.max_health * 0.75:
+                crit_chance += 0.10
+
+        return crit_chance
+
+    def get_damage_reduction(self) -> float:
+        """
+        Get damage reduction percentage.
+
+        Returns:
+            Damage reduction from 0.0 to 1.0
+        """
+        reduction = 0.0
+
+        # Iron Skin passive (Tier 2): 10% damage reduction
+        if self.skills.has_passive_skill("iron_skin"):
+            reduction += 0.10
+
+        return min(reduction, 0.75)  # Cap at 75% reduction
+
+    def gain_experience(self, xp_amount: int) -> bool:
+        """
+        Gain experience points.
+
+        Args:
+            xp_amount: Amount of XP to gain
+
+        Returns:
+            True if leveled up, False otherwise
+        """
+        return self.experience.add_xp(xp_amount)
 
     def count_health_potions(self) -> int:
         """
@@ -99,20 +153,109 @@ class Warrior(Entity):
 
         return False
 
-    def attack(self, target: "Entity") -> bool:
+    def take_damage(self, damage: int):
+        """
+        Take damage with skill-based modifications.
+
+        Args:
+            damage: Incoming damage amount
+        """
+        # Apply damage reduction from passives
+        reduction = self.get_damage_reduction()
+        actual_damage = int(damage * (1.0 - reduction))
+
+        # Call parent take_damage
+        super().take_damage(actual_damage)
+
+        # Check for Last Stand passive (Tier 5)
+        if self.skills.has_passive_skill("last_stand") and not self.skills.last_stand_used:
+            if self.health > 0 and self.health <= self.max_health * 0.2:
+                # Grant emergency shield (30% max HP)
+                shield_amount = int(self.max_health * 0.3)
+                self.health = min(self.max_health, self.health + shield_amount)
+                self.skills.last_stand_used = True
+
+    def attack(self, target: "Entity", use_skill: bool = False) -> dict:
         """
         Attempt to attack a target with effective damage.
 
-        Returns:
-            True if attack was successful, False otherwise
-        """
-        if not self.can_attack():
-            return False
+        Args:
+            target: Target entity
+            use_skill: If True, use active skill instead of basic attack
 
-        effective_damage = self.get_effective_attack_damage()
-        target.take_damage(effective_damage)
+        Returns:
+            Dictionary with attack results:
+            - success: bool - if attack occurred
+            - damage: int - damage dealt
+            - crit: bool - if it was a critical hit
+            - skill_used: str or None - name of skill used
+            - healed: int - amount healed (vampiric strikes)
+        """
+        result = {
+            "success": False,
+            "damage": 0,
+            "crit": False,
+            "skill_used": None,
+            "healed": 0,
+        }
+
+        if not self.can_attack():
+            return result
+
+        # Determine if using a skill
+        active_skill = None
+        damage_multiplier = 1.0
+
+        if use_skill and self.skills.active_skill:
+            active_skill = self.skills.get_active_skill()
+            if active_skill and active_skill.can_use():
+                result["skill_used"] = active_skill.name
+                active_skill.use()
+
+                # Apply skill damage multipliers
+                if active_skill.name == "Power Strike":
+                    damage_multiplier = 1.5
+                elif active_skill.name == "Shield Bash":
+                    damage_multiplier = 0.75
+                    # TODO: Apply stun effect to target
+                elif active_skill.name == "Whirlwind":
+                    damage_multiplier = 1.0
+                    # TODO: Hit all adjacent enemies
+                elif active_skill.name == "Cleave":
+                    damage_multiplier = 2.0
+                    # TODO: Extended range
+                elif active_skill.name == "Earthsplitter":
+                    damage_multiplier = 2.5
+                    # TODO: AOE shockwave
+            else:
+                # Skill on cooldown, use basic attack
+                use_skill = False
+
+        # Calculate base damage
+        base_damage = self.get_effective_attack_damage()
+        damage = int(base_damage * damage_multiplier)
+
+        # Check for critical hit
+        import random
+
+        crit_chance = self.get_crit_chance()
+        if random.random() < crit_chance:
+            damage = int(damage * 1.5)  # Crits deal 150% damage
+            result["crit"] = True
+
+        # Deal damage
+        target.take_damage(damage)
+        result["damage"] = damage
+        result["success"] = True
+
+        # Vampiric Strikes passive (Tier 3): Heal for 15% of damage dealt
+        if self.skills.has_passive_skill("vampiric_strikes"):
+            heal_amount = int(damage * 0.15)
+            self.health = min(self.max_health, self.health + heal_amount)
+            result["healed"] = heal_amount
+
         self.turns_since_last_attack = 0
-        return True
+        return result
 
     def queue_movement(self, dx: int, dy: int):
         """
@@ -128,37 +271,39 @@ class Warrior(Entity):
         """Queue an attack action for the next turn."""
         self.pending_action = ("attack",)
 
-    def execute_turn(self, target: "Entity" = None, world_map=None) -> bool:
+    def execute_turn(self, target: "Entity" = None, world_map=None, use_skill: bool = False) -> dict:
         """
         Execute the queued action for this turn.
 
         Args:
             target: Target entity for attack actions
             world_map: Optional WorldMap object for movement validation
+            use_skill: If True, use active skill for attack
 
         Returns:
-            True if an action was executed, False otherwise
+            Dictionary with execution results (same as attack method for attacks,
+            or {'success': bool} for other actions)
         """
         if self.pending_action is None:
-            return False
+            return {"success": False}
 
         action_type = self.pending_action[0]
 
         if action_type == "move":
             _, dx, dy = self.pending_action
-            self.move(dx, dy, world_map)
+            success = self.move(dx, dy, world_map)
             self.pending_action = None
-            return True
+            return {"success": success}
         elif action_type == "attack":
             # Warrior attacks in melee range (1 tile)
             if target and self.grid_distance_to(target) <= 1:
-                success = self.attack(target)
+                result = self.attack(target, use_skill)
                 self.pending_action = None
-                return success
+                return result
             self.pending_action = None
-            return False
+            return {"success": False}
 
-        return False
+        return {"success": False}
 
     def draw(self, screen: pygame.Surface):
         """Draw the warrior as a human player character."""

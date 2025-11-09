@@ -9,6 +9,7 @@ from combat import CombatSystem
 from inventory_ui import InventoryUI
 from shop import Shop
 from shop_ui import ShopUI
+from skill_ui import SkillUI
 from item import Item, ItemType
 from camera import Camera
 from chest import Chest
@@ -68,6 +69,7 @@ class Game:
 
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
+        self.skill_ui = SkillUI()
         self.hud = HUD()
 
         # Initialize shop (AC11: located at specific position - town area)
@@ -303,6 +305,16 @@ class Game:
                     else:
                         # AC12: Exit shop without penalty
                         self.state = config.STATE_PLAYING
+                # Handle skill UI toggle
+                elif event.key == pygame.K_k and self.state in [
+                    config.STATE_PLAYING,
+                    config.STATE_SKILLS,
+                ]:
+                    # Toggle skills UI
+                    if self.state == config.STATE_PLAYING:
+                        self.state = config.STATE_SKILLS
+                    else:
+                        self.state = config.STATE_PLAYING
                 # Handle pickup (instant, doesn't consume a turn)
                 elif event.key == pygame.K_g and self.state == config.STATE_PLAYING:
                     self.pickup_item_at_position(
@@ -351,6 +363,14 @@ class Game:
             # Handle shop input when shop is open
             if self.state == config.STATE_SHOP:
                 self.shop_ui.handle_input(event, self.shop, self.warrior)
+
+            # Handle skill UI input when skills screen is open
+            if self.state == config.STATE_SKILLS:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left click - learn skill
+                        self.skill_ui.handle_click(event.pos, self.warrior, False)
+                    elif event.button == 3:  # Right click - set active
+                        self.skill_ui.handle_click(event.pos, self.warrior, True)
 
     def restart(self):
         """Restart the game."""
@@ -575,17 +595,24 @@ class Game:
                     }
                 )
 
+                # Award experience points
+                xp_gained = monster.xp_value
+                leveled_up = self.warrior.gain_experience(xp_gained)
+
+                # Show level up message if applicable
+                if leveled_up:
+                    self._show_message(
+                        f"Level Up! Now level {self.warrior.experience.current_level}! (+{xp_gained} XP)"
+                    )
+                else:
+                    self._show_message(f"Gained {xp_gained} XP!")
+
                 # Use loot_table system to generate loot
                 loot_item = get_loot_for_monster(monster.monster_type)
 
                 if loot_item:
                     # Create ground item at monster location
                     self.drop_item(loot_item, monster.grid_x, monster.grid_y)
-
-                    # Show message
-                    self._show_message(
-                        f"The {monster.monster_type.replace('_', ' ')} drops a {loot_item.name}!"
-                    )
 
                 # Remove dead monster from list so loot only drops once
                 self.monsters.remove(monster)
@@ -681,6 +708,24 @@ class Game:
 
             # Draw shop overlay on top
             self.shop_ui.draw(self.screen, self.shop, self.warrior)
+
+        elif self.state == config.STATE_SKILLS:
+            # Draw game world behind
+            self.screen.fill(config.BLACK)
+            self.camera.set_viewport(
+                0,
+                0,
+                self.camera.viewport_width,
+                self.camera.viewport_height,
+            )
+            self._draw_world_objects_with_camera()
+            self._draw_entities_with_camera()
+
+            # Draw HUD (player stats, potions, gold)
+            self.hud.draw(self.screen, self.warrior)
+
+            # Draw skills UI overlay on top
+            self.skill_ui.draw(self.screen, self.warrior)
 
         elif self.state == config.STATE_GAME_OVER:
             self.draw_game_over_screen("GAME OVER!", config.RED)

@@ -82,6 +82,7 @@ STATE_PLAYING = "playing"
 STATE_GAME_OVER = "game_over"
 STATE_INVENTORY = "inventory"
 STATE_SHOP = "shop"
+STATE_SKILLS = "skills"
 
 # Shop settings
 SHOP_BACKGROUND_COLOR = (40, 40, 60)  # Dark blue-gray
