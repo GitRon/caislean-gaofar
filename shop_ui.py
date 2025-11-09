@@ -42,7 +42,7 @@ class ShopUI:
 
         # Message state
         self.message = ""
-        self.message_timer = 0
+        self.message_start_time = 0
         self.message_duration = 3000  # milliseconds
         self.message_color = config.WHITE
 
@@ -59,10 +59,11 @@ class ShopUI:
         screen_height = screen.get_height()
 
         # Update message timer
-        if self.message_timer > 0:
-            self.message_timer -= pygame.time.get_time()
-            if self.message_timer <= 0:
+        if self.message and self.message_start_time > 0:
+            elapsed = pygame.time.get_ticks() - self.message_start_time
+            if elapsed >= self.message_duration:
                 self.message = ""
+                self.message_start_time = 0
 
         # Center the panel
         panel_x = (screen_width - self.panel_width) // 2
@@ -698,4 +699,4 @@ class ShopUI:
     def _show_message(self, message: str):
         """Show a message to the player."""
         self.message = message
-        self.message_timer = self.message_duration
+        self.message_start_time = pygame.time.get_ticks()
