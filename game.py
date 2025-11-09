@@ -7,6 +7,8 @@ from warrior import Warrior
 from monsters import ALL_MONSTER_CLASSES
 from combat import CombatSystem
 from inventory_ui import InventoryUI
+from shop import Shop
+from shop_ui import ShopUI
 from item import Item, ItemType
 from camera import Camera
 from chest import Chest
@@ -38,16 +40,17 @@ class Game:
 
         # Initialize dungeon manager
         if map_file is None:
-            map_file = os.path.join("maps", "overworld.json")
+            map_file = config.resource_path(os.path.join("maps", "overworld.json"))
         self.dungeon_manager = DungeonManager(map_file)
         self.dungeon_manager.load_world_map()
 
         # Load dungeons
         self.dungeon_manager.load_dungeon(
-            "dark_cave", os.path.join("maps", "dark_cave.json")
+            "dark_cave", config.resource_path(os.path.join("maps", "dark_cave.json"))
         )
         self.dungeon_manager.load_dungeon(
-            "ancient_castle", os.path.join("maps", "ancient_castle.json")
+            "ancient_castle",
+            config.resource_path(os.path.join("maps", "ancient_castle.json")),
         )
 
         # Get current map (initially world map)
@@ -66,6 +69,12 @@ class Game:
         self.combat_system = CombatSystem()
         self.inventory_ui = InventoryUI()
         self.hud = HUD()
+
+        # Initialize shop (AC11: located at specific position - town area)
+        # Shop is located near spawn point
+        spawn_x, spawn_y = self.world_map.spawn_point
+        self.shop = Shop(spawn_x + 3, spawn_y)  # 3 tiles to the right of spawn
+        self.shop_ui = ShopUI()
 
         # Turn-based state
         self.waiting_for_player_input = True
@@ -279,6 +288,21 @@ class Game:
                         self.state = config.STATE_INVENTORY
                     else:
                         self.state = config.STATE_PLAYING
+                # Handle shop toggle (AC11, AC12)
+                elif event.key == pygame.K_s and self.state in [
+                    config.STATE_PLAYING,
+                    config.STATE_SHOP,
+                ]:
+                    # Toggle shop (only if near shop location)
+                    if self.state == config.STATE_PLAYING:
+                        # Check if player is near shop
+                        if self._is_near_shop():
+                            self.state = config.STATE_SHOP
+                        else:
+                            self._show_message("No shop nearby!")
+                    else:
+                        # AC12: Exit shop without penalty
+                        self.state = config.STATE_PLAYING
                 # Handle pickup (instant, doesn't consume a turn)
                 elif event.key == pygame.K_g and self.state == config.STATE_PLAYING:
                     self.pickup_item_at_position(
@@ -323,6 +347,10 @@ class Game:
             # Handle inventory input when inventory is open
             if self.state == config.STATE_INVENTORY:
                 self.inventory_ui.handle_input(event, self.warrior.inventory, self)
+
+            # Handle shop input when shop is open
+            if self.state == config.STATE_SHOP:
+                self.shop_ui.handle_input(event, self.shop, self.warrior)
 
     def restart(self):
         """Restart the game."""
@@ -567,6 +595,18 @@ class Game:
         self.message = message
         self.message_timer = self.message_duration
 
+    def _is_near_shop(self) -> bool:
+        """
+        Check if player is near the shop (AC11).
+
+        Returns:
+            True if player is within 1 tile of shop
+        """
+        distance = abs(self.warrior.grid_x - self.shop.grid_x) + abs(
+            self.warrior.grid_y - self.shop.grid_y
+        )
+        return distance <= 1
+
     def draw(self):
         """Draw all game objects."""
         self.screen.fill(config.BLACK)
@@ -624,6 +664,24 @@ class Game:
             # Draw inventory overlay on top
             self.inventory_ui.draw(self.screen, self.warrior.inventory)
 
+        elif self.state == config.STATE_SHOP:
+            # Draw the game in the background
+            self.world_map.draw(
+                self.screen,
+                self.camera.x,
+                self.camera.y,
+                self.camera.viewport_width,
+                self.camera.viewport_height,
+            )
+            self._draw_world_objects_with_camera()
+            self._draw_entities_with_camera()
+
+            # Draw HUD (player stats, potions, gold)
+            self.hud.draw(self.screen, self.warrior)
+
+            # Draw shop overlay on top
+            self.shop_ui.draw(self.screen, self.shop, self.warrior)
+
         elif self.state == config.STATE_GAME_OVER:
             self.draw_game_over_screen("GAME OVER!", config.RED)
 
@@ -642,7 +700,14 @@ class Game:
         return nearest_monster
 
     def _draw_world_objects_with_camera(self):
-        """Draw chests and ground items with camera offset applied."""
+        """Draw chests, ground items, and shop with camera offset applied."""
+        # Draw shop building
+        if self.camera.is_visible(self.shop.grid_x, self.shop.grid_y):
+            screen_x, screen_y = self.camera.world_to_screen(
+                self.shop.grid_x, self.shop.grid_y
+            )
+            self._draw_shop_building(screen_x, screen_y)
+
         # Draw chests
         for chest in self.chests:
             if self.camera.is_visible(chest.grid_x, chest.grid_y):
@@ -666,6 +731,78 @@ class Game:
                 ground_item.draw(self.screen)
                 ground_item.grid_x = original_x
                 ground_item.grid_y = original_y
+
+    def _draw_shop_building(self, grid_x: int, grid_y: int):
+        """Draw a shop building at the given grid position."""
+        # Convert grid coordinates to pixel coordinates
+        x = grid_x * config.TILE_SIZE
+        y = grid_y * config.TILE_SIZE
+        size = config.TILE_SIZE
+
+        # Draw building (brown/tan house)
+        building_color = (139, 90, 43)  # Brown
+        roof_color = (160, 82, 45)  # Saddle brown
+        door_color = (101, 67, 33)  # Dark brown
+        window_color = (135, 206, 235)  # Sky blue
+
+        # Main building
+        pygame.draw.rect(
+            self.screen, building_color, (x, y + size // 3, size, size * 2 // 3)
+        )
+
+        # Roof (triangle)
+        roof_points = [
+            (x, y + size // 3),  # Left corner
+            (x + size // 2, y),  # Top
+            (x + size, y + size // 3),  # Right corner
+        ]
+        pygame.draw.polygon(self.screen, roof_color, roof_points)
+
+        # Door
+        door_width = size // 4
+        door_height = size // 3
+        door_x = x + size // 2 - door_width // 2
+        door_y = y + size - door_height
+        pygame.draw.rect(
+            self.screen, door_color, (door_x, door_y, door_width, door_height)
+        )
+
+        # Windows
+        window_size = size // 6
+        # Left window
+        pygame.draw.rect(
+            self.screen,
+            window_color,
+            (x + size // 6, y + size // 2, window_size, window_size),
+        )
+        # Right window
+        pygame.draw.rect(
+            self.screen,
+            window_color,
+            (x + size * 2 // 3, y + size // 2, window_size, window_size),
+        )
+
+        # Sign above door (gold coin symbol)
+        sign_size = size // 5
+        sign_x = x + size // 2
+        sign_y = y + size // 2
+        pygame.draw.circle(self.screen, config.GOLD, (sign_x, sign_y), sign_size)
+        pygame.draw.circle(
+            self.screen, building_color, (sign_x, sign_y), sign_size - 2, 2
+        )
+
+        # "SHOP" text indicator when player is near
+        if self._is_near_shop():
+            font = pygame.font.Font(None, 20)
+            text = font.render("Press S", True, config.WHITE)
+            text_x = x + size // 2 - text.get_width() // 2
+            text_y = y - 20
+            # Draw background for text
+            bg_rect = pygame.Rect(
+                text_x - 3, text_y - 3, text.get_width() + 6, text.get_height() + 6
+            )
+            pygame.draw.rect(self.screen, (0, 0, 0, 200), bg_rect)
+            self.screen.blit(text, (text_x, text_y))
 
     def _draw_entities_with_camera(self):
         """Draw all entities with camera offset applied."""
@@ -755,19 +892,35 @@ class Game:
             item_type=ItemType.WEAPON,
             description="A basic short sword",
             attack_bonus=3,
+            gold_value=20,
         )
         woolen_tunic = Item(
             name="Woolen Tunic",
             item_type=ItemType.ARMOR,
             description="A simple woolen tunic",
             defense_bonus=1,
+            gold_value=15,
+        )
+        health_potion = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
+        )
+        health_potion = Item(
+            name="Health Potion",
+            item_type=ItemType.CONSUMABLE,
+            description="Restores 30 HP",
+            health_bonus=30,
         )
 
         # Equip starting items (they'll auto-equip to appropriate slots)
         self.warrior.inventory.add_item(short_sword)
         self.warrior.inventory.add_item(woolen_tunic)
+        self.warrior.inventory.add_item(health_potion)
 
-        # Player starts with 0 gold (default)
+        # Player starts with some gold to buy items
+        self.warrior.add_gold(100)
 
     def save_game(self, filename: str = "quicksave") -> bool:
         """
