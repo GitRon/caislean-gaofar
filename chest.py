@@ -132,7 +132,6 @@ class Chest:
                 health_bonus=100,
             ),
             # Misc
-            Item("Gold Coin", ItemType.MISC, "A shiny coin"),
             Item("Ancient Key", ItemType.MISC, "Opens something?"),
             Item("Magic Scroll", ItemType.MISC, "Mysterious writings"),
         ]
