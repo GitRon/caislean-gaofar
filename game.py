@@ -191,6 +191,10 @@ class Game:
         # Clear existing chests
         self.chests = []
 
+        # Don't spawn chests in town
+        if self.dungeon_manager.current_map_id == "town":
+            return
+
         # Try to spawn chests from map data
         chest_spawns = self.world_map.get_entity_spawns("chests")
         if chest_spawns:
@@ -585,6 +589,9 @@ class Game:
             self.world_map = self.dungeon_manager.get_current_map()
             self.camera = Camera(self.world_map.width, self.world_map.height)
 
+            # Clear chests when entering town
+            self.chests = []
+
             # Teleport to town spawn point
             spawn_x, spawn_y = self.world_map.spawn_point
             self.warrior.grid_x, self.warrior.grid_y = spawn_x, spawn_y
@@ -616,6 +623,10 @@ class Game:
             self.world_map = self.dungeon_manager.get_current_map()
             self.camera = Camera(self.world_map.width, self.world_map.height)
 
+            # Respawn chests when returning from town
+            if map_id != "town":
+                self._spawn_chests()
+
         # Return to saved position
         self.warrior.grid_x = grid_x
         self.warrior.grid_y = grid_y
@@ -646,6 +657,34 @@ class Game:
         )
         return distance <= 1
 
+    def _draw_shop_building(self):
+        """Draw the shop building on the town map."""
+        if not self.camera.is_visible(self.shop.grid_x, self.shop.grid_y):
+            return
+
+        # Convert shop grid position to screen position
+        screen_x, screen_y = self.camera.world_to_screen(
+            self.shop.grid_x, self.shop.grid_y
+        )
+
+        # Draw shop sign/marker
+        shop_rect = pygame.Rect(
+            screen_x * config.TILE_SIZE,
+            screen_y * config.TILE_SIZE,
+            config.TILE_SIZE,
+            config.TILE_SIZE,
+        )
+
+        # Draw shop with a distinct appearance
+        pygame.draw.rect(self.screen, (200, 150, 50), shop_rect)
+        pygame.draw.rect(self.screen, (255, 215, 0), shop_rect, 3)
+
+        # Draw 'SHOP' text
+        font = pygame.font.Font(None, 24)
+        text = font.render("SHOP", True, config.BLACK)
+        text_rect = text.get_rect(center=shop_rect.center)
+        self.screen.blit(text, text_rect)
+
     def draw(self):
         """Draw all game objects."""
         self.screen.fill(config.BLACK)
@@ -663,8 +702,8 @@ class Game:
             # Draw world objects (chests and ground items) with camera offset
             self._draw_world_objects_with_camera()
 
-            # Draw active portal if present
-            if self.active_portal:
+            # Draw active portal if present (only when NOT in town)
+            if self.active_portal and self.dungeon_manager.current_map_id != "town":
                 if self.camera.is_visible(
                     self.active_portal.grid_x, self.active_portal.grid_y
                 ):
@@ -679,8 +718,8 @@ class Game:
                     self.active_portal.grid_x = original_x
                     self.active_portal.grid_y = original_y
 
-            # Draw return portal if present (on town map)
-            if self.return_portal:
+            # Draw return portal if present (only when IN town)
+            if self.return_portal and self.dungeon_manager.current_map_id == "town":
                 if self.camera.is_visible(
                     self.return_portal.grid_x, self.return_portal.grid_y
                 ):
@@ -694,6 +733,10 @@ class Game:
                     self.return_portal.draw(self.screen)
                     self.return_portal.grid_x = original_x
                     self.return_portal.grid_y = original_y
+
+            # Draw shop building if in town
+            if self.dungeon_manager.current_map_id == "town":
+                self._draw_shop_building()
 
             # Draw entities with camera offset
             self._draw_entities_with_camera()
