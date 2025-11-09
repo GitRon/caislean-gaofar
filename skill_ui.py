@@ -11,7 +11,7 @@ class SkillUI:
     def __init__(self):
         """Initialize the skill UI."""
         self.panel_width = 500
-        self.panel_height = 450
+        self.panel_height = 520  # Increased from 450 to prevent overlap
         self.panel_x = (config.SCREEN_WIDTH - self.panel_width) // 2
         self.panel_y = (config.SCREEN_HEIGHT - self.panel_height) // 2
 
@@ -68,8 +68,8 @@ class SkillUI:
         # Draw skills organized by tier
         self._draw_skill_tree(screen, warrior)
 
-        # Draw instructions
-        font_hint = pygame.font.Font(None, 20)
+        # Draw instructions at the very bottom
+        font_hint = pygame.font.Font(None, 18)
         hint_text = font_hint.render(
             "Press C to close | Click to learn skill | Right-click to set active",
             True,
@@ -77,7 +77,7 @@ class SkillUI:
         )
         screen.blit(
             hint_text,
-            (self.panel_x + 20, self.panel_y + self.panel_height - 30),
+            (self.panel_x + 20, self.panel_y + self.panel_height - 25),
         )
 
     def _draw_skill_tree(self, screen: pygame.Surface, warrior):
@@ -197,7 +197,7 @@ class SkillUI:
             screen: Pygame surface to draw on
             skill: The skill to describe
         """
-        details_y = self.panel_y + self.panel_height - 80
+        details_y = self.panel_y + 440  # Position below tier 5 skills
         font_desc = pygame.font.Font(None, 16)
 
         # Draw description (word wrap)
