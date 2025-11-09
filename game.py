@@ -93,6 +93,7 @@ class Game:
         self.return_portal = None  # Portal in shop
         self.portal_return_location = None  # (map_id, grid_x, grid_y)
         self.shop_warrior_position = (6, 5)  # Fixed position in shop
+        self.portal_cooldown = 0  # Prevent instant re-teleportation
 
         # Messages
         self.message = ""
@@ -370,6 +371,10 @@ class Game:
             if self.message_timer <= 0:
                 self.message = ""
 
+        # Update portal cooldown timer
+        if self.portal_cooldown > 0:
+            self.portal_cooldown -= self.clock.get_time()
+
         # Update HUD (always update for animations)
         self.hud.update(self.warrior, dt)
 
@@ -391,7 +396,7 @@ class Game:
         self.camera.update(self.warrior.grid_x, self.warrior.grid_y)
 
         # Check if player stepped on return portal (auto-teleport back)
-        if self.return_portal:
+        if self.return_portal and self.portal_cooldown <= 0:
             if (
                 self.warrior.grid_x == self.return_portal.grid_x
                 and self.warrior.grid_y == self.return_portal.grid_y
@@ -604,12 +609,17 @@ class Game:
             # Stay in playing state (on town map)
             self.state = config.STATE_PLAYING
 
+            # Set cooldown to prevent instant re-teleportation (500ms)
+            self.portal_cooldown = 500
+
             self._show_message("You enter the portal and arrive in town!")
         else:
             if portal_count <= 0:
                 self._show_message("No town portals in inventory!")
             else:
-                self._show_message(f"You have {portal_count} portal(s) but cannot use them here!")
+                self._show_message(
+                    f"You have {portal_count} portal(s) but cannot use them here!"
+                )
 
     def _use_return_portal(self):
         """Use the return portal to go back to saved location."""
@@ -635,6 +645,9 @@ class Game:
 
         # Return to playing state
         self.state = config.STATE_PLAYING
+
+        # Set cooldown to prevent instant re-teleportation (500ms)
+        self.portal_cooldown = 500
 
         # Close both portals
         self._close_portals()
