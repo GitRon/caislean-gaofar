@@ -674,7 +674,7 @@ class Game:
         return distance <= 1
 
     def _draw_shop_building(self):
-        """Draw the shop building on the town map as a nice house."""
+        """Draw the shop building on the town map."""
         if not self.camera.is_visible(self.shop.grid_x, self.shop.grid_y):
             return
 
@@ -683,61 +683,75 @@ class Game:
             self.shop.grid_x, self.shop.grid_y
         )
 
-        pixel_x = screen_x * config.TILE_SIZE
-        pixel_y = screen_y * config.TILE_SIZE
-        tile_size = config.TILE_SIZE
+        # Convert grid coordinates to pixel coordinates
+        x = screen_x * config.TILE_SIZE
+        y = screen_y * config.TILE_SIZE
+        size = config.TILE_SIZE
 
-        # Draw building walls (stone/brick)
-        wall_color = (139, 119, 101)  # Light brown/tan
-        wall_rect = pygame.Rect(
-            pixel_x, pixel_y + tile_size // 3, tile_size, tile_size * 2 // 3
+        # Draw building (brown/tan house)
+        building_color = (139, 90, 43)  # Brown
+        roof_color = (160, 82, 45)  # Saddle brown
+        door_color = (101, 67, 33)  # Dark brown
+        window_color = (135, 206, 235)  # Sky blue
+
+        # Main building
+        pygame.draw.rect(
+            self.screen, building_color, (x, y + size // 3, size, size * 2 // 3)
         )
-        pygame.draw.rect(self.screen, wall_color, wall_rect)
-        pygame.draw.rect(self.screen, (100, 80, 60), wall_rect, 2)  # Dark border
 
-        # Draw triangular roof (red)
-        roof_color = (178, 34, 34)  # Firebrick red
+        # Roof (triangle)
         roof_points = [
-            (pixel_x, pixel_y + tile_size // 3),  # Bottom left
-            (pixel_x + tile_size, pixel_y + tile_size // 3),  # Bottom right
-            (pixel_x + tile_size // 2, pixel_y),  # Top center (peak)
+            (x, y + size // 3),  # Left corner
+            (x + size // 2, y),  # Top
+            (x + size, y + size // 3),  # Right corner
         ]
         pygame.draw.polygon(self.screen, roof_color, roof_points)
-        pygame.draw.polygon(
-            self.screen, (139, 28, 28), roof_points, 2
-        )  # Darker outline
 
-        # Draw door (dark wood)
-        door_width = tile_size // 3
-        door_height = tile_size // 2
-        door_x = pixel_x + (tile_size - door_width) // 2
-        door_y = pixel_y + tile_size - door_height
-        door_rect = pygame.Rect(door_x, door_y, door_width, door_height)
-        pygame.draw.rect(self.screen, (101, 67, 33), door_rect)  # Dark brown
-        pygame.draw.rect(self.screen, (70, 47, 23), door_rect, 1)  # Darker outline
+        # Door
+        door_width = size // 4
+        door_height = size // 3
+        door_x = x + size // 2 - door_width // 2
+        door_y = y + size - door_height
+        pygame.draw.rect(
+            self.screen, door_color, (door_x, door_y, door_width, door_height)
+        )
 
-        # Draw window (light blue glass)
-        window_size = tile_size // 5
-        window_x = pixel_x + tile_size // 6
-        window_y = pixel_y + tile_size // 2
-        window_rect = pygame.Rect(window_x, window_y, window_size, window_size)
-        pygame.draw.rect(self.screen, (173, 216, 230), window_rect)  # Light blue
-        pygame.draw.rect(self.screen, (100, 100, 100), window_rect, 1)  # Gray frame
+        # Windows
+        window_size = size // 6
+        # Left window
+        pygame.draw.rect(
+            self.screen,
+            window_color,
+            (x + size // 6, y + size // 2, window_size, window_size),
+        )
+        # Right window
+        pygame.draw.rect(
+            self.screen,
+            window_color,
+            (x + size * 2 // 3, y + size // 2, window_size, window_size),
+        )
 
-        # Draw shop sign above door (hanging sign)
-        sign_width = door_width + 10
-        sign_height = 12
-        sign_x = pixel_x + (tile_size - sign_width) // 2
-        sign_y = door_y - sign_height - 3
-        sign_rect = pygame.Rect(sign_x, sign_y, sign_width, sign_height)
-        pygame.draw.rect(self.screen, (255, 223, 186), sign_rect)  # Beige/parchment
-        pygame.draw.rect(self.screen, (139, 90, 43), sign_rect, 1)  # Brown border
+        # Sign above door (gold coin symbol)
+        sign_size = size // 5
+        sign_x = x + size // 2
+        sign_y = y + size // 2
+        pygame.draw.circle(self.screen, config.GOLD, (sign_x, sign_y), sign_size)
+        pygame.draw.circle(
+            self.screen, building_color, (sign_x, sign_y), sign_size - 2, 2
+        )
 
-        # Draw 'SHOP' text on sign
-        font = pygame.font.Font(None, 16)
-        text = font.render("SHOP", True, (139, 69, 19))  # Saddle brown
-        text_rect = text.get_rect(center=sign_rect.center)
-        self.screen.blit(text, text_rect)
+        # "Press S" text indicator when player is near
+        if self._is_near_shop():
+            font = pygame.font.Font(None, 20)
+            text = font.render("Press S", True, config.WHITE)
+            text_x = x + size // 2 - text.get_width() // 2
+            text_y = y - 20
+            # Draw background for text
+            bg_rect = pygame.Rect(
+                text_x - 3, text_y - 3, text.get_width() + 6, text.get_height() + 6
+            )
+            pygame.draw.rect(self.screen, config.BLACK, bg_rect)
+            self.screen.blit(text, (text_x, text_y))
 
     def draw(self):
         """Draw all game objects."""
