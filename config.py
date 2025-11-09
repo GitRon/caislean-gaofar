@@ -72,6 +72,7 @@ GAME_GRID_HEIGHT = GAME_AREA_HEIGHT // TILE_SIZE  # 12 tiles
 WARRIOR_SIZE = TILE_SIZE  # Same as tile size
 WARRIOR_SPEED = 1  # Movement in tiles per turn
 WARRIOR_MAX_HEALTH = 100
+WARRIOR_HP_PER_LEVEL = 10  # HP bonus gained per level up
 WARRIOR_ATTACK_DAMAGE = 15
 WARRIOR_ATTACK_COOLDOWN = 1  # turns between attacks
 

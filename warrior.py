@@ -5,7 +5,7 @@ from entity import Entity
 from inventory import Inventory
 from item import ItemType
 from experience import ExperienceSystem
-from skills import SkillManager, SkillType
+from skills import SkillManager
 import config
 
 
@@ -75,7 +75,7 @@ class Warrior(Entity):
 
     def gain_experience(self, xp_amount: int) -> bool:
         """
-        Gain experience points.
+        Gain experience points and apply level up bonuses.
 
         Args:
             xp_amount: Amount of XP to gain
@@ -83,7 +83,20 @@ class Warrior(Entity):
         Returns:
             True if leveled up, False otherwise
         """
-        return self.experience.add_xp(xp_amount)
+        old_level = self.experience.current_level
+        leveled_up = self.experience.add_xp(xp_amount)
+
+        # Apply HP bonus for each level gained
+        if leveled_up:
+            new_level = self.experience.current_level
+            levels_gained = new_level - old_level
+
+            # Increase max health and restore full health
+            hp_bonus = config.WARRIOR_HP_PER_LEVEL * levels_gained
+            self.max_health += hp_bonus
+            self.health = self.max_health  # Restore to full health on level up
+
+        return leveled_up
 
     def count_health_potions(self) -> int:
         """
@@ -207,7 +220,10 @@ class Warrior(Entity):
         super().take_damage(actual_damage)
 
         # Check for Last Stand passive (Tier 5)
-        if self.skills.has_passive_skill("last_stand") and not self.skills.last_stand_used:
+        if (
+            self.skills.has_passive_skill("last_stand")
+            and not self.skills.last_stand_used
+        ):
             if self.health > 0 and self.health <= self.max_health * 0.2:
                 # Grant emergency shield (30% max HP)
                 shield_amount = int(self.max_health * 0.3)
@@ -310,7 +326,9 @@ class Warrior(Entity):
         """Queue an attack action for the next turn."""
         self.pending_action = ("attack",)
 
-    def execute_turn(self, target: "Entity" = None, world_map=None, use_skill: bool = False) -> dict:
+    def execute_turn(
+        self, target: "Entity" = None, world_map=None, use_skill: bool = False
+    ) -> dict:
         """
         Execute the queued action for this turn.
 

@@ -679,3 +679,104 @@ class TestWarrior:
         assert result is True
         assert warrior.count_town_portals() == 1  # Portal should remain
         assert warrior.count_health_potions() == 0  # Potion should be consumed
+
+
+class TestWarriorLevelUpHPBonus:
+    """Tests for HP bonus on level up"""
+
+    def test_gain_experience_increases_max_hp_on_level_up(self):
+        """Test that leveling up increases max HP"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        initial_max_hp = warrior.max_health
+
+        # Act - Gain enough XP to level up to level 2
+        warrior.gain_experience(100)
+
+        # Assert
+        assert warrior.experience.current_level == 2
+        assert warrior.max_health == initial_max_hp + config.WARRIOR_HP_PER_LEVEL
+
+    def test_gain_experience_restores_full_hp_on_level_up(self):
+        """Test that leveling up restores full HP"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.health = 50  # Damage the warrior
+
+        # Act - Gain enough XP to level up
+        warrior.gain_experience(100)
+
+        # Assert
+        assert warrior.health == warrior.max_health
+
+    def test_gain_experience_multiple_levels_applies_correct_hp_bonus(self):
+        """Test that gaining multiple levels applies correct HP bonus"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        initial_max_hp = warrior.max_health
+
+        # Act - Gain enough XP to jump from level 1 to level 5
+        warrior.gain_experience(1000)
+
+        # Assert
+        assert warrior.experience.current_level == 5
+        # Should gain HP for 4 level ups (2, 3, 4, 5)
+        expected_hp = initial_max_hp + (config.WARRIOR_HP_PER_LEVEL * 4)
+        assert warrior.max_health == expected_hp
+        assert warrior.health == warrior.max_health
+
+    def test_gain_experience_no_level_up_no_hp_bonus(self):
+        """Test that gaining XP without leveling up doesn't change HP"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        initial_max_hp = warrior.max_health
+        initial_hp = warrior.health
+
+        # Act - Gain some XP but not enough to level up
+        warrior.gain_experience(50)
+
+        # Assert
+        assert warrior.experience.current_level == 1
+        assert warrior.max_health == initial_max_hp
+        assert warrior.health == initial_hp
+
+    def test_gain_experience_at_max_level_no_hp_bonus(self):
+        """Test that gaining XP at max level doesn't increase HP"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        # Level up to max level
+        warrior.gain_experience(1000)
+        max_level_hp = warrior.max_health
+
+        # Act - Gain more XP at max level
+        warrior.gain_experience(500)
+
+        # Assert
+        assert warrior.experience.current_level == 5
+        assert warrior.max_health == max_level_hp  # No change
+
+    def test_hp_bonus_applies_correctly_per_level(self):
+        """Test that each level up applies exactly WARRIOR_HP_PER_LEVEL bonus"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        initial_max_hp = warrior.max_health
+
+        # Act & Assert - Level up one at a time
+        # Level 1 -> 2
+        warrior.gain_experience(100)
+        assert warrior.max_health == initial_max_hp + config.WARRIOR_HP_PER_LEVEL
+
+        # Level 2 -> 3
+        level_2_hp = warrior.max_health
+        warrior.gain_experience(150)  # 250 total
+        assert warrior.max_health == level_2_hp + config.WARRIOR_HP_PER_LEVEL
+
+        # Level 3 -> 4
+        level_3_hp = warrior.max_health
+        warrior.gain_experience(250)  # 500 total
+        assert warrior.max_health == level_3_hp + config.WARRIOR_HP_PER_LEVEL
+
+        # Level 4 -> 5
+        level_4_hp = warrior.max_health
+        warrior.gain_experience(500)  # 1000 total
+        assert warrior.max_health == level_4_hp + config.WARRIOR_HP_PER_LEVEL
