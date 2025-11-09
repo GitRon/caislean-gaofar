@@ -1,6 +1,5 @@
 """Tests for skills.py - Skills system"""
 
-import pytest
 from unittest.mock import patch
 from skills import Skill, SkillType, SkillManager, WARRIOR_SKILLS
 
@@ -413,24 +412,44 @@ class TestWarriorSkills:
         all_skills = WARRIOR_SKILLS.values()
 
         # Count skills explicitly for tier 1
-        tier1_active = sum(1 for s in all_skills if s.tier == 1 and s.skill_type == SkillType.ACTIVE)
-        tier1_passive = sum(1 for s in all_skills if s.tier == 1 and s.skill_type == SkillType.PASSIVE)
+        tier1_active = sum(
+            1 for s in all_skills if s.tier == 1 and s.skill_type == SkillType.ACTIVE
+        )
+        tier1_passive = sum(
+            1 for s in all_skills if s.tier == 1 and s.skill_type == SkillType.PASSIVE
+        )
 
         # Count skills explicitly for tier 2
-        tier2_active = sum(1 for s in all_skills if s.tier == 2 and s.skill_type == SkillType.ACTIVE)
-        tier2_passive = sum(1 for s in all_skills if s.tier == 2 and s.skill_type == SkillType.PASSIVE)
+        tier2_active = sum(
+            1 for s in all_skills if s.tier == 2 and s.skill_type == SkillType.ACTIVE
+        )
+        tier2_passive = sum(
+            1 for s in all_skills if s.tier == 2 and s.skill_type == SkillType.PASSIVE
+        )
 
         # Count skills explicitly for tier 3
-        tier3_active = sum(1 for s in all_skills if s.tier == 3 and s.skill_type == SkillType.ACTIVE)
-        tier3_passive = sum(1 for s in all_skills if s.tier == 3 and s.skill_type == SkillType.PASSIVE)
+        tier3_active = sum(
+            1 for s in all_skills if s.tier == 3 and s.skill_type == SkillType.ACTIVE
+        )
+        tier3_passive = sum(
+            1 for s in all_skills if s.tier == 3 and s.skill_type == SkillType.PASSIVE
+        )
 
         # Count skills explicitly for tier 4
-        tier4_active = sum(1 for s in all_skills if s.tier == 4 and s.skill_type == SkillType.ACTIVE)
-        tier4_passive = sum(1 for s in all_skills if s.tier == 4 and s.skill_type == SkillType.PASSIVE)
+        tier4_active = sum(
+            1 for s in all_skills if s.tier == 4 and s.skill_type == SkillType.ACTIVE
+        )
+        tier4_passive = sum(
+            1 for s in all_skills if s.tier == 4 and s.skill_type == SkillType.PASSIVE
+        )
 
         # Count skills explicitly for tier 5
-        tier5_active = sum(1 for s in all_skills if s.tier == 5 and s.skill_type == SkillType.ACTIVE)
-        tier5_passive = sum(1 for s in all_skills if s.tier == 5 and s.skill_type == SkillType.PASSIVE)
+        tier5_active = sum(
+            1 for s in all_skills if s.tier == 5 and s.skill_type == SkillType.ACTIVE
+        )
+        tier5_passive = sum(
+            1 for s in all_skills if s.tier == 5 and s.skill_type == SkillType.PASSIVE
+        )
 
         # Assert tier 1
         assert tier1_active == 1, "Tier 1 should have 1 active skill"
@@ -454,16 +473,9 @@ class TestWarriorSkills:
 
     def test_active_skills_have_cooldowns(self):
         """Test that all active skills have cooldowns"""
-        # Get all active skills
-        active_skills = {
-            skill_id: skill
-            for skill_id, skill in WARRIOR_SKILLS.items()
-            if skill.skill_type == SkillType.ACTIVE
-        }
-
-        # Assert each active skill has a cooldown
-        assert active_skills["power_strike"].cooldown > 0
-        assert active_skills["shield_bash"].cooldown > 0
-        assert active_skills["whirlwind"].cooldown > 0
-        assert active_skills["cleave"].cooldown > 0
-        assert active_skills["earthsplitter"].cooldown > 0
+        # Assert each active skill has a cooldown explicitly
+        assert WARRIOR_SKILLS["power_strike"].cooldown > 0
+        assert WARRIOR_SKILLS["shield_bash"].cooldown > 0
+        assert WARRIOR_SKILLS["whirlwind"].cooldown > 0
+        assert WARRIOR_SKILLS["cleave"].cooldown > 0
+        assert WARRIOR_SKILLS["earthsplitter"].cooldown > 0
