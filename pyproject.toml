@@ -47,6 +47,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "raise AssertionError",
     "raise NotImplementedError",
+    "if TYPE_CHECKING:",
 ]
 
 [tool.boa-restrictor]

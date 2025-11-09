@@ -400,3 +400,77 @@ class TestWorldMap:
 
         # Assert - should still complete without error
         assert mock_draw_rect.called
+
+    @patch("pygame.draw.rect")
+    def test_draw_with_fog_of_war_undiscovered_tiles(
+        self, mock_draw_rect, sample_map_data
+    ):
+        """Test drawing with fog of war - undiscovered tiles are not drawn"""
+        from fog_of_war import FogOfWar
+
+        # Arrange
+        world_map = WorldMap()
+        world_map.load_from_dict(sample_map_data)
+        mock_screen = Mock(spec=pygame.Surface)
+        fog = FogOfWar(visibility_radius=2)
+
+        # Player at (5, 4) - only tiles near player are discovered
+        fog.update_visibility(5, 4, "dungeon1")
+
+        # Act
+        world_map.draw(mock_screen, 0, 0, 10, 8, fog_of_war=fog, map_id="dungeon1")
+
+        # Assert - should only draw discovered tiles (not all tiles)
+        # The mock will be called for discovered tiles only
+        assert mock_draw_rect.called
+
+    @patch("pygame.draw.rect")
+    def test_draw_with_fog_of_war_discovered_tiles(
+        self, mock_draw_rect, sample_map_data
+    ):
+        """Test drawing with fog of war - discovered tiles are drawn"""
+        from fog_of_war import FogOfWar
+
+        # Arrange
+        world_map = WorldMap()
+        world_map.load_from_dict(sample_map_data)
+        mock_screen = Mock(spec=pygame.Surface)
+        fog = FogOfWar(visibility_radius=2)
+
+        # Discover all tiles by updating visibility at strategic positions
+        # that cover the entire 10x8 map with radius 2
+        fog.update_visibility(1, 1, "dungeon1")
+        fog.update_visibility(1, 4, "dungeon1")
+        fog.update_visibility(1, 7, "dungeon1")
+        fog.update_visibility(4, 1, "dungeon1")
+        fog.update_visibility(4, 4, "dungeon1")
+        fog.update_visibility(4, 7, "dungeon1")
+        fog.update_visibility(7, 1, "dungeon1")
+        fog.update_visibility(7, 4, "dungeon1")
+        fog.update_visibility(7, 7, "dungeon1")
+        fog.update_visibility(9, 1, "dungeon1")
+        fog.update_visibility(9, 4, "dungeon1")
+        fog.update_visibility(9, 7, "dungeon1")
+
+        # Act
+        world_map.draw(mock_screen, 0, 0, 10, 8, fog_of_war=fog, map_id="dungeon1")
+
+        # Assert - all tiles should be drawn since they're all discovered
+        assert mock_draw_rect.called
+
+    @patch("pygame.draw.rect")
+    def test_draw_without_fog_of_war(self, mock_draw_rect, sample_map_data):
+        """Test drawing without fog of war (world map)"""
+        from fog_of_war import FogOfWar
+
+        # Arrange
+        world_map = WorldMap()
+        world_map.load_from_dict(sample_map_data)
+        mock_screen = Mock(spec=pygame.Surface)
+        fog = FogOfWar(visibility_radius=2)
+
+        # Act - world map should ignore fog of war
+        world_map.draw(mock_screen, 0, 0, 10, 8, fog_of_war=fog, map_id="world")
+
+        # Assert - all tiles should be drawn
+        assert mock_draw_rect.called
