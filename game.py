@@ -569,6 +569,8 @@ class Game:
 
     def _use_town_portal(self):
         """Use a town portal to teleport to town."""
+        portal_count = self.warrior.count_town_portals()
+
         if self.warrior.use_town_portal():
             # Close any existing portals
             self._close_portals()
@@ -604,10 +606,10 @@ class Game:
 
             self._show_message("You enter the portal and arrive in town!")
         else:
-            if self.warrior.count_town_portals() <= 0:
+            if portal_count <= 0:
                 self._show_message("No town portals in inventory!")
             else:
-                self._show_message("Cannot use portal here!")
+                self._show_message(f"You have {portal_count} portal(s) but cannot use them here!")
 
     def _use_return_portal(self):
         """Use the return portal to go back to saved location."""
