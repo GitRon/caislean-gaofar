@@ -255,3 +255,39 @@ def test_hud_initialization_from_zero_health(hud, warrior):
 
     # After update, displayed_health should be set to warrior health
     assert hud.displayed_health == warrior.health
+
+
+def test_hud_draw_with_xp_progress(hud, warrior):
+    """Test HUD draws XP bar fill when warrior has XP progress."""
+    screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+
+    # Give warrior some XP (but not enough to level up)
+    warrior.gain_experience(50)
+
+    # Should not raise any exceptions and should draw XP bar fill
+    hud.draw(screen, warrior)
+    assert warrior.experience.get_xp_progress() > 0
+
+
+def test_hud_draw_at_max_level(hud, warrior):
+    """Test HUD draws 'MAX LEVEL' text when warrior is at max level."""
+    screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+
+    # Level up to max level
+    warrior.gain_experience(1000)
+
+    # Should not raise any exceptions and should draw MAX LEVEL text
+    hud.draw(screen, warrior)
+    assert warrior.experience.is_max_level()
+
+
+def test_hud_draw_with_skill_points_available(hud, warrior):
+    """Test HUD draws skill points badge when warrior has unspent skill points."""
+    screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+
+    # Level up to gain a skill point
+    warrior.gain_experience(100)
+
+    # Should not raise any exceptions and should draw skill points badge
+    hud.draw(screen, warrior)
+    assert warrior.experience.get_available_skill_points() > 0

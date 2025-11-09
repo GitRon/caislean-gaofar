@@ -780,3 +780,222 @@ class TestWarriorLevelUpHPBonus:
         level_4_hp = warrior.max_health
         warrior.gain_experience(500)  # 1000 total
         assert warrior.max_health == level_4_hp + config.WARRIOR_HP_PER_LEVEL
+
+
+class TestWarriorSkillBonuses:
+    """Tests for warrior skill bonuses"""
+
+    def test_berserker_rage_passive_activates_below_50_percent_hp(self):
+        """Test that Berserker Rage passive gives +25% attack below 50% HP"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Learn Berserker Rage skill
+        warrior.skills.learn_skill("berserker_rage")
+
+        # Act - Damage warrior below 50% HP
+        warrior.health = warrior.max_health * 0.4  # 40% HP
+
+        # Assert - Should have +25% attack
+        boosted_damage = warrior.get_effective_attack_damage()
+        assert boosted_damage == int(base_damage * 1.25)
+
+    def test_berserker_rage_passive_not_active_above_50_percent_hp(self):
+        """Test that Berserker Rage passive doesn't activate above 50% HP"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Learn Berserker Rage skill
+        warrior.skills.learn_skill("berserker_rage")
+
+        # Act - Keep HP above 50%
+        warrior.health = warrior.max_health * 0.6  # 60% HP
+
+        # Assert - Should have normal damage
+        damage = warrior.get_effective_attack_damage()
+        assert damage == base_damage
+
+    def test_battle_hardened_passive_gives_crit_chance_above_75_percent_hp(self):
+        """Test that Battle Hardened passive gives +10% crit above 75% HP"""
+        # Arrange
+        warrior = Warrior(5, 5)
+
+        # Learn Battle Hardened skill
+        warrior.skills.learn_skill("battle_hardened")
+
+        # Act - Keep HP above 75%
+        warrior.health = warrior.max_health * 0.8  # 80% HP
+
+        # Assert - Should have 10% crit chance
+        crit_chance = warrior.get_crit_chance()
+        assert crit_chance == 0.10
+
+    def test_battle_hardened_passive_no_crit_below_75_percent_hp(self):
+        """Test that Battle Hardened passive doesn't activate below 75% HP"""
+        # Arrange
+        warrior = Warrior(5, 5)
+
+        # Learn Battle Hardened skill
+        warrior.skills.learn_skill("battle_hardened")
+
+        # Act - Damage to below 75%
+        warrior.health = warrior.max_health * 0.5  # 50% HP
+
+        # Assert - Should have 0% crit chance
+        crit_chance = warrior.get_crit_chance()
+        assert crit_chance == 0.0
+
+    def test_iron_skin_passive_gives_damage_reduction(self):
+        """Test that Iron Skin passive gives 10% damage reduction"""
+        # Arrange
+        warrior = Warrior(5, 5)
+
+        # Learn Iron Skin skill
+        warrior.skills.learn_skill("iron_skin")
+
+        # Act
+        reduction = warrior.get_damage_reduction()
+
+        # Assert - Should have 10% damage reduction
+        assert reduction == 0.10
+
+    def test_last_stand_passive_triggers_at_low_hp(self):
+        """Test that Last Stand passive activates at <= 20% HP"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.skills.learn_skill("last_stand")
+
+        # Act - Take damage to 20% HP
+        warrior.health = int(warrior.max_health * 0.2)
+        warrior.take_damage(5)  # This should trigger Last Stand
+
+        # Assert - Should have emergency shield (30% max HP)
+        expected_hp = int(warrior.max_health * 0.2) - 5 + int(warrior.max_health * 0.3)
+        assert warrior.health == expected_hp
+        assert warrior.skills.last_stand_used is True
+
+    def test_last_stand_passive_only_triggers_once(self):
+        """Test that Last Stand passive only triggers once per battle"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.skills.learn_skill("last_stand")
+
+        # Act - Trigger Last Stand first time
+        warrior.health = int(warrior.max_health * 0.2)
+        warrior.take_damage(5)
+
+        # Damage again to low HP
+        warrior.health = 10
+        warrior.take_damage(5)
+
+        # Assert - Last Stand should not trigger again
+        assert warrior.health == 5  # Just took 5 damage, no shield
+
+    def test_vampiric_strikes_passive_heals_on_damage(self):
+        """Test that Vampiric Strikes passive heals for 15% of damage dealt"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        from entity import Entity
+
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Learn Vampiric Strikes skill
+        warrior.skills.learn_skill("vampiric_strikes")
+
+        # Damage warrior first
+        warrior.health = 50
+
+        # Act - Attack target
+        result = warrior.attack(target)
+
+        # Assert - Should heal for 15% of damage
+        expected_heal = int(result["damage"] * 0.15)
+        assert result["healed"] == expected_heal
+        assert warrior.health == 50 + expected_heal
+
+
+class TestWarriorActiveSkills:
+    """Tests for warrior active skills"""
+
+    def test_attack_with_skill_on_cooldown_uses_basic_attack(self):
+        """Test that trying to use skill on cooldown falls back to basic attack"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        from entity import Entity
+        from unittest.mock import patch
+
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Learn and set Power Strike as active
+        warrior.skills.learn_skill("power_strike")
+        warrior.skills.set_active_skill("power_strike")
+
+        # Act - Attack with skill, but mock it as on cooldown
+        with patch.object(
+            warrior.skills.learned_skills["power_strike"], "can_use", return_value=False
+        ):
+            result = warrior.attack(target, use_skill=True)
+
+        # Assert - Should use basic attack (no skill)
+        assert result["success"] is True
+        assert result["skill_used"] is None
+
+
+class TestWarriorCriticalHits:
+    """Tests for critical hit mechanics"""
+
+    def test_critical_hit_deals_150_percent_damage(self):
+        """Test that critical hits deal 1.5x damage"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        from entity import Entity
+        from unittest.mock import patch
+
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Give warrior crit chance
+        warrior.skills.learn_skill("battle_hardened")
+        warrior.health = warrior.max_health  # Full HP for 10% crit
+
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Make sure warrior can attack
+        warrior.turns_since_last_attack = warrior.attack_cooldown
+
+        # Act - Mock random to always crit
+        with patch("random.random", return_value=0.05):  # Below 10% threshold
+            result = warrior.attack(target)
+
+        # Assert - Should deal 1.5x damage
+        assert result["success"] is True
+        assert result["crit"] is True
+        assert result["damage"] == int(base_damage * 1.5)
+
+    def test_no_critical_hit_deals_normal_damage(self):
+        """Test that non-crits deal normal damage"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        from entity import Entity
+        from unittest.mock import patch
+
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Give warrior crit chance
+        warrior.skills.learn_skill("battle_hardened")
+        warrior.health = warrior.max_health  # Full HP for 10% crit
+
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Make sure warrior can attack
+        warrior.turns_since_last_attack = warrior.attack_cooldown
+
+        # Act - Mock random to not crit
+        with patch("random.random", return_value=0.15):  # Above 10% threshold
+            result = warrior.attack(target)
+
+        # Assert - Should deal normal damage
+        assert result["success"] is True
+        assert result["crit"] is False
+        assert result["damage"] == base_damage
