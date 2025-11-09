@@ -743,16 +743,17 @@ class Game:
                         elif "castle" in dungeon_id.lower():
                             self._draw_castle_icon(screen_x, screen_y)
 
-        # Draw shop building
-        if self.camera.is_visible(self.shop.grid_x, self.shop.grid_y):
-            # Check fog of war visibility
-            if not fog_enabled or self.fog_of_war.is_visible(
-                self.shop.grid_x, self.shop.grid_y
-            ):
-                screen_x, screen_y = self.camera.world_to_screen(
+        # Draw shop building (only on world map)
+        if self.dungeon_manager.current_map_id == "world":
+            if self.camera.is_visible(self.shop.grid_x, self.shop.grid_y):
+                # Check fog of war visibility
+                if not fog_enabled or self.fog_of_war.is_visible(
                     self.shop.grid_x, self.shop.grid_y
-                )
-                self._draw_shop_building(screen_x, screen_y)
+                ):
+                    screen_x, screen_y = self.camera.world_to_screen(
+                        self.shop.grid_x, self.shop.grid_y
+                    )
+                    self._draw_shop_building(screen_x, screen_y)
 
         # Draw chests
         for chest in self.chests:
