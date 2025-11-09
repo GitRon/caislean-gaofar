@@ -433,7 +433,7 @@ class HUD:
         """
         # Panel dimensions and position (below defense, relative to HUD)
         panel_width = self.width - 20
-        panel_height = 70
+        panel_height = 60
         panel_x = self.x + 10
         panel_y = self.y + 390
 
@@ -443,17 +443,17 @@ class HUD:
         self._draw_ornate_border(screen, panel_rect)
 
         # Draw title with level
-        font_title = pygame.font.Font(None, 24)
+        font_title = pygame.font.Font(None, 22)
         level_text = font_title.render(
             f"Level {warrior.experience.current_level}", True, self.ornate_gold
         )
-        screen.blit(level_text, (panel_x + 10, panel_y + 8))
+        screen.blit(level_text, (panel_x + 10, panel_y + 6))
 
         # XP bar dimensions
         bar_width = panel_width - 20
-        bar_height = 20
+        bar_height = 18
         bar_x = panel_x + 10
-        bar_y = panel_y + 35
+        bar_y = panel_y + 30
 
         # Calculate XP progress
         xp_progress = warrior.experience.get_xp_progress()
@@ -507,9 +507,9 @@ class HUD:
         """
         # Panel dimensions and position (below XP, relative to HUD)
         panel_width = self.width - 20
-        panel_height = 70
+        panel_height = 60
         panel_x = self.x + 10
-        panel_y = self.y + 470
+        panel_y = self.y + 460
 
         # Create panel background
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
@@ -563,7 +563,7 @@ class HUD:
         panel_width = self.width - 20
         panel_height = 60
         panel_x = self.x + 10
-        panel_y = self.y + 550
+        panel_y = self.y + 530
 
         # Create panel background
         panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)

@@ -712,9 +712,10 @@ class Game:
         elif self.state == config.STATE_SKILLS:
             # Draw game world behind
             self.screen.fill(config.BLACK)
-            self.camera.set_viewport(
-                0,
-                0,
+            self.world_map.draw(
+                self.screen,
+                self.camera.x,
+                self.camera.y,
                 self.camera.viewport_width,
                 self.camera.viewport_height,
             )
