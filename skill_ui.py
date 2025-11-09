@@ -71,7 +71,7 @@ class SkillUI:
         # Draw instructions
         font_hint = pygame.font.Font(None, 20)
         hint_text = font_hint.render(
-            "Press K to close | Click to learn skill | Right-click to set active",
+            "Press C to close | Click to learn skill | Right-click to set active",
             True,
             config.GRAY,
         )

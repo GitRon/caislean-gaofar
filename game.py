@@ -306,7 +306,7 @@ class Game:
                         # AC12: Exit shop without penalty
                         self.state = config.STATE_PLAYING
                 # Handle skill UI toggle
-                elif event.key == pygame.K_k and self.state in [
+                elif event.key == pygame.K_c and self.state in [
                     config.STATE_PLAYING,
                     config.STATE_SKILLS,
                 ]:
