@@ -999,3 +999,171 @@ class TestWarriorCriticalHits:
         assert result["success"] is True
         assert result["crit"] is False
         assert result["damage"] == base_damage
+
+
+class TestWarriorActiveSkillDamageMultipliers:
+    """Tests for active skill damage multipliers in warrior attack"""
+
+    def test_power_strike_damage_multiplier(self):
+        """Test that Power Strike applies 1.5x damage multiplier"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Learn and set active skill
+        warrior.skills.learn_skill("power_strike")
+        warrior.skills.set_active_skill("power_strike")
+
+        # Make warrior able to attack
+        warrior.turns_since_last_attack = warrior.attack_cooldown
+
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Mock can_use to return True to bypass cooldown
+        with patch.object(
+            warrior.skills.get_active_skill(), "can_use", return_value=True
+        ):
+            # Act
+            result = warrior.attack(target, use_skill=True)
+
+        # Assert - Should apply 1.5x multiplier
+        assert result["success"] is True
+        assert result["skill_used"] == "Power Strike"
+        assert result["damage"] == int(base_damage * 1.5)
+
+    def test_shield_bash_damage_multiplier(self):
+        """Test that Shield Bash applies 0.75x damage multiplier"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Learn and set active skill
+        warrior.skills.learn_skill("shield_bash")
+        warrior.skills.set_active_skill("shield_bash")
+
+        # Make warrior able to attack
+        warrior.turns_since_last_attack = warrior.attack_cooldown
+
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Mock can_use to return True to bypass cooldown
+        with patch.object(
+            warrior.skills.get_active_skill(), "can_use", return_value=True
+        ):
+            # Act
+            result = warrior.attack(target, use_skill=True)
+
+        # Assert - Should apply 0.75x multiplier
+        assert result["success"] is True
+        assert result["skill_used"] == "Shield Bash"
+        assert result["damage"] == int(base_damage * 0.75)
+
+    def test_whirlwind_damage_multiplier(self):
+        """Test that Whirlwind applies 1.0x damage multiplier"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Learn and set active skill
+        warrior.skills.learn_skill("whirlwind")
+        warrior.skills.set_active_skill("whirlwind")
+
+        # Make warrior able to attack
+        warrior.turns_since_last_attack = warrior.attack_cooldown
+
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Mock can_use to return True to bypass cooldown
+        with patch.object(
+            warrior.skills.get_active_skill(), "can_use", return_value=True
+        ):
+            # Act
+            result = warrior.attack(target, use_skill=True)
+
+        # Assert - Should apply 1.0x multiplier (normal damage)
+        assert result["success"] is True
+        assert result["skill_used"] == "Whirlwind"
+        assert result["damage"] == int(base_damage * 1.0)
+
+    def test_cleave_damage_multiplier(self):
+        """Test that Cleave applies 2.0x damage multiplier"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Learn and set active skill (need to be level 4 for Cleave)
+        warrior.gain_experience(500)  # Level up to 4
+        warrior.skills.learn_skill("cleave")
+        warrior.skills.set_active_skill("cleave")
+
+        # Make warrior able to attack
+        warrior.turns_since_last_attack = warrior.attack_cooldown
+
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Mock can_use to return True to bypass cooldown
+        with patch.object(
+            warrior.skills.get_active_skill(), "can_use", return_value=True
+        ):
+            # Act
+            result = warrior.attack(target, use_skill=True)
+
+        # Assert - Should apply 2.0x multiplier
+        assert result["success"] is True
+        assert result["skill_used"] == "Cleave"
+        assert result["damage"] == int(base_damage * 2.0)
+
+    def test_earthsplitter_damage_multiplier(self):
+        """Test that Earthsplitter applies 2.5x damage multiplier"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Learn and set active skill (need to be level 5 for Earthsplitter)
+        warrior.gain_experience(1000)  # Level up to 5
+        warrior.skills.learn_skill("earthsplitter")
+        warrior.skills.set_active_skill("earthsplitter")
+
+        # Make warrior able to attack
+        warrior.turns_since_last_attack = warrior.attack_cooldown
+
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Mock can_use to return True to bypass cooldown
+        with patch.object(
+            warrior.skills.get_active_skill(), "can_use", return_value=True
+        ):
+            # Act
+            result = warrior.attack(target, use_skill=True)
+
+        # Assert - Should apply 2.5x multiplier
+        assert result["success"] is True
+        assert result["skill_used"] == "Earthsplitter"
+        assert result["damage"] == int(base_damage * 2.5)
+
+    def test_skill_on_cooldown_uses_basic_attack(self):
+        """Test that when skill is on cooldown, basic attack is used instead"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Learn and set active skill
+        warrior.skills.learn_skill("power_strike")
+        warrior.skills.set_active_skill("power_strike")
+
+        # Make warrior able to attack
+        warrior.turns_since_last_attack = warrior.attack_cooldown
+
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Mock can_use to return False (skill on cooldown)
+        with patch.object(
+            warrior.skills.get_active_skill(), "can_use", return_value=False
+        ):
+            # Act
+            result = warrior.attack(target, use_skill=True)
+
+        # Assert - Should use basic attack (no skill, normal damage)
+        assert result["success"] is True
+        assert result.get("skill_used") is None
+        assert result["damage"] == base_damage
