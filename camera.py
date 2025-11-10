@@ -38,23 +38,13 @@ class Camera:
         target_x = player_grid_x - self.viewport_width // 2
         target_y = player_grid_y - self.viewport_height // 2
 
-        # Clamp camera to world bounds
-        self.x = self._clamp(target_x, 0, self.world_width - self.viewport_width)
-        self.y = self._clamp(target_y, 0, self.world_height - self.viewport_height)
+        # Clamp camera to world bounds (using max/min pattern)
+        # If world is smaller than viewport, camera stays at 0
+        max_x = max(0, self.world_width - self.viewport_width)
+        max_y = max(0, self.world_height - self.viewport_height)
 
-    def _clamp(self, value: int, min_val: int, max_val: int) -> int:
-        """
-        Clamp a value between min and max.
-
-        Args:
-            value: Value to clamp
-            min_val: Minimum value
-            max_val: Maximum value
-
-        Returns:
-            Clamped value
-        """
-        return max(min_val, min(value, max_val))
+        self.x = max(0, min(target_x, max_x))
+        self.y = max(0, min(target_y, max_y))
 
     def world_to_screen(self, world_x: int, world_y: int) -> Tuple[int, int]:
         """

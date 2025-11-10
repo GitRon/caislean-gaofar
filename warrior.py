@@ -98,6 +98,10 @@ class Warrior(Entity):
 
         return leveled_up
 
+    def get_effective_defense(self) -> int:
+        """Get total defense including inventory bonuses."""
+        return self.inventory.get_total_defense_bonus()
+
     def count_health_potions(self) -> int:
         """
         Count health potions in inventory.
@@ -216,8 +220,11 @@ class Warrior(Entity):
         reduction = self.get_damage_reduction()
         actual_damage = int(damage * (1.0 - reduction))
 
-        # Call parent take_damage
-        super().take_damage(actual_damage)
+        # Get defense from equipment
+        defense = self.get_effective_defense()
+
+        # Call parent take_damage with defense
+        super().take_damage(actual_damage, defense)
 
         # Check for Last Stand passive (Tier 5)
         if (

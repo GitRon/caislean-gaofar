@@ -1212,3 +1212,74 @@ class TestWarriorActiveSkillDamageMultipliers:
         assert result["success"] is True
         assert result["skill_used"] == "UnknownSkill"
         assert result["damage"] == int(base_damage * 1.0)
+
+
+class TestWarriorDefense:
+    """Tests for warrior defense mechanics"""
+
+    def test_get_effective_defense_no_equipment(self):
+        """Test effective defense with no equipment"""
+        # Arrange
+        warrior = Warrior(5, 5)
+
+        # Act
+        defense = warrior.get_effective_defense()
+
+        # Assert
+        assert defense == 0
+
+    def test_get_effective_defense_with_armor(self):
+        """Test effective defense with armor equipped"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        armor = Item("Shield", ItemType.ARMOR, defense_bonus=10)
+        warrior.inventory.add_item(armor)
+
+        # Act
+        defense = warrior.get_effective_defense()
+
+        # Assert
+        assert defense == 10
+
+    def test_get_effective_defense_with_weapon_and_armor(self):
+        """Test effective defense with both weapon and armor"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        weapon = Item("Sword", ItemType.WEAPON, defense_bonus=2)
+        armor = Item("Shield", ItemType.ARMOR, defense_bonus=10)
+        warrior.inventory.add_item(weapon)
+        warrior.inventory.add_item(armor)
+
+        # Act
+        defense = warrior.get_effective_defense()
+
+        # Assert
+        assert defense == 12
+
+    def test_take_damage_with_defense_bonus(self):
+        """Test taking damage with defense bonus reduces damage"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        armor = Item("Shield", ItemType.ARMOR, defense_bonus=5)
+        warrior.inventory.add_item(armor)
+        initial_health = warrior.health
+
+        # Act
+        warrior.take_damage(10)
+
+        # Assert - Should take 10 - 5 = 5 damage
+        assert warrior.health == initial_health - 5
+
+    def test_take_damage_with_high_defense_minimum_damage(self):
+        """Test that defense can't reduce damage below 1"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        armor = Item("Super Shield", ItemType.ARMOR, defense_bonus=100)
+        warrior.inventory.add_item(armor)
+        initial_health = warrior.health
+
+        # Act
+        warrior.take_damage(10)
+
+        # Assert - Should take at least 1 damage
+        assert warrior.health == initial_health - 1

@@ -87,9 +87,17 @@ class Entity:
         self.turns_since_last_attack = 0
         return True
 
-    def take_damage(self, damage: int):
-        """Take damage and update health."""
-        self.health -= damage
+    def take_damage(self, damage: int, defense: int = 0):
+        """
+        Take damage and update health.
+
+        Args:
+            damage: Raw damage amount
+            defense: Defense value to reduce damage (default 0)
+        """
+        # Apply defense reduction (minimum 1 damage to prevent immunity)
+        actual_damage = max(1, damage - defense)
+        self.health -= actual_damage
         if self.health <= 0:
             self.health = 0
             self.is_alive = False
