@@ -8,6 +8,7 @@ from item import Item, ItemType
 from camera import Camera
 from ground_item import GroundItem
 from dungeon_manager import DungeonManager
+from fog_of_war import FogOfWar
 import config
 
 # Import new component classes
@@ -69,6 +70,9 @@ class Game:
 
         # Add starting items to warrior inventory
         self._add_starting_items()
+
+        # Initialize fog of war (2 tile visibility radius)
+        self.fog_of_war = FogOfWar(visibility_radius=2)
 
         # Initialize shop (located at specific position on town map)
         self.shop = Shop(grid_x=4, grid_y=3)  # Position in town
@@ -353,6 +357,9 @@ class Game:
         # Update camera to follow player
         self.camera.update(self.warrior.grid_x, self.warrior.grid_y)
 
+        # Update fog of war based on player position
+        self.fog_of_war.update_visibility(self.warrior.grid_x, self.warrior.grid_y)
+
         # Check if player stepped on return portal (auto-teleport back)
         if self.state_manager.check_return_portal_collision(self.warrior):
             self._handle_use_return_portal()
@@ -547,6 +554,7 @@ class Game:
                 active_portal=self.state_manager.active_portal,
                 return_portal=self.state_manager.return_portal,
                 message=self.state_manager.message,
+                fog_of_war=self.fog_of_war,
             )
         elif self.state_manager.state == config.STATE_INVENTORY:
             self.renderer.draw_inventory_state(
@@ -554,6 +562,7 @@ class Game:
                 camera=self.camera,
                 entity_manager=self.entity_manager,
                 warrior=self.warrior,
+                fog_of_war=self.fog_of_war,
             )
         elif self.state_manager.state == config.STATE_SHOP:
             self.renderer.draw_shop_state(shop=self.shop, warrior=self.warrior)

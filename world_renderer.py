@@ -39,6 +39,7 @@ class WorldRenderer:
         active_portal,
         return_portal,
         message: str,
+        fog_of_war=None,
     ):
         """
         Draw the playing state.
@@ -53,17 +54,28 @@ class WorldRenderer:
             active_portal: Active portal if present
             return_portal: Return portal if present
             message: Current message to display
+            fog_of_war: Fog of war system (optional)
         """
         self.screen.fill(config.BLACK)
 
         # Draw world map
-        world_map.draw(
-            self.screen,
-            camera.x,
-            camera.y,
-            camera.viewport_width,
-            camera.viewport_height,
-        )
+        if fog_of_war:
+            world_map.draw(
+                self.screen,
+                camera.x,
+                camera.y,
+                camera.viewport_width,
+                camera.viewport_height,
+                fog_of_war,
+            )
+        else:
+            world_map.draw(
+                self.screen,
+                camera.x,
+                camera.y,
+                camera.viewport_width,
+                camera.viewport_height,
+            )
 
         # Draw world objects (chests and ground items) with camera offset
         self._draw_world_objects_with_camera(camera, entity_manager)
@@ -103,6 +115,7 @@ class WorldRenderer:
         camera: Camera,
         entity_manager: EntityManager,
         warrior: Warrior,
+        fog_of_war=None,
     ):
         """
         Draw the inventory state.
@@ -112,17 +125,28 @@ class WorldRenderer:
             camera: The camera instance
             entity_manager: The entity manager
             warrior: The warrior entity
+            fog_of_war: Fog of war system (optional)
         """
         self.screen.fill(config.BLACK)
 
         # Draw the game in the background
-        world_map.draw(
-            self.screen,
-            camera.x,
-            camera.y,
-            camera.viewport_width,
-            camera.viewport_height,
-        )
+        if fog_of_war:
+            world_map.draw(
+                self.screen,
+                camera.x,
+                camera.y,
+                camera.viewport_width,
+                camera.viewport_height,
+                fog_of_war,
+            )
+        else:
+            world_map.draw(
+                self.screen,
+                camera.x,
+                camera.y,
+                camera.viewport_width,
+                camera.viewport_height,
+            )
         self._draw_world_objects_with_camera(camera, entity_manager)
         self._draw_entities_with_camera(camera, warrior, entity_manager)
         nearest_monster = entity_manager.get_nearest_alive_monster(warrior)
