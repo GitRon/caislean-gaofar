@@ -17,6 +17,7 @@ from loot_table import get_loot_for_monster
 from hud import HUD
 from dungeon_manager import DungeonManager
 from portal import Portal
+from temple import Temple
 from fog_of_war import FogOfWar
 import config
 
@@ -79,6 +80,10 @@ class Game:
         # Position matches 'S' in town.json
         self.shop = Shop(grid_x=4, grid_y=3)  # Position in town
         self.shop_ui = ShopUI()
+
+        # Initialize temple (located at specific position on town map)
+        # Position matches 'T' in town.json
+        self.temple = Temple(grid_x=8, grid_y=1)  # Position in town
 
         # Turn-based state
         self.waiting_for_player_input = True
@@ -449,6 +454,10 @@ class Game:
         if self.return_portal:
             self.return_portal.update(dt)
 
+        # Update temple animation
+        if self.temple:
+            self.temple.update(dt)
+
         # Only update game logic when actively playing
         if self.state != config.STATE_PLAYING:
             return
@@ -475,6 +484,14 @@ class Game:
             ):
                 self._use_return_portal()
                 return
+
+        # Check if player stepped on temple (heal to max HP)
+        if (
+            self.dungeon_manager.current_map_id == "town"
+            and self.warrior.grid_x == self.temple.grid_x
+            and self.warrior.grid_y == self.temple.grid_y
+        ):
+            self._heal_at_temple()
 
         # Check game over conditions
         if not self.warrior.is_alive:
@@ -751,6 +768,15 @@ class Game:
         self.active_portal = None
         self.return_portal = None
         self.portal_return_location = None
+
+    def _heal_at_temple(self):
+        """Heal the warrior to maximum HP when stepping on the temple."""
+        if self.warrior.health < self.warrior.max_health:
+            # Heal to max HP
+            self.warrior.health = self.warrior.max_health
+            # Activate healing visual effect
+            self.temple.activate_healing()
+            self._show_message("The temple's divine power restores your health!")
 
     def _is_near_shop(self) -> bool:
         """
@@ -1040,6 +1066,19 @@ class Game:
             # Draw shop building if in town
             if self.dungeon_manager.current_map_id == "town":
                 self._draw_shop_building()
+
+                # Draw temple if in town
+                if self.camera.is_visible(self.temple.grid_x, self.temple.grid_y):
+                    original_x = self.temple.grid_x
+                    original_y = self.temple.grid_y
+                    screen_x, screen_y = self.camera.world_to_screen(
+                        original_x, original_y
+                    )
+                    self.temple.grid_x = screen_x
+                    self.temple.grid_y = screen_y
+                    self.temple.draw(self.screen)
+                    self.temple.grid_x = original_x
+                    self.temple.grid_y = original_y
 
             # Draw entities with camera offset
             self._draw_entities_with_camera()
