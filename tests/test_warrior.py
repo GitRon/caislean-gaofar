@@ -893,6 +893,21 @@ class TestWarriorSkillBonuses:
         # Assert - Last Stand should not trigger again
         assert warrior.health == 5  # Just took 5 damage, no shield
 
+    def test_last_stand_passive_does_not_trigger_above_threshold(self):
+        """Test that Last Stand doesn't trigger when health stays above 20%"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        warrior.skills.learn_skill("last_stand")
+
+        # Act - Take damage but stay above 20% HP
+        warrior.health = warrior.max_health  # Full health
+        initial_health = warrior.health
+        warrior.take_damage(10)  # Small damage
+
+        # Assert - Last Stand should NOT trigger (health still above 20%)
+        assert warrior.health == initial_health - 10
+        assert warrior.skills.last_stand_used is False
+
     def test_vampiric_strikes_passive_heals_on_damage(self):
         """Test that Vampiric Strikes passive heals for 15% of damage dealt"""
         # Arrange
@@ -1167,3 +1182,33 @@ class TestWarriorActiveSkillDamageMultipliers:
         assert result["success"] is True
         assert result.get("skill_used") is None
         assert result["damage"] == base_damage
+
+    def test_unknown_skill_name_uses_default_multiplier(self):
+        """Test that an unknown skill name uses 1.0x damage multiplier"""
+        # Arrange
+        warrior = Warrior(5, 5)
+        target = Entity(10, 10, 32, (255, 0, 0), 100, 1, 10, 1)
+
+        # Learn a skill and set it as active
+        warrior.skills.learn_skill("power_strike")
+        warrior.skills.set_active_skill("power_strike")
+
+        # Make warrior able to attack
+        warrior.turns_since_last_attack = warrior.attack_cooldown
+
+        base_damage = warrior.get_effective_attack_damage()
+
+        # Mock the active skill to have an unknown name
+        mock_skill = Mock()
+        mock_skill.name = "UnknownSkill"
+        mock_skill.can_use = Mock(return_value=True)
+        mock_skill.use = Mock()
+
+        # Act - Mock get_active_skill to return our mock skill
+        with patch.object(warrior.skills, "get_active_skill", return_value=mock_skill):
+            result = warrior.attack(target, use_skill=True)
+
+        # Assert - Should use 1.0x multiplier (default)
+        assert result["success"] is True
+        assert result["skill_used"] == "UnknownSkill"
+        assert result["damage"] == int(base_damage * 1.0)
