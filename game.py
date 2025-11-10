@@ -8,7 +8,6 @@ from item import Item, ItemType
 from camera import Camera
 from ground_item import GroundItem
 from dungeon_manager import DungeonManager
-from portal import Portal
 from fog_of_war import FogOfWar
 import config
 
