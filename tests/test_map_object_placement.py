@@ -174,8 +174,9 @@ class TestMapObjectPlacement:
         # Check for overlaps
         for pos, objects in positions.items():  # noqa: PBR008
             if len(objects) > 1:
-                pytest.warn(
-                    UserWarning(
-                        f"Map '{map_name}': Multiple objects at position {pos}: {', '.join(objects)}"
-                    )
+                import warnings
+
+                warnings.warn(
+                    f"Map '{map_name}': Multiple objects at position {pos}: {', '.join(objects)}",
+                    UserWarning,
                 )
