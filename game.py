@@ -958,6 +958,10 @@ class Game:
             # Draw shop UI
             self.shop_ui.draw(self.screen, self.shop, self.warrior)
 
+        elif self.state == config.STATE_SKILLS:
+            # Draw skill UI
+            self.skill_ui.draw(self.screen, self.warrior)
+
         elif self.state == config.STATE_GAME_OVER:
             self.draw_game_over_screen("GAME OVER!", config.RED)
 
