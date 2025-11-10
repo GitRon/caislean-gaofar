@@ -8,6 +8,7 @@ from item import Item, ItemType
 from camera import Camera
 from ground_item import GroundItem
 from dungeon_manager import DungeonManager
+from portal import Portal
 from fog_of_war import FogOfWar
 import config
 
@@ -70,6 +71,9 @@ class Game:
 
         # Add starting items to warrior inventory
         self._add_starting_items()
+
+        # Initialize fog of war (2 tile visibility radius)
+        self.fog_of_war = FogOfWar(visibility_radius=2)
 
         # Initialize fog of war (2 tile visibility radius)
         self.fog_of_war = FogOfWar(visibility_radius=2)
@@ -358,7 +362,11 @@ class Game:
         self.camera.update(self.warrior.grid_x, self.warrior.grid_y)
 
         # Update fog of war based on player position
-        self.fog_of_war.update_visibility(self.warrior.grid_x, self.warrior.grid_y)
+        self.fog_of_war.update_visibility(
+            self.warrior.grid_x,
+            self.warrior.grid_y,
+            self.dungeon_manager.current_map_id,
+        )
 
         # Check if player stepped on return portal (auto-teleport back)
         if self.state_manager.check_return_portal_collision(self.warrior):
@@ -540,6 +548,7 @@ class Game:
             self.warrior.grid_y - self.shop.grid_y
         )
         return distance <= 1
+
 
     def draw(self):
         """Draw all game objects."""

@@ -31,6 +31,21 @@ class Warrior(Entity):
         """Get total attack damage including inventory bonuses."""
         return self.base_attack_damage + self.inventory.get_total_attack_bonus()
 
+    def get_effective_defense(self) -> int:
+        """Get total defense including inventory bonuses."""
+        return self.inventory.get_total_defense_bonus()
+
+    def take_damage(self, damage: int, defense: int = 0):
+        """
+        Take damage with defense bonus automatically applied.
+
+        Args:
+            damage: Raw damage amount
+            defense: Additional defense (default 0, uses inventory defense)
+        """
+        total_defense = self.get_effective_defense() + defense
+        super().take_damage(damage, total_defense)
+
     def count_health_potions(self) -> int:
         """
         Count health potions in inventory.
