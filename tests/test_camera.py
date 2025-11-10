@@ -204,12 +204,18 @@ class TestCamera:
         assert max_x == 10 + camera.viewport_width
         assert max_y == 5 + camera.viewport_height
 
-    def test_clamp_method(self):
-        """Test _clamp method returns clamped value"""
+    def test_update_with_small_world(self):
+        """Test camera with world smaller than viewport"""
         # Arrange
-        camera = Camera(40, 30)
+        # Create a world smaller than the viewport
+        camera = Camera(8, 6)  # Smaller than GAME_GRID_WIDTH and GAME_GRID_HEIGHT
+        player_x = 4
+        player_y = 3
 
-        # Act & Assert
-        assert camera._clamp(5, 0, 10) == 5
-        assert camera._clamp(-5, 0, 10) == 0
-        assert camera._clamp(15, 0, 10) == 10
+        # Act
+        camera.update(player_x, player_y)
+
+        # Assert
+        # Camera should be clamped to 0 since world is smaller than viewport
+        assert camera.x == 0
+        assert camera.y == 0
