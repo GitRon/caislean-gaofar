@@ -28,6 +28,7 @@ class BaseMonster(Entity):
     ATTACK_RANGE = 1
     DESCRIPTION = "Unknown creature"
     MONSTER_TYPE = "banshee"  # Default fallback
+    XP_VALUE = 50  # Experience points awarded when defeated
 
     def __init__(self, grid_x: int, grid_y: int):
         """
@@ -51,6 +52,7 @@ class BaseMonster(Entity):
         self.chase_range = self.CHASE_RANGE
         self.attack_range = self.ATTACK_RANGE
         self.description = self.DESCRIPTION
+        self.xp_value = self.XP_VALUE
         self.frame_count = 0  # For animation
 
     def execute_turn(self, target: Entity, world_map=None):

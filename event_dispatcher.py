@@ -173,6 +173,16 @@ class EventDispatcher:
             else:
                 game_state_manager.transition_to_inventory()
 
+        # Skills toggle
+        elif event.key == pygame.K_c and game_state_manager.state in [
+            config.STATE_PLAYING,
+            config.STATE_SKILLS,
+        ]:
+            if game_state_manager.state == config.STATE_PLAYING:
+                game_state_manager.state = config.STATE_SKILLS
+            else:
+                game_state_manager.state = config.STATE_PLAYING
+
         # Shop toggle
         elif event.key == pygame.K_s and game_state_manager.state in [
             config.STATE_PLAYING,

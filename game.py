@@ -4,6 +4,7 @@ import pygame
 import os
 from warrior import Warrior
 from shop import Shop
+from skill_ui import SkillUI
 from item import Item, ItemType
 from camera import Camera
 from ground_item import GroundItem
@@ -74,8 +75,8 @@ class Game:
         # Initialize fog of war (2 tile visibility radius)
         self.fog_of_war = FogOfWar(visibility_radius=2)
 
-        # Initialize fog of war (2 tile visibility radius)
-        self.fog_of_war = FogOfWar(visibility_radius=2)
+        # Initialize skill UI (separate from renderer since it's a full-screen UI)
+        self.skill_ui = SkillUI()
 
         # Initialize shop (located at specific position on town map)
         self.shop = Shop(grid_x=4, grid_y=3)  # Position in town
@@ -288,6 +289,7 @@ class Game:
 
     def handle_events(self):
         """Handle pygame events."""
+        # Use event dispatcher for most event handling
         self.event_dispatcher.handle_events(
             warrior=self.warrior,
             game_state_manager=self.state_manager,
@@ -306,6 +308,15 @@ class Game:
             on_shop_check=self._handle_shop_check,
             inventory_game_ref=self,
         )
+
+        # Handle skill UI input separately (skills screen)
+        for event in pygame.event.get():
+            if self.state_manager.state == config.STATE_SKILLS:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left click - learn skill
+                        self.skill_ui.handle_click(event.pos, self.warrior, False)
+                    elif event.button == 3:  # Right click - set active
+                        self.skill_ui.handle_click(event.pos, self.warrior, True)
 
     def restart(self):
         """Restart the game."""
@@ -454,17 +465,27 @@ class Game:
         """
         self._show_message(f"You open the chest. Inside you find a {item.name}!")
 
-    def _handle_monster_death(self, loot_item: Item, monster_type: str):
+    def _handle_monster_death(self, loot_item: Item, monster_type: str, xp_value: int):
         """
         Handle monster death event.
 
         Args:
             loot_item: The loot item dropped
             monster_type: The type of monster that died
+            xp_value: Experience points awarded
         """
-        self._show_message(
-            f"The {monster_type.replace('_', ' ')} drops a {loot_item.name}!"
-        )
+        # Award experience points
+        leveled_up = self.warrior.gain_experience(xp_value)
+
+        # Show appropriate message
+        if leveled_up:
+            self._show_message(
+                f"Level Up! Now level {self.warrior.experience.current_level}! The {monster_type.replace('_', ' ')} drops a {loot_item.name}! (+{xp_value} XP)"
+            )
+        else:
+            self._show_message(
+                f"The {monster_type.replace('_', ' ')} drops a {loot_item.name}! (+{xp_value} XP)"
+            )
 
     def _handle_pickup_item(self, grid_x: int, grid_y: int):
         """
@@ -574,6 +595,10 @@ class Game:
             )
         elif self.state_manager.state == config.STATE_SHOP:
             self.renderer.draw_shop_state(shop=self.shop, warrior=self.warrior)
+        elif self.state_manager.state == config.STATE_SKILLS:
+            # Draw skill UI (full-screen)
+            self.skill_ui.draw(self.screen, self.warrior)
+            pygame.display.flip()
         elif self.state_manager.state == config.STATE_GAME_OVER:
             self.renderer.draw_game_over_state("GAME OVER!", config.RED)
 

@@ -62,10 +62,10 @@ class TurnProcessor:
 
         # Check for monster deaths and drop loot (after warrior attacks)
         loot_drops = entity_manager.check_monster_deaths(dungeon_manager)
-        for loot_item, grid_x, grid_y, monster_type in loot_drops:
+        for loot_item, grid_x, grid_y, monster_type, xp_value in loot_drops:
             # Create ground item at monster location
             entity_manager.drop_item(loot_item, grid_x, grid_y)
-            on_monster_death(loot_item, monster_type)
+            on_monster_death(loot_item, monster_type, xp_value)
 
         # Monster turns
         for monster in entity_manager.monsters:

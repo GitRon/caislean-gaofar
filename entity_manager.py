@@ -223,7 +223,9 @@ class EntityManager:
                     nearest_monster = monster
         return nearest_monster
 
-    def check_monster_deaths(self, dungeon_manager) -> list[tuple[Item, int, int, str]]:
+    def check_monster_deaths(
+        self, dungeon_manager
+    ) -> list[tuple[Item, int, int, str, int]]:
         """
         Check for dead monsters and prepare their loot drops.
 
@@ -231,7 +233,7 @@ class EntityManager:
             dungeon_manager: The dungeon manager instance
 
         Returns:
-            List of tuples (item, grid_x, grid_y, monster_type) for loot drops
+            List of tuples (item, grid_x, grid_y, monster_type, xp_value) for loot drops
         """
         current_map_id = dungeon_manager.current_map_id
         loot_drops = []
@@ -258,6 +260,7 @@ class EntityManager:
                             monster.grid_x,
                             monster.grid_y,
                             monster.monster_type,
+                            monster.xp_value,
                         )
                     )
 

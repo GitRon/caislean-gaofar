@@ -46,6 +46,9 @@
     "x": 6,
     "y": 5
   },
-  "entities": [],
-  "dungeons": []
+  "entities": {
+    "monsters": [],
+    "chests": [],
+    "dungeons": []
+  }
 }
