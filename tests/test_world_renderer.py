@@ -533,9 +533,7 @@ class TestWorldRenderer:
         active_portal.draw = Mock()
 
         # Act
-        with patch.object(
-            renderer, "_draw_portal_with_camera"
-        ) as mock_draw_portal:
+        with patch.object(renderer, "_draw_portal_with_camera") as mock_draw_portal:
             renderer.draw_playing_state(
                 world_map=world_map,
                 camera=camera,
@@ -603,9 +601,7 @@ class TestWorldRenderer:
         return_portal.draw = Mock()
 
         # Act
-        with patch.object(
-            renderer, "_draw_portal_with_camera"
-        ) as mock_draw_portal:
+        with patch.object(renderer, "_draw_portal_with_camera") as mock_draw_portal:
             renderer.draw_playing_state(
                 world_map=world_map,
                 camera=camera,
@@ -668,9 +664,7 @@ class TestWorldRenderer:
         shop.grid_y = 1
 
         # Act
-        with patch.object(
-            renderer, "_draw_shop_building"
-        ) as mock_draw_shop:
+        with patch.object(renderer, "_draw_shop_building") as mock_draw_shop:
             renderer.draw_playing_state(
                 world_map=world_map,
                 camera=camera,
@@ -736,9 +730,7 @@ class TestWorldRenderer:
         shop.grid_y = 1
 
         # Act
-        with patch.object(
-            renderer.combat_system, "draw_combat_ui"
-        ) as mock_draw_combat:
+        with patch.object(renderer.combat_system, "draw_combat_ui") as mock_draw_combat:
             renderer.draw_playing_state(
                 world_map=world_map,
                 camera=camera,
@@ -853,9 +845,7 @@ class TestWorldRenderer:
         warrior.experience.get_available_skill_points.return_value = 0
 
         # Act
-        with patch.object(
-            renderer.combat_system, "draw_combat_ui"
-        ) as mock_draw_combat:
+        with patch.object(renderer.combat_system, "draw_combat_ui") as mock_draw_combat:
             renderer.draw_inventory_state(
                 world_map=world_map,
                 camera=camera,
@@ -925,8 +915,6 @@ class TestWorldRenderer:
 
         # Assert
         # Verify that "Press S" text was rendered
-        mock_font_instance.render.assert_called_once_with(
-            "Press S", True, config.WHITE
-        )
+        mock_font_instance.render.assert_called_once_with("Press S", True, config.WHITE)
         # Verify text was drawn
         assert screen.blit.call_count >= 1
