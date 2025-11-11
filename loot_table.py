@@ -34,36 +34,45 @@ class LootTable:
 # Common item pool for loot generation
 def create_common_weapon(name: str, attack_bonus: int) -> Item:
     """Create a common weapon item."""
+    # Gold value based on attack power (10 gold per attack point)
+    gold_value = attack_bonus * 10
     return Item(
         name,
         ItemType.WEAPON,
         f"Deals {attack_bonus} extra damage",
         attack_bonus=attack_bonus,
+        gold_value=gold_value,
     )
 
 
 def create_common_armor(name: str, defense_bonus: int, health_bonus: int = 0) -> Item:
     """Create a common armor item."""
+    # Gold value based on defense and health (10 gold per defense, 2 gold per health)
+    gold_value = (defense_bonus * 10) + (health_bonus * 2)
     return Item(
         name,
         ItemType.ARMOR,
         f"+{defense_bonus} defense",
         defense_bonus=defense_bonus,
         health_bonus=health_bonus,
+        gold_value=gold_value,
     )
 
 
 def create_consumable(name: str, health_bonus: int) -> Item:
     """Create a consumable item."""
+    # Gold value based on health restoration (1 gold per HP restored)
+    gold_value = health_bonus
     return Item(
         name,
         ItemType.CONSUMABLE,
         f"Restores {health_bonus} health",
         health_bonus=health_bonus,
+        gold_value=gold_value,
     )
 
 
-def create_misc_item(name: str, description: str, gold_value: int = 0) -> Item:
+def create_misc_item(name: str, description: str, gold_value: int = 10) -> Item:
     """Create a misc item."""
     return Item(name, ItemType.MISC, description, gold_value=gold_value)
 
@@ -86,6 +95,7 @@ def create_town_portal() -> Item:
         ItemType.CONSUMABLE,
         "Opens a portal to town. Use with 'T' key.",
         health_bonus=0,  # Not for healing
+        gold_value=100,  # Valuable utility item
     )
 
 
