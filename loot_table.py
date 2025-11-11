@@ -42,24 +42,22 @@ def create_common_weapon(name: str, attack_bonus: int) -> Item:
     )
 
 
-def create_common_armor(name: str, defense_bonus: int, health_bonus: int = 0) -> Item:
+def create_common_armor(name: str, defense_bonus: int) -> Item:
     """Create a common armor item."""
     return Item(
         name,
         ItemType.ARMOR,
         f"+{defense_bonus} defense",
         defense_bonus=defense_bonus,
-        health_bonus=health_bonus,
     )
 
 
-def create_consumable(name: str, health_bonus: int) -> Item:
-    """Create a consumable item."""
+def create_consumable(name: str) -> Item:
+    """Create a consumable health potion item."""
     return Item(
         name,
         ItemType.CONSUMABLE,
-        f"Restores {health_bonus} health",
-        health_bonus=health_bonus,
+        "Restores 30 health",
     )
 
 
@@ -85,7 +83,6 @@ def create_town_portal() -> Item:
         "Town Portal",
         ItemType.CONSUMABLE,
         "Opens a portal to town. Use with 'T' key.",
-        health_bonus=0,  # Not for healing
     )
 
 
@@ -94,10 +91,10 @@ LOOT_TABLES = {
     "banshee": LootTable(
         [
             (
-                create_common_armor("Spectral Veil", defense_bonus=8, health_bonus=15),
+                create_common_armor("Spectral Veil", defense_bonus=8),
                 0.3,
             ),
-            (create_consumable("Tear of Sorrow", health_bonus=25), 0.6),
+            (create_consumable("Tear of Sorrow"), 0.6),
             (create_gold_drop(1, 5), 0.5),
             (create_town_portal(), 0.15),  # 15% chance for town portal
         ]
@@ -114,10 +111,10 @@ LOOT_TABLES = {
         [
             (create_common_weapon("Twisted Horn", attack_bonus=15), 0.35),
             (
-                create_common_armor("Shadow Pelt", defense_bonus=10, health_bonus=20),
+                create_common_armor("Shadow Pelt", defense_bonus=10),
                 0.3,
             ),
-            (create_consumable("Dark Berry", health_bonus=30), 0.7),
+            (create_consumable("Dark Berry"), 0.7),
             (create_gold_drop(2, 6), 0.5),
             (create_town_portal(), 0.15),
         ]
@@ -125,12 +122,10 @@ LOOT_TABLES = {
     "selkie": LootTable(
         [
             (
-                create_common_armor(
-                    "Seal Skin Cloak", defense_bonus=12, health_bonus=25
-                ),
+                create_common_armor("Seal Skin Cloak", defense_bonus=12),
                 0.4,
             ),
-            (create_consumable("Ocean Pearl", health_bonus=40), 0.6),
+            (create_consumable("Ocean Pearl"), 0.6),
             (create_gold_drop(2, 7), 0.5),
             (create_town_portal(), 0.15),
         ]
@@ -139,9 +134,7 @@ LOOT_TABLES = {
         [
             (create_common_weapon("Headless Blade", attack_bonus=25), 0.4),
             (
-                create_common_armor(
-                    "Dark Rider's Mail", defense_bonus=15, health_bonus=30
-                ),
+                create_common_armor("Dark Rider's Mail", defense_bonus=15),
                 0.3,
             ),
             (create_gold_drop(5, 12), 0.6),
@@ -151,7 +144,7 @@ LOOT_TABLES = {
     "changeling": LootTable(
         [
             (create_common_weapon("Fae Dagger", attack_bonus=18), 0.35),
-            (create_consumable("Glamour Essence", health_bonus=35), 0.65),
+            (create_consumable("Glamour Essence"), 0.65),
             (create_gold_drop(3, 8), 0.5),
             (create_town_portal(), 0.15),
         ]
@@ -159,7 +152,7 @@ LOOT_TABLES = {
     "clurichaun": LootTable(
         [
             (create_common_weapon("Drunken Bottle", attack_bonus=14), 0.4),
-            (create_consumable("Fine Whiskey", health_bonus=45), 0.75),
+            (create_consumable("Fine Whiskey"), 0.75),
             (create_gold_drop(4, 10), 0.65),
             (create_town_portal(), 0.15),
         ]
@@ -167,20 +160,20 @@ LOOT_TABLES = {
     "merrow": LootTable(
         [
             (
-                create_common_armor("Coral Crown", defense_bonus=11, health_bonus=22),
+                create_common_armor("Coral Crown", defense_bonus=11),
                 0.35,
             ),
             (create_common_weapon("Trident Shard", attack_bonus=20), 0.3),
-            (create_consumable("Sea Kelp", health_bonus=28), 0.7),
+            (create_consumable("Sea Kelp"), 0.7),
             (create_gold_drop(3, 9), 0.5),
             (create_town_portal(), 0.15),
         ]
     ),
     "fear_gorta": LootTable(
         [
-            (create_consumable("Blessed Bread", health_bonus=50), 0.7),
+            (create_consumable("Blessed Bread"), 0.7),
             (
-                create_common_armor("Tattered Robes", defense_bonus=6, health_bonus=10),
+                create_common_armor("Tattered Robes", defense_bonus=6),
                 0.4,
             ),
             (create_gold_drop(1, 4), 0.4),
@@ -190,7 +183,7 @@ LOOT_TABLES = {
     "cat_si": LootTable(
         [
             (create_common_weapon("Cat's Claw", attack_bonus=16), 0.4),
-            (create_common_armor("Fur Mantle", defense_bonus=9, health_bonus=18), 0.35),
+            (create_common_armor("Fur Mantle", defense_bonus=9), 0.35),
             (create_gold_drop(2, 6), 0.5),
             (create_town_portal(), 0.15),
         ]

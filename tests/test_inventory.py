@@ -533,58 +533,6 @@ class TestInventory:
         # Assert
         assert bonus == 12
 
-    def test_get_total_health_bonus_no_items(self):
-        """Test total health bonus with no items"""
-        # Arrange
-        inventory = Inventory()
-
-        # Act
-        bonus = inventory.get_total_health_bonus()
-
-        # Assert
-        assert bonus == 0
-
-    def test_get_total_health_bonus_weapon_only(self):
-        """Test total health bonus with weapon only"""
-        # Arrange
-        inventory = Inventory()
-        weapon = Item("Sword", ItemType.WEAPON, health_bonus=5)
-        inventory.weapon_slot = weapon
-
-        # Act
-        bonus = inventory.get_total_health_bonus()
-
-        # Assert
-        assert bonus == 5
-
-    def test_get_total_health_bonus_armor_only(self):
-        """Test total health bonus with armor only"""
-        # Arrange
-        inventory = Inventory()
-        armor = Item("Shield", ItemType.ARMOR, health_bonus=20)
-        inventory.armor_slot = armor
-
-        # Act
-        bonus = inventory.get_total_health_bonus()
-
-        # Assert
-        assert bonus == 20
-
-    def test_get_total_health_bonus_both_items(self):
-        """Test total health bonus with both weapon and armor"""
-        # Arrange
-        inventory = Inventory()
-        weapon = Item("Sword", ItemType.WEAPON, health_bonus=5)
-        armor = Item("Shield", ItemType.ARMOR, health_bonus=20)
-        inventory.weapon_slot = weapon
-        inventory.armor_slot = armor
-
-        # Act
-        bonus = inventory.get_total_health_bonus()
-
-        # Assert
-        assert bonus == 25
-
     def test_has_space_empty_inventory(self):
         """Test has_space returns True for empty inventory"""
         # Arrange

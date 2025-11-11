@@ -1312,7 +1312,6 @@ class Game:
             name="Health Potion",
             item_type=ItemType.CONSUMABLE,
             description="Restores 30 HP",
-            health_bonus=30,
         )
 
         # Equip starting items (they'll auto-equip to appropriate slots)

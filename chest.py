@@ -98,38 +98,31 @@ class Chest:
                 ItemType.ARMOR,
                 "Basic protection",
                 defense_bonus=5,
-                health_bonus=10,
             ),
             Item(
                 "Chain Mail",
                 ItemType.ARMOR,
                 "Metal armor",
                 defense_bonus=10,
-                health_bonus=20,
             ),
             Item(
                 "Plate Armor",
                 ItemType.ARMOR,
                 "Heavy armor",
                 defense_bonus=15,
-                health_bonus=30,
             ),
             Item("Shield", ItemType.ARMOR, "A sturdy shield", defense_bonus=8),
             # Consumables
-            Item(
-                "Health Potion", ItemType.CONSUMABLE, "Restores 50 HP", health_bonus=50
-            ),
+            Item("Health Potion", ItemType.CONSUMABLE, "Restores 30 HP"),
             Item(
                 "Minor Health Potion",
                 ItemType.CONSUMABLE,
-                "Restores 25 HP",
-                health_bonus=25,
+                "Restores 30 HP",
             ),
             Item(
                 "Greater Health Potion",
                 ItemType.CONSUMABLE,
-                "Restores 100 HP",
-                health_bonus=100,
+                "Restores 30 HP",
             ),
             # Misc
             Item("Ancient Key", ItemType.MISC, "Opens something?"),

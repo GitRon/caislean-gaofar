@@ -41,7 +41,6 @@ class TestItem:
         assert item.description == ""
         assert item.attack_bonus == 0
         assert item.defense_bonus == 0
-        assert item.health_bonus == 0
 
     def test_item_initialization_with_description(self):
         """Test Item initialization with description"""
@@ -54,7 +53,6 @@ class TestItem:
         assert item.description == "A sturdy shield"
         assert item.attack_bonus == 0
         assert item.defense_bonus == 0
-        assert item.health_bonus == 0
 
     def test_item_initialization_with_attack_bonus(self):
         """Test Item initialization with attack bonus"""
@@ -65,7 +63,6 @@ class TestItem:
         assert item.name == "Sword"
         assert item.attack_bonus == 10
         assert item.defense_bonus == 0
-        assert item.health_bonus == 0
 
     def test_item_initialization_with_defense_bonus(self):
         """Test Item initialization with defense bonus"""
@@ -76,18 +73,6 @@ class TestItem:
         assert item.name == "Shield"
         assert item.defense_bonus == 5
         assert item.attack_bonus == 0
-        assert item.health_bonus == 0
-
-    def test_item_initialization_with_health_bonus(self):
-        """Test Item initialization with health bonus"""
-        # Arrange & Act
-        item = Item("Amulet", ItemType.ARMOR, health_bonus=20)
-
-        # Assert
-        assert item.name == "Amulet"
-        assert item.health_bonus == 20
-        assert item.attack_bonus == 0
-        assert item.defense_bonus == 0
 
     def test_item_initialization_with_all_bonuses(self):
         """Test Item initialization with all bonuses"""
@@ -98,7 +83,6 @@ class TestItem:
             description="A powerful weapon",
             attack_bonus=15,
             defense_bonus=3,
-            health_bonus=10,
         )
 
         # Assert
@@ -107,7 +91,6 @@ class TestItem:
         assert item.description == "A powerful weapon"
         assert item.attack_bonus == 15
         assert item.defense_bonus == 3
-        assert item.health_bonus == 10
 
     def test_item_initialization_with_gold_value(self):
         """Test Item initialization with gold value"""
@@ -119,7 +102,6 @@ class TestItem:
         assert item.gold_value == 100
         assert item.attack_bonus == 0
         assert item.defense_bonus == 0
-        assert item.health_bonus == 0
 
     def test_item_repr_weapon(self):
         """Test Item __repr__ for weapon"""

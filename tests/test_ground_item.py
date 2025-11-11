@@ -140,16 +140,14 @@ class TestGroundItem:
     def test_ground_item_with_consumable_type(self):
         """Test ground item can hold consumable type items"""
         # Arrange
-        potion = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores 50 HP", health_bonus=50
-        )
+        potion = Item("Health Potion", ItemType.CONSUMABLE, "Restores 30 HP")
 
         # Act
         ground_item = GroundItem(potion, 2, 2)
 
         # Assert
         assert ground_item.item.item_type == ItemType.CONSUMABLE
-        assert ground_item.item.health_bonus == 50
+        assert ground_item.item.description == "Restores 30 HP"
 
     def test_ground_item_with_misc_type(self):
         """Test ground item can hold misc type items"""
