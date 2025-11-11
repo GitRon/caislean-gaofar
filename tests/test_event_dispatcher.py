@@ -607,6 +607,141 @@ class TestEventDispatcher:
         # Assert
         mocks["on_use_return_portal"].assert_called_once()
 
+    @patch("pygame.event.get")
+    def test_handle_escape_in_shop_without_return_portal(self, mock_get_events):
+        """Test ESC key in shop without return portal (exits branch without action)."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        escape_event = Mock()
+        escape_event.type = pygame.KEYDOWN
+        escape_event.key = pygame.K_ESCAPE
+        mock_get_events.return_value = [escape_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SHOP
+        mocks["game_state_manager"].return_portal = None  # No return portal
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert - should not call return portal or exit
+        mocks["on_use_return_portal"].assert_not_called()
+        assert dispatcher.running is True  # Still running
+
+    @patch("pygame.event.get")
+    @patch("pygame.time.get_ticks")
+    def test_handle_movement_when_not_waiting_for_input(
+        self, mock_ticks, mock_get_events
+    ):
+        """Test movement keys when not waiting for player input (branch exit)."""
+        # Arrange
+        dispatcher = EventDispatcher()
+        mock_ticks.return_value = 1000
+
+        move_event = Mock()
+        move_event.type = pygame.KEYDOWN
+        move_event.key = pygame.K_w
+        mock_get_events.return_value = [move_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_PLAYING
+        mocks["turn_processor"].waiting_for_player_input = False  # Not waiting
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert - no movement should be queued
+        mocks["turn_processor"].queue_player_action.assert_not_called()
+
+    @patch("pygame.event.get")
+    @patch("pygame.time.get_ticks")
+    def test_handle_unknown_key_during_movement(self, mock_ticks, mock_get_events):
+        """Test unknown key press during movement (action_queued stays False)."""
+        # Arrange
+        dispatcher = EventDispatcher()
+        mock_ticks.return_value = 1000
+
+        unknown_event = Mock()
+        unknown_event.type = pygame.KEYDOWN
+        unknown_event.key = pygame.K_z  # Not a movement key
+        mock_get_events.return_value = [unknown_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_PLAYING
+        mocks["turn_processor"].waiting_for_player_input = True
+
+        # Act
+        initial_last_key_time = dispatcher.last_key_time
+        dispatcher.handle_events(**mocks)
+
+        # Assert - no action queued, last_key_time unchanged
+        mocks["turn_processor"].queue_player_action.assert_not_called()
+        assert dispatcher.last_key_time == initial_last_key_time
+
+    @patch("pygame.event.get")
+    def test_handle_t_key_in_shop_without_return_portal(self, mock_get_events):
+        """Test T key in shop without return portal (branch exit)."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        portal_event = Mock()
+        portal_event.type = pygame.KEYDOWN
+        portal_event.key = pygame.K_t
+        mock_get_events.return_value = [portal_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SHOP
+        mocks["game_state_manager"].return_portal = None  # No portal
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert - should not call return portal
+        mocks["on_use_return_portal"].assert_not_called()
+
+    @patch("pygame.event.get")
+    def test_handle_t_key_when_not_in_shop(self, mock_get_events):
+        """Test T key when not in shop state (branch exit)."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        portal_event = Mock()
+        portal_event.type = pygame.KEYDOWN
+        portal_event.key = pygame.K_t
+        mock_get_events.return_value = [portal_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_PLAYING  # Not shop
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert - T key does nothing when not in shop (it's town portal in playing)
+        mocks["on_use_town_portal"].assert_called_once()
+
+    @patch("pygame.event.get")
+    def test_handle_unhandled_key_in_skills_state(self, mock_get_events):
+        """Test unhandled key in skills state (exits all branches)."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        random_event = Mock()
+        random_event.type = pygame.KEYDOWN
+        random_event.key = pygame.K_x  # Not a handled key
+        mock_get_events.return_value = [random_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SKILLS
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert - nothing should happen, all branches should be skipped
+        mocks["on_use_town_portal"].assert_not_called()
+        mocks["on_use_return_portal"].assert_not_called()
+        mocks["turn_processor"].queue_player_action.assert_not_called()
+
     def _create_mock_parameters(self):
         """Create mock parameters for handle_events method."""
         warrior = Mock(spec=Warrior)

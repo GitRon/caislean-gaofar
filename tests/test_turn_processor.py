@@ -297,3 +297,21 @@ class TestTurnProcessor:
 
         # Assert
         assert processor.waiting_for_player_input is True
+
+    def test_queue_player_action_unknown_type(self):
+        """Test queuing an unknown action type (does nothing but sets waiting to False)."""
+        # Arrange
+        processor = TurnProcessor()
+        processor.waiting_for_player_input = True
+
+        warrior = Mock()
+        warrior.queue_movement = Mock()
+        warrior.queue_attack = Mock()
+
+        # Act
+        processor.queue_player_action("unknown_action", warrior)
+
+        # Assert - neither move nor attack should be called
+        warrior.queue_movement.assert_not_called()
+        warrior.queue_attack.assert_not_called()
+        assert processor.waiting_for_player_input is False

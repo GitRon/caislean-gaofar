@@ -580,3 +580,110 @@ class TestEntityManager:
 
         # Assert - only 2 chests should spawn (one was already opened)
         assert len(manager.chests) == 2
+
+    def test_get_item_at_position_multiple_items(self):
+        """Test getting item when multiple items exist (loop continuation)."""
+        # Arrange
+        manager = EntityManager()
+        item1 = Item("Item1", ItemType.MISC)
+        item2 = Item("Item2", ItemType.MISC)
+        manager.drop_item(item1, 5, 10)
+        manager.drop_item(item2, 6, 11)
+
+        # Act - get second item (loop must continue past first)
+        result = manager.get_item_at_position(6, 11)
+
+        # Assert
+        assert result is not None
+        assert result.item == item2
+
+    def test_pickup_item_at_position_multiple_items(self):
+        """Test picking up item when multiple items exist (loop continuation)."""
+        # Arrange
+        manager = EntityManager()
+        item1 = Item("Item1", ItemType.MISC)
+        item2 = Item("Item2", ItemType.MISC)
+        manager.drop_item(item1, 5, 10)
+        manager.drop_item(item2, 6, 11)
+
+        warrior = Mock()
+        warrior.inventory.add_item.return_value = True
+
+        # Act - pickup second item (loop must continue past first)
+        success, message = manager.pickup_item_at_position(6, 11, warrior)
+
+        # Assert
+        assert success is True
+        assert "Item2" in message
+
+    def test_check_ground_item_pickup_multiple_items(self):
+        """Test auto-pickup when multiple items exist (loop continuation)."""
+        # Arrange
+        manager = EntityManager()
+        item1 = Item("Item1", ItemType.MISC)
+        item2 = Item("Item2", ItemType.MISC)
+        manager.drop_item(item1, 5, 10)
+        manager.drop_item(item2, 6, 11)
+
+        warrior = Mock()
+        warrior.grid_x = 6
+        warrior.grid_y = 11
+        warrior.inventory.add_item.return_value = True
+
+        # Act - pickup second item (loop must continue past first)
+        success, message = manager.check_ground_item_pickup(warrior)
+
+        # Assert
+        assert success is True
+        assert "Item2" in message
+
+    @patch("entity_manager.get_loot_for_monster")
+    def test_check_monster_deaths_no_loot(self, mock_get_loot):
+        """Test checking monster deaths when no loot is generated."""
+        # Arrange
+        mock_get_loot.return_value = None  # No loot
+
+        manager = EntityManager()
+
+        monster = Mock()
+        monster.is_alive = False
+        monster.monster_type = "banshee"
+        monster.grid_x = 5
+        monster.grid_y = 10
+        monster.xp_value = 50
+
+        manager.monsters = [monster]
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "test_map"
+
+        # Act
+        loot_drops = manager.check_monster_deaths(dungeon_manager)
+
+        # Assert
+        assert len(loot_drops) == 0  # No loot dropped
+        assert len(manager.monsters) == 0  # Monster still removed
+        assert len(manager.killed_monsters) == 1  # Monster still tracked
+
+    def test_check_monster_deaths_all_alive(self):
+        """Test checking monster deaths when all monsters are alive (loop doesn't enter body)."""
+        # Arrange
+        manager = EntityManager()
+
+        monster1 = Mock()
+        monster1.is_alive = True
+        monster2 = Mock()
+        monster2.is_alive = True
+
+        manager.monsters = [monster1, monster2]
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "test_map"
+
+        # Act
+        loot_drops = manager.check_monster_deaths(dungeon_manager)
+
+        # Assert
+        assert len(loot_drops) == 0
+        assert len(manager.monsters) == 2  # No monsters removed
+        assert len(manager.killed_monsters) == 0

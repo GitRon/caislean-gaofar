@@ -918,3 +918,123 @@ class TestWorldRenderer:
         mock_font_instance.render.assert_called_once_with("Press S", True, config.WHITE)
         # Verify text was drawn
         assert screen.blit.call_count >= 1
+
+    def test_draw_world_objects_with_camera_not_visible(self):
+        """Test drawing world objects when not visible to camera."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = False  # Not visible
+
+        chest = Mock()
+        chest.grid_x = 5
+        chest.grid_y = 10
+        chest.draw = Mock()
+
+        ground_item = Mock()
+        ground_item.grid_x = 7
+        ground_item.grid_y = 12
+        ground_item.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.chests = [chest]
+        entity_manager.ground_items = [ground_item]
+
+        # Act
+        renderer._draw_world_objects_with_camera(camera, entity_manager)
+
+        # Assert - nothing should be drawn
+        chest.draw.assert_not_called()
+        ground_item.draw.assert_not_called()
+
+    def test_draw_entities_with_camera_warrior_not_visible(self):
+        """Test drawing entities when warrior is not visible."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = False  # Not visible
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.monsters = []
+
+        # Act
+        renderer._draw_entities_with_camera(camera, warrior, entity_manager)
+
+        # Assert - warrior should not be drawn
+        warrior.draw.assert_not_called()
+
+    def test_draw_entities_with_camera_monster_not_visible(self):
+        """Test drawing entities when monster is not visible."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+
+        def is_visible_check(x, y):
+            # Warrior visible, monster not visible
+            return x == 5 and y == 10
+
+        camera.is_visible.side_effect = is_visible_check
+        camera.world_to_screen.return_value = (15, 25)
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.draw = Mock()
+
+        monster = Mock()
+        monster.is_alive = True
+        monster.grid_x = 20
+        monster.grid_y = 30
+        monster.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.monsters = [monster]
+
+        # Act
+        renderer._draw_entities_with_camera(camera, warrior, entity_manager)
+
+        # Assert
+        warrior.draw.assert_called_once()  # Warrior drawn
+        monster.draw.assert_not_called()  # Monster not drawn
+
+    def test_draw_entities_with_camera_dead_monster(self):
+        """Test drawing entities skips dead monsters."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (15, 25)
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.draw = Mock()
+
+        monster = Mock()
+        monster.is_alive = False  # Dead
+        monster.grid_x = 7
+        monster.grid_y = 12
+        monster.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.monsters = [monster]
+
+        # Act
+        renderer._draw_entities_with_camera(camera, warrior, entity_manager)
+
+        # Assert
+        warrior.draw.assert_called_once()
+        monster.draw.assert_not_called()  # Dead monster not drawn

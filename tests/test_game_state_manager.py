@@ -441,3 +441,39 @@ class TestGameStateManager:
         assert manager.message == ""
         assert manager.message_timer == 0
         assert manager.active_portal is None
+
+    def test_transition_to_inventory_from_other_state(self):
+        """Test transitioning to inventory from non-playing/shop state (no transition)."""
+        # Arrange
+        manager = GameStateManager()
+        manager.state = config.STATE_GAME_OVER
+
+        # Act
+        manager.transition_to_inventory()
+
+        # Assert - state should remain unchanged
+        assert manager.state == config.STATE_GAME_OVER
+
+    def test_transition_from_inventory_from_non_inventory_state(self):
+        """Test transitioning from inventory when not in inventory state (no transition)."""
+        # Arrange
+        manager = GameStateManager()
+        manager.state = config.STATE_PLAYING
+
+        # Act
+        manager.transition_from_inventory()
+
+        # Assert - state should remain unchanged
+        assert manager.state == config.STATE_PLAYING
+
+    def test_transition_from_shop_from_non_shop_state(self):
+        """Test transitioning from shop when not in shop state (no transition)."""
+        # Arrange
+        manager = GameStateManager()
+        manager.state = config.STATE_PLAYING
+
+        # Act
+        manager.transition_from_shop()
+
+        # Assert - state should remain unchanged
+        assert manager.state == config.STATE_PLAYING
