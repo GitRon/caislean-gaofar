@@ -481,3 +481,452 @@ class TestWorldRenderer:
             "Test message", True, config.WHITE
         )
         assert screen.blit.call_count >= 2  # Background and text
+
+    @patch("pygame.display.flip")
+    def test_draw_playing_state_with_active_portal_not_in_town(self, mock_flip):
+        """Test drawing active portal when not in town."""
+        # Arrange
+        screen = pygame.Surface((800, 600))
+        renderer = WorldRenderer(screen)
+
+        world_map = Mock()
+        world_map.draw = Mock()
+
+        camera = Mock()
+        camera.x = 0
+        camera.y = 0
+        camera.viewport_width = 800
+        camera.viewport_height = 600
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = []
+        entity_manager.monsters = []
+        entity_manager.get_nearest_alive_monster.return_value = None
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.health = 100
+        warrior.max_health = 100
+        warrior.gold = 50
+        warrior.draw = Mock()
+        warrior.inventory = Mock()
+        warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "dungeon_level_1"
+
+        shop = Mock()
+        shop.grid_x = 1
+        shop.grid_y = 1
+
+        active_portal = Mock()
+        active_portal.grid_x = 8
+        active_portal.grid_y = 8
+        active_portal.draw = Mock()
+
+        # Act
+        with patch.object(
+            renderer, "_draw_portal_with_camera"
+        ) as mock_draw_portal:
+            renderer.draw_playing_state(
+                world_map=world_map,
+                camera=camera,
+                entity_manager=entity_manager,
+                warrior=warrior,
+                dungeon_manager=dungeon_manager,
+                shop=shop,
+                active_portal=active_portal,
+                return_portal=None,
+                message="",
+                fog_of_war=None,
+            )
+
+            # Assert
+            mock_draw_portal.assert_called_once_with(camera, active_portal)
+
+    @patch("pygame.display.flip")
+    def test_draw_playing_state_with_return_portal_in_town(self, mock_flip):
+        """Test drawing return portal when in town."""
+        # Arrange
+        screen = pygame.Surface((800, 600))
+        renderer = WorldRenderer(screen)
+
+        world_map = Mock()
+        world_map.draw = Mock()
+
+        camera = Mock()
+        camera.x = 0
+        camera.y = 0
+        camera.viewport_width = 800
+        camera.viewport_height = 600
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = []
+        entity_manager.monsters = []
+        entity_manager.get_nearest_alive_monster.return_value = None
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.health = 100
+        warrior.max_health = 100
+        warrior.gold = 50
+        warrior.draw = Mock()
+        warrior.inventory = Mock()
+        warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "town"
+
+        shop = Mock()
+        shop.grid_x = 1
+        shop.grid_y = 1
+
+        return_portal = Mock()
+        return_portal.grid_x = 12
+        return_portal.grid_y = 12
+        return_portal.draw = Mock()
+
+        # Act
+        with patch.object(
+            renderer, "_draw_portal_with_camera"
+        ) as mock_draw_portal:
+            renderer.draw_playing_state(
+                world_map=world_map,
+                camera=camera,
+                entity_manager=entity_manager,
+                warrior=warrior,
+                dungeon_manager=dungeon_manager,
+                shop=shop,
+                active_portal=None,
+                return_portal=return_portal,
+                message="",
+                fog_of_war=None,
+            )
+
+            # Assert
+            mock_draw_portal.assert_called_once_with(camera, return_portal)
+
+    @patch("pygame.display.flip")
+    def test_draw_playing_state_with_shop_in_town(self, mock_flip):
+        """Test drawing shop building when in town."""
+        # Arrange
+        screen = pygame.Surface((800, 600))
+        renderer = WorldRenderer(screen)
+
+        world_map = Mock()
+        world_map.draw = Mock()
+
+        camera = Mock()
+        camera.x = 0
+        camera.y = 0
+        camera.viewport_width = 800
+        camera.viewport_height = 600
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = []
+        entity_manager.monsters = []
+        entity_manager.get_nearest_alive_monster.return_value = None
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.health = 100
+        warrior.max_health = 100
+        warrior.gold = 50
+        warrior.draw = Mock()
+        warrior.inventory = Mock()
+        warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "town"
+
+        shop = Mock()
+        shop.grid_x = 1
+        shop.grid_y = 1
+
+        # Act
+        with patch.object(
+            renderer, "_draw_shop_building"
+        ) as mock_draw_shop:
+            renderer.draw_playing_state(
+                world_map=world_map,
+                camera=camera,
+                entity_manager=entity_manager,
+                warrior=warrior,
+                dungeon_manager=dungeon_manager,
+                shop=shop,
+                active_portal=None,
+                return_portal=None,
+                message="",
+                fog_of_war=None,
+            )
+
+            # Assert
+            mock_draw_shop.assert_called_once_with(camera, shop, warrior)
+
+    @patch("pygame.display.flip")
+    def test_draw_playing_state_with_nearest_monster(self, mock_flip):
+        """Test drawing combat UI when nearest monster exists."""
+        # Arrange
+        screen = pygame.Surface((800, 600))
+        renderer = WorldRenderer(screen)
+
+        world_map = Mock()
+        world_map.draw = Mock()
+
+        camera = Mock()
+        camera.x = 0
+        camera.y = 0
+        camera.viewport_width = 800
+        camera.viewport_height = 600
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        nearest_monster = Mock()
+        nearest_monster.is_alive = True
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = []
+        entity_manager.monsters = [nearest_monster]
+        entity_manager.get_nearest_alive_monster.return_value = nearest_monster
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.health = 100
+        warrior.max_health = 100
+        warrior.gold = 50
+        warrior.draw = Mock()
+        warrior.inventory = Mock()
+        warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "test"
+
+        shop = Mock()
+        shop.grid_x = 1
+        shop.grid_y = 1
+
+        # Act
+        with patch.object(
+            renderer.combat_system, "draw_combat_ui"
+        ) as mock_draw_combat:
+            renderer.draw_playing_state(
+                world_map=world_map,
+                camera=camera,
+                entity_manager=entity_manager,
+                warrior=warrior,
+                dungeon_manager=dungeon_manager,
+                shop=shop,
+                active_portal=None,
+                return_portal=None,
+                message="",
+                fog_of_war=None,
+            )
+
+            # Assert
+            mock_draw_combat.assert_called_once_with(screen, warrior, nearest_monster)
+
+    @patch("pygame.display.flip")
+    def test_draw_inventory_state_with_fog(self, mock_flip):
+        """Test drawing inventory state with fog of war."""
+        # Arrange
+        screen = pygame.Surface((800, 600))
+        renderer = WorldRenderer(screen)
+
+        world_map = Mock()
+        world_map.draw = Mock()
+
+        camera = Mock()
+        camera.x = 0
+        camera.y = 0
+        camera.viewport_width = 800
+        camera.viewport_height = 600
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = []
+        entity_manager.monsters = []
+        entity_manager.get_nearest_alive_monster.return_value = None
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.health = 100
+        warrior.max_health = 100
+        warrior.gold = 50
+        warrior.inventory = Mock()
+        warrior.inventory.get_all_items.return_value = []
+        warrior.inventory.weapon_slot = None
+        warrior.inventory.armor_slot = None
+        warrior.inventory.backpack_slots = [None] * 13
+        warrior.draw = Mock()
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
+
+        fog_of_war = Mock()
+
+        # Act
+        renderer.draw_inventory_state(
+            world_map=world_map,
+            camera=camera,
+            entity_manager=entity_manager,
+            warrior=warrior,
+            fog_of_war=fog_of_war,
+        )
+
+        # Assert
+        world_map.draw.assert_called_once_with(screen, 0, 0, 800, 600, fog_of_war)
+
+    @patch("pygame.display.flip")
+    def test_draw_inventory_state_with_nearest_monster(self, mock_flip):
+        """Test drawing combat UI in inventory state when nearest monster exists."""
+        # Arrange
+        screen = pygame.Surface((800, 600))
+        renderer = WorldRenderer(screen)
+
+        world_map = Mock()
+        camera = Mock()
+        camera.x = 0
+        camera.y = 0
+        camera.viewport_width = 800
+        camera.viewport_height = 600
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        nearest_monster = Mock()
+        nearest_monster.is_alive = True
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = []
+        entity_manager.monsters = [nearest_monster]
+        entity_manager.get_nearest_alive_monster.return_value = nearest_monster
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.health = 100
+        warrior.max_health = 100
+        warrior.gold = 50
+        warrior.inventory = Mock()
+        warrior.inventory.get_all_items.return_value = []
+        warrior.inventory.weapon_slot = None
+        warrior.inventory.armor_slot = None
+        warrior.inventory.backpack_slots = [None] * 13
+        warrior.draw = Mock()
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
+
+        # Act
+        with patch.object(
+            renderer.combat_system, "draw_combat_ui"
+        ) as mock_draw_combat:
+            renderer.draw_inventory_state(
+                world_map=world_map,
+                camera=camera,
+                entity_manager=entity_manager,
+                warrior=warrior,
+            )
+
+            # Assert
+            mock_draw_combat.assert_called_once_with(screen, warrior, nearest_monster)
+
+    def test_draw_shop_building_not_visible(self):
+        """Test that shop building is not drawn when not visible."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = False
+
+        shop = Mock()
+        shop.grid_x = 4
+        shop.grid_y = 3
+
+        warrior = Mock()
+        warrior.grid_x = 4
+        warrior.grid_y = 4
+
+        # Act
+        renderer._draw_shop_building(camera, shop, warrior)
+
+        # Assert
+        camera.world_to_screen.assert_not_called()
+
+    @patch("pygame.draw.rect")
+    @patch("pygame.draw.polygon")
+    @patch("pygame.draw.circle")
+    @patch("pygame.font.Font")
+    def test_draw_shop_building_with_nearby_warrior(
+        self, mock_font, mock_circle, mock_polygon, mock_rect
+    ):
+        """Test drawing shop building with 'Press S' text when warrior is nearby."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        shop = Mock()
+        shop.grid_x = 4
+        shop.grid_y = 3
+
+        warrior = Mock()
+        warrior.grid_x = 4  # Distance = 0, which is <= 1
+        warrior.grid_y = 3
+
+        mock_font_instance = Mock()
+        mock_font.return_value = mock_font_instance
+        mock_text_surface = Mock()
+        mock_text_surface.get_width.return_value = 50
+        mock_text_surface.get_height.return_value = 20
+        mock_font_instance.render.return_value = mock_text_surface
+
+        # Act
+        renderer._draw_shop_building(camera, shop, warrior)
+
+        # Assert
+        # Verify that "Press S" text was rendered
+        mock_font_instance.render.assert_called_once_with(
+            "Press S", True, config.WHITE
+        )
+        # Verify text was drawn
+        assert screen.blit.call_count >= 1

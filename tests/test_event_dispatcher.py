@@ -380,6 +380,233 @@ class TestEventDispatcher:
             test_event, mocks["shop"], mocks["warrior"]
         )
 
+    @patch("pygame.event.get")
+    def test_handle_escape_in_shop_with_return_portal(self, mock_get_events):
+        """Test handling ESC key in shop with return portal."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        escape_event = Mock()
+        escape_event.type = pygame.KEYDOWN
+        escape_event.key = pygame.K_ESCAPE
+        mock_get_events.return_value = [escape_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SHOP
+        mocks["game_state_manager"].return_portal = True
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["on_use_return_portal"].assert_called_once()
+
+    @patch("pygame.event.get")
+    def test_handle_skills_toggle_open(self, mock_get_events):
+        """Test opening skills screen."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        skills_event = Mock()
+        skills_event.type = pygame.KEYDOWN
+        skills_event.key = pygame.K_c
+        mock_get_events.return_value = [skills_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_PLAYING
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        assert mocks["game_state_manager"].state == config.STATE_SKILLS
+
+    @patch("pygame.event.get")
+    def test_handle_skills_toggle_close(self, mock_get_events):
+        """Test closing skills screen."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        skills_event = Mock()
+        skills_event.type = pygame.KEYDOWN
+        skills_event.key = pygame.K_c
+        mock_get_events.return_value = [skills_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SKILLS
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        assert mocks["game_state_manager"].state == config.STATE_PLAYING
+
+    @patch("pygame.event.get")
+    def test_handle_shop_exit(self, mock_get_events):
+        """Test exiting shop with S key."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        shop_event = Mock()
+        shop_event.type = pygame.KEYDOWN
+        shop_event.key = pygame.K_s
+        mock_get_events.return_value = [shop_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SHOP
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["game_state_manager"].transition_from_shop.assert_called_once()
+
+    @patch("pygame.event.get")
+    @patch("pygame.time.get_ticks")
+    def test_handle_movement_down_arrow(self, mock_ticks, mock_get_events):
+        """Test handling DOWN arrow for down movement."""
+        # Arrange
+        dispatcher = EventDispatcher()
+        mock_ticks.return_value = 1000
+
+        move_event = Mock()
+        move_event.type = pygame.KEYDOWN
+        move_event.key = pygame.K_DOWN
+        mock_get_events.return_value = [move_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_PLAYING
+        mocks["turn_processor"].waiting_for_player_input = True
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["turn_processor"].queue_player_action.assert_called_once_with(
+            "move", mocks["warrior"], 0, 1
+        )
+
+    @patch("pygame.event.get")
+    @patch("pygame.time.get_ticks")
+    def test_handle_movement_left_a(self, mock_ticks, mock_get_events):
+        """Test handling A key for left movement."""
+        # Arrange
+        dispatcher = EventDispatcher()
+        mock_ticks.return_value = 1000
+
+        move_event = Mock()
+        move_event.type = pygame.KEYDOWN
+        move_event.key = pygame.K_a
+        mock_get_events.return_value = [move_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_PLAYING
+        mocks["turn_processor"].waiting_for_player_input = True
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["turn_processor"].queue_player_action.assert_called_once_with(
+            "move", mocks["warrior"], -1, 0
+        )
+
+    @patch("pygame.event.get")
+    @patch("pygame.time.get_ticks")
+    def test_handle_movement_left_arrow(self, mock_ticks, mock_get_events):
+        """Test handling LEFT arrow for left movement."""
+        # Arrange
+        dispatcher = EventDispatcher()
+        mock_ticks.return_value = 1000
+
+        move_event = Mock()
+        move_event.type = pygame.KEYDOWN
+        move_event.key = pygame.K_LEFT
+        mock_get_events.return_value = [move_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_PLAYING
+        mocks["turn_processor"].waiting_for_player_input = True
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["turn_processor"].queue_player_action.assert_called_once_with(
+            "move", mocks["warrior"], -1, 0
+        )
+
+    @patch("pygame.event.get")
+    @patch("pygame.time.get_ticks")
+    def test_handle_movement_right_d(self, mock_ticks, mock_get_events):
+        """Test handling D key for right movement."""
+        # Arrange
+        dispatcher = EventDispatcher()
+        mock_ticks.return_value = 1000
+
+        move_event = Mock()
+        move_event.type = pygame.KEYDOWN
+        move_event.key = pygame.K_d
+        mock_get_events.return_value = [move_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_PLAYING
+        mocks["turn_processor"].waiting_for_player_input = True
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["turn_processor"].queue_player_action.assert_called_once_with(
+            "move", mocks["warrior"], 1, 0
+        )
+
+    @patch("pygame.event.get")
+    @patch("pygame.time.get_ticks")
+    def test_handle_movement_right_arrow(self, mock_ticks, mock_get_events):
+        """Test handling RIGHT arrow for right movement."""
+        # Arrange
+        dispatcher = EventDispatcher()
+        mock_ticks.return_value = 1000
+
+        move_event = Mock()
+        move_event.type = pygame.KEYDOWN
+        move_event.key = pygame.K_RIGHT
+        mock_get_events.return_value = [move_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_PLAYING
+        mocks["turn_processor"].waiting_for_player_input = True
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["turn_processor"].queue_player_action.assert_called_once_with(
+            "move", mocks["warrior"], 1, 0
+        )
+
+    @patch("pygame.event.get")
+    def test_handle_return_portal_in_shop(self, mock_get_events):
+        """Test using return portal in shop with T key."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        portal_event = Mock()
+        portal_event.type = pygame.KEYDOWN
+        portal_event.key = pygame.K_t
+        mock_get_events.return_value = [portal_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SHOP
+        mocks["game_state_manager"].return_portal = True
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["on_use_return_portal"].assert_called_once()
+
     def _create_mock_parameters(self):
         """Create mock parameters for handle_events method."""
         warrior = Mock(spec=Warrior)
@@ -393,6 +620,7 @@ class TestEventDispatcher:
         game_state_manager.transition_to_inventory = Mock()
         game_state_manager.transition_from_inventory = Mock()
         game_state_manager.transition_to_shop = Mock()
+        game_state_manager.transition_from_shop = Mock()
         game_state_manager.show_message = Mock()
 
         turn_processor = Mock(spec=TurnProcessor)

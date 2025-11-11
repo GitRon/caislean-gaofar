@@ -457,6 +457,21 @@ class TestEntityManager:
         assert "full" in message.lower()
         assert len(manager.ground_items) == 1  # Item still on ground
 
+    def test_check_ground_item_pickup_no_item(self):
+        """Test auto-pickup when no item at position."""
+        # Arrange
+        manager = EntityManager()
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+
+        # Act
+        success, message = manager.check_ground_item_pickup(warrior)
+
+        # Assert
+        assert success is False
+        assert message == ""
+
     def test_clear_ground_items(self):
         """Test clearing all ground items."""
         # Arrange
@@ -485,3 +500,83 @@ class TestEntityManager:
         # Assert
         assert len(manager.killed_monsters) == 0
         assert len(manager.opened_chests) == 0
+
+    @patch("entity_manager.ALL_MONSTER_CLASSES")
+    @patch("entity_manager.random")
+    def test_spawn_monsters_unknown_type_fallback(
+        self, mock_random, mock_monster_classes
+    ):
+        """Test spawning monster with unknown type falls back to random choice."""
+        # Arrange
+        mock_monster = Mock()
+        mock_monster.MONSTER_TYPE = "known_type"
+        mock_monster_classes.__iter__.return_value = [mock_monster]
+
+        fallback_monster = Mock()
+        mock_random.choice.return_value = fallback_monster
+        mock_instance = Mock()
+        fallback_monster.return_value = mock_instance
+
+        world_map = Mock()
+        world_map.get_entity_spawns.return_value = [
+            {"type": "unknown_monster_type", "x": 7, "y": 8}
+        ]
+        world_map.spawn_point = (0, 0)
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "test_map"
+
+        manager = EntityManager()
+
+        # Act
+        manager.spawn_monsters(world_map, dungeon_manager)
+
+        # Assert
+        assert len(manager.monsters) == 1
+        mock_random.choice.assert_called_once_with(mock_monster_classes)
+        fallback_monster.assert_called_once_with(7, 8)
+
+    def test_spawn_monsters_default_killed(self):
+        """Test that default spawn monster is not created if already killed."""
+        # Arrange
+        world_map = Mock()
+        world_map.get_entity_spawns.return_value = []
+        world_map.spawn_point = (5, 5)
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "test_map"
+
+        manager = EntityManager()
+        # Mark the default spawn position as killed
+        manager.killed_monsters = [
+            {"x": 10, "y": 5, "map_id": "test_map"}  # spawn_x + 5, spawn_y
+        ]
+
+        # Act
+        manager.spawn_monsters(world_map, dungeon_manager)
+
+        # Assert
+        assert len(manager.monsters) == 0
+
+    @patch("entity_manager.random")
+    def test_spawn_chests_random_with_opened_chests(self, mock_random):
+        """Test spawning random chests skips already opened chests."""
+        # Arrange
+        mock_random.randint.return_value = 3
+        mock_random.sample.return_value = [(5, 3), (10, 2), (7, 5)]
+
+        world_map = Mock()
+        world_map.get_entity_spawns.return_value = []
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "test_map"
+
+        manager = EntityManager()
+        # Mark one of the random positions as already opened
+        manager.opened_chests = [{"x": 5, "y": 3, "map_id": "test_map"}]
+
+        # Act
+        manager.spawn_chests(world_map, dungeon_manager)
+
+        # Assert - only 2 chests should spawn (one was already opened)
+        assert len(manager.chests) == 2
