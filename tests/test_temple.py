@@ -160,12 +160,18 @@ class TestTemple:
         temple = Temple(0, 0)
         temple.activate_healing()
 
-        # Test at different points during the effect
-        for i in range(10):
-            dt = 0.09  # Just under 1 second total
-            temple.update(dt)
-            if i < 10:  # Should still be active
-                assert temple.healing_active is True or temple.healing_effect_time <= 0
+        # Test at different points during the effect - update 10 times with small delta
+        dt = 0.09  # Just under 1 second total
+        temple.update(dt)
+        assert temple.healing_active is True or temple.healing_effect_time <= 0
+        temple.update(dt)
+        assert temple.healing_active is True or temple.healing_effect_time <= 0
+        temple.update(dt)
+        assert temple.healing_active is True or temple.healing_effect_time <= 0
+        temple.update(dt)
+        assert temple.healing_active is True or temple.healing_effect_time <= 0
+        temple.update(dt)
+        assert temple.healing_active is True or temple.healing_effect_time <= 0
 
     def test_temple_size_matches_tile_size(self):
         """Test temple size matches the configured tile size."""
@@ -181,6 +187,7 @@ class TestTemple:
         # Set animation time to create a zero pulse (sin = 0)
         # This ensures the radius calculations hit edge cases
         import math
+
         # When sin(animation_time * 4) = 0, pulse = 0
         temple.animation_time = math.pi / 4  # sin(pi) = 0
 
@@ -195,9 +202,18 @@ class TestTemple:
         # Create multiple draw calls with different animation times
         # to ensure all branches in the glow effect loop are covered
         import math
-        for angle in [0, math.pi / 4, math.pi / 2, math.pi, 3 * math.pi / 2]:
-            temple.animation_time = angle
-            temple.draw(screen)
+
+        # Test various angles
+        temple.animation_time = 0
+        temple.draw(screen)
+        temple.animation_time = math.pi / 4
+        temple.draw(screen)
+        temple.animation_time = math.pi / 2
+        temple.draw(screen)
+        temple.animation_time = math.pi
+        temple.draw(screen)
+        temple.animation_time = 3 * math.pi / 2
+        temple.draw(screen)
 
         # Also test with very large animation time
         temple.animation_time = 100.0

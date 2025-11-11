@@ -68,55 +68,44 @@ class Temple:
             step_x = self.x + (i * 2)
             step_y = self.y + self.size - (3 - i) * step_height - 15
             pygame.draw.rect(
-                screen,
-                shadow_color,
-                (step_x, step_y, step_width, step_height)
+                screen, shadow_color, (step_x, step_y, step_width, step_height)
             )
 
         # Main temple floor
         floor_y = self.y + self.size - 15
-        pygame.draw.rect(
-            screen,
-            marble_color,
-            (self.x + 6, floor_y, self.size - 12, 8)
-        )
+        pygame.draw.rect(screen, marble_color, (self.x + 6, floor_y, self.size - 12, 8))
 
         # Draw 4 columns
         column_width = 6
         column_height = 20
-        column_positions = [
-            self.x + 10,
-            self.x + 18,
-            self.x + 26,
-            self.x + 34
-        ]
+        column_positions = [self.x + 10, self.x + 18, self.x + 26, self.x + 34]
 
         for col_x in column_positions:
             # Column shadow
             pygame.draw.rect(
                 screen,
                 shadow_color,
-                (col_x + 1, floor_y - column_height + 1, column_width, column_height)
+                (col_x + 1, floor_y - column_height + 1, column_width, column_height),
             )
             # Column
             pygame.draw.rect(
                 screen,
                 marble_color,
-                (col_x, floor_y - column_height, column_width, column_height)
+                (col_x, floor_y - column_height, column_width, column_height),
             )
             # Column capital (top decoration)
             pygame.draw.rect(
                 screen,
                 gold_color,
-                (col_x - 1, floor_y - column_height, column_width + 2, 3)
+                (col_x - 1, floor_y - column_height, column_width + 2, 3),
             )
 
         # Roof (triangular pediment)
         roof_top_y = floor_y - column_height - 8
         roof_points = [
             (self.x + self.size // 2, roof_top_y),  # Top point
-            (self.x + 8, floor_y - column_height),   # Bottom left
-            (self.x + self.size - 8, floor_y - column_height)  # Bottom right
+            (self.x + 8, floor_y - column_height),  # Bottom left
+            (self.x + self.size - 8, floor_y - column_height),  # Bottom right
         ]
         pygame.draw.polygon(screen, gold_color, roof_points)
         pygame.draw.polygon(screen, shadow_color, roof_points, 2)
@@ -137,16 +126,8 @@ class Temple:
                 # Create surface with per-pixel alpha
                 glow_surface = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
                 glow_color = (50, 255, 50, alpha_value)  # Green healing glow
-                pygame.draw.circle(
-                    glow_surface,
-                    glow_color,
-                    (radius, radius),
-                    radius
-                )
-                screen.blit(
-                    glow_surface,
-                    (center_x - radius, center_y - radius)
-                )
+                pygame.draw.circle(glow_surface, glow_color, (radius, radius), radius)
+                screen.blit(glow_surface, (center_x - radius, center_y - radius))
 
         # Draw healing cross symbol in the center
         cross_color = (255, 100, 100) if self.healing_active else (200, 50, 50)
@@ -154,21 +135,12 @@ class Temple:
         center_y = floor_y - 5
 
         # Vertical bar of cross
-        pygame.draw.rect(
-            screen,
-            cross_color,
-            (center_x - 2, center_y - 6, 4, 12)
-        )
+        pygame.draw.rect(screen, cross_color, (center_x - 2, center_y - 6, 4, 12))
         # Horizontal bar of cross
-        pygame.draw.rect(
-            screen,
-            cross_color,
-            (center_x - 5, center_y - 2, 10, 4)
-        )
+        pygame.draw.rect(screen, cross_color, (center_x - 5, center_y - 2, 10, 4))
 
-        # Draw label below temple with gentle pulsing
+        # Draw label below temple
         font = pygame.font.Font(None, 18)
-        label_alpha = 200 + int(55 * abs(math.sin(self.animation_time)))
         label_text = "Temple"
         text_surface = font.render(label_text, True, (255, 255, 255))
 
