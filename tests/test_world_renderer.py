@@ -67,6 +67,10 @@ class TestWorldRenderer:
         warrior.draw = Mock()
         warrior.inventory = Mock()
         warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
 
         dungeon_manager = Mock()
         dungeon_manager.current_map_id = "test"
@@ -126,6 +130,10 @@ class TestWorldRenderer:
         warrior.draw = Mock()
         warrior.inventory = Mock()
         warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
 
         dungeon_manager = Mock()
         dungeon_manager.current_map_id = "test"
@@ -183,6 +191,10 @@ class TestWorldRenderer:
         warrior.draw = Mock()
         warrior.inventory = Mock()
         warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
 
         dungeon_manager = Mock()
         dungeon_manager.current_map_id = "test"
@@ -242,6 +254,10 @@ class TestWorldRenderer:
         warrior.inventory.armor_slot = None
         warrior.inventory.backpack_slots = [None] * 13  # 13 backpack slots
         warrior.draw = Mock()
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
 
         # Act
         with patch.object(renderer.inventory_ui, "draw") as mock_inventory_draw:

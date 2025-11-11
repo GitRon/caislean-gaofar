@@ -176,7 +176,7 @@ class TestTurnProcessor:
         entity_manager.check_chest_collision.return_value = None
         entity_manager.check_ground_item_pickup.return_value = (False, "")
         entity_manager.check_monster_deaths.return_value = [
-            (loot_item, 7, 14, "banshee")
+            (loot_item, 7, 14, "banshee", 50)
         ]
         entity_manager.drop_item = Mock()
         entity_manager.monsters = []
@@ -202,7 +202,7 @@ class TestTurnProcessor:
 
         # Assert
         entity_manager.drop_item.assert_called_once_with(loot_item, 7, 14)
-        on_monster_death.assert_called_once_with(loot_item, "banshee")
+        on_monster_death.assert_called_once_with(loot_item, "banshee", 50)
 
     def test_process_turn_skips_dead_monsters(self):
         """Test that dead monsters don't take turns."""
