@@ -198,7 +198,9 @@ class TestEventDispatcher:
         dispatcher.handle_events(**mocks)
 
         # Assert
-        mocks["game_state_manager"].show_message.assert_called_once_with("No shop nearby!")
+        mocks["game_state_manager"].show_message.assert_called_once_with(
+            "No shop nearby!"
+        )
 
     @patch("pygame.event.get")
     def test_handle_pickup_key(self, mock_get_events):

@@ -569,7 +569,6 @@ class Game:
         )
         return distance <= 1
 
-
     def draw(self):
         """Draw all game objects."""
         if self.state_manager.state == config.STATE_PLAYING:
