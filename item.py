@@ -20,7 +20,6 @@ class Item:
         description: str = "",
         attack_bonus: int = 0,
         defense_bonus: int = 0,
-        health_bonus: int = 0,
         gold_value: int = 0,
         sell_price: int = None,
         unsellable: bool = False,
@@ -30,7 +29,6 @@ class Item:
         self.description = description
         self.attack_bonus = attack_bonus
         self.defense_bonus = defense_bonus
-        self.health_bonus = health_bonus
         self.gold_value = gold_value  # Gold/currency value of the item (buy price)
         # Sell price defaults to half of buy price if not specified
         self.sell_price = sell_price if sell_price is not None else gold_value // 2

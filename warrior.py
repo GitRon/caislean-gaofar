@@ -115,7 +115,6 @@ class Warrior(Entity):
                 item
                 and item.item_type == ItemType.CONSUMABLE
                 and item.name != "Town Portal"
-                and item.health_bonus > 0
             ):
                 count += 1
         return count
@@ -182,10 +181,9 @@ class Warrior(Entity):
                 item
                 and item.item_type == ItemType.CONSUMABLE
                 and item.name != "Town Portal"
-                and item.health_bonus > 0
             ):
-                # Use the potion
-                heal_amount = item.health_bonus if item.health_bonus > 0 else 30
+                # Use the potion - heals 30 HP
+                heal_amount = 30
                 self.health = min(self.max_health, self.health + heal_amount)
                 # Remove from inventory
                 self.inventory.backpack_slots[i] = None
