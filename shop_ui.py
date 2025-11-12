@@ -30,6 +30,7 @@ class ShopUI:
         self.selected_item_index = None
         self.hovered_item_index = None
         self.item_rects = []  # List of (rect, item/shop_item) tuples
+        self.scroll_offset = 0  # Vertical scroll offset for item list
 
         # Button state
         self.buy_button_rect = None
@@ -201,13 +202,17 @@ class ShopUI:
 
         # Draw each item
         for i, shop_item in enumerate(available_items):
-            item_y = list_y + 5 + i * (item_height + 5)
+            item_y = list_y + 5 + i * (item_height + 5) - self.scroll_offset
             item_rect = pygame.Rect(
                 panel_x + self.padding + 5,
                 item_y,
                 self.panel_width - 2 * self.padding - 10,
                 item_height,
             )
+
+            # Skip items that are above the visible area
+            if item_y + item_height < list_y:
+                continue
 
             # Check if item is within list bounds
             if item_y + item_height > list_y + list_height:
@@ -266,13 +271,17 @@ class ShopUI:
 
         # Draw each item
         for i, item in enumerate(player_items):
-            item_y = list_y + 5 + i * (item_height + 5)
+            item_y = list_y + 5 + i * (item_height + 5) - self.scroll_offset
             item_rect = pygame.Rect(
                 panel_x + self.padding + 5,
                 item_y,
                 self.panel_width - 2 * self.padding - 10,
                 item_height,
             )
+
+            # Skip items that are above the visible area
+            if item_y + item_height < list_y:
+                continue
 
             # Check if item is within list bounds
             if item_y + item_height > list_y + list_height:
@@ -571,6 +580,26 @@ class ShopUI:
         Returns:
             True if the event was handled
         """
+        # Handle mouse wheel scrolling
+        if event.type == pygame.MOUSEWHEEL:
+            # Get the list of items to calculate max scroll
+            if self.active_tab == "buy":
+                num_items = len(shop.get_available_items())
+            else:
+                num_items = len(warrior.inventory.get_all_items())
+
+            # Calculate max scroll (ensure we can see all items)
+            item_height = 65
+            list_height = 310
+            total_height = num_items * (item_height + 5)
+            max_scroll = max(0, total_height - list_height)
+
+            # Update scroll offset
+            scroll_amount = 70  # Pixels per scroll wheel tick
+            self.scroll_offset -= event.y * scroll_amount
+            self.scroll_offset = max(0, min(self.scroll_offset, max_scroll))
+            return True
+
         # Handle confirmation dialog input first
         if self.confirmation_dialog and event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left click
@@ -593,10 +622,12 @@ class ShopUI:
             if self.buy_tab_rect and self.buy_tab_rect.collidepoint(event.pos):
                 self.active_tab = "buy"
                 self.selected_item_index = None
+                self.scroll_offset = 0  # Reset scroll when switching tabs
                 return True
             elif self.sell_tab_rect and self.sell_tab_rect.collidepoint(event.pos):
                 self.active_tab = "sell"
                 self.selected_item_index = None
+                self.scroll_offset = 0  # Reset scroll when switching tabs
                 return True
 
         # Handle item selection
