@@ -28,7 +28,6 @@ def test_serialize_item_with_data():
         description="A test weapon",
         attack_bonus=5,
         defense_bonus=1,
-        health_bonus=2,
         gold_value=100,
     )
 
@@ -39,7 +38,6 @@ def test_serialize_item_with_data():
     assert serialized["description"] == "A test weapon"
     assert serialized["attack_bonus"] == 5
     assert serialized["defense_bonus"] == 1
-    assert serialized["health_bonus"] == 2
     assert serialized["gold_value"] == 100
 
 
@@ -56,7 +54,6 @@ def test_deserialize_item_with_data():
         "description": "Test armor piece",
         "attack_bonus": 2,
         "defense_bonus": 5,
-        "health_bonus": 10,
         "gold_value": 50,
     }
 
@@ -67,7 +64,6 @@ def test_deserialize_item_with_data():
     assert item.description == "Test armor piece"
     assert item.attack_bonus == 2
     assert item.defense_bonus == 5
-    assert item.health_bonus == 10
     assert item.gold_value == 50
 
 
@@ -90,7 +86,6 @@ def test_deserialize_item_minimal_data():
     assert item.description == ""
     assert item.attack_bonus == 0
     assert item.defense_bonus == 0
-    assert item.health_bonus == 0
     assert item.gold_value == 0
 
 
@@ -100,7 +95,7 @@ def test_serialize_inventory():
 
     weapon = Item("Sword", ItemType.WEAPON, attack_bonus=3)
     armor = Item("Shield", ItemType.ARMOR, defense_bonus=2)
-    potion = Item("Potion", ItemType.CONSUMABLE, health_bonus=20)
+    potion = Item("Potion", ItemType.CONSUMABLE)
 
     inventory.weapon_slot = weapon
     inventory.armor_slot = armor

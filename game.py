@@ -9,6 +9,7 @@ from item import Item, ItemType
 from camera import Camera
 from ground_item import GroundItem
 from dungeon_manager import DungeonManager
+from temple import Temple
 from fog_of_war import FogOfWar
 import config
 
@@ -80,6 +81,10 @@ class Game:
 
         # Initialize shop (located at specific position on town map)
         self.shop = Shop(grid_x=4, grid_y=3)  # Position in town
+
+        # Initialize temple (located at specific position on town map)
+        # Position matches 'T' in town.json
+        self.temple = Temple(grid_x=8, grid_y=1)  # Position in town
 
         # Spawn monsters and chests
         self.entity_manager.spawn_monsters(self.world_map, self.dungeon_manager)
@@ -360,6 +365,10 @@ class Game:
         # Update HUD (always update for animations)
         self.renderer.hud.update(self.warrior, dt)
 
+        # Update temple animation
+        if self.temple:
+            self.temple.update(dt)
+
         # Only update game logic when actively playing
         if self.state_manager.state != config.STATE_PLAYING:
             return
@@ -382,6 +391,14 @@ class Game:
         if self.state_manager.check_return_portal_collision(self.warrior):
             self._handle_use_return_portal()
             return
+
+        # Check if player stepped on temple (heal to max HP)
+        if (
+            self.dungeon_manager.current_map_id == "town"
+            and self.warrior.grid_x == self.temple.grid_x
+            and self.warrior.grid_y == self.temple.grid_y
+        ):
+            self._heal_at_temple()
 
         # Check game over conditions
         if not self.warrior.is_alive:
@@ -557,6 +574,15 @@ class Game:
         """Show a message to the player."""
         self.state_manager.show_message(message)
 
+    def _heal_at_temple(self):
+        """Heal the warrior to maximum HP when stepping on the temple."""
+        if self.warrior.health < self.warrior.max_health:
+            # Heal to max HP
+            self.warrior.health = self.warrior.max_health
+            # Activate healing visual effect
+            self.temple.activate_healing()
+            self._show_message("The temple's divine power restores your health!")
+
     def _is_near_shop(self) -> bool:
         """
         Check if player is near the shop.
@@ -583,6 +609,7 @@ class Game:
                 return_portal=self.state_manager.return_portal,
                 message=self.state_manager.message,
                 fog_of_war=self.fog_of_war,
+                temple=self.temple,
             )
         elif self.state_manager.state == config.STATE_INVENTORY:
             self.renderer.draw_inventory_state(
@@ -635,7 +662,6 @@ class Game:
             name="Health Potion",
             item_type=ItemType.CONSUMABLE,
             description="Restores 30 HP",
-            health_bonus=30,
             gold_value=30,
         )
 

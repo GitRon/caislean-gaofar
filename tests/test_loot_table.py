@@ -92,10 +92,9 @@ class TestCreateFunctions:
         assert weapon.description == "Deals 15 extra damage"
         assert weapon.attack_bonus == 15
         assert weapon.defense_bonus == 0
-        assert weapon.health_bonus == 0
 
-    def test_create_common_armor_without_health_bonus(self):
-        """Test create_common_armor without health bonus"""
+    def test_create_common_armor(self):
+        """Test create_common_armor"""
         # Arrange & Act
         armor = create_common_armor("Iron Plate", 10)
 
@@ -104,32 +103,17 @@ class TestCreateFunctions:
         assert armor.item_type == ItemType.ARMOR
         assert armor.description == "+10 defense"
         assert armor.defense_bonus == 10
-        assert armor.health_bonus == 0
-        assert armor.attack_bonus == 0
-
-    def test_create_common_armor_with_health_bonus(self):
-        """Test create_common_armor with health bonus"""
-        # Arrange & Act
-        armor = create_common_armor("Magic Plate", 10, health_bonus=25)
-
-        # Assert
-        assert armor.name == "Magic Plate"
-        assert armor.item_type == ItemType.ARMOR
-        assert armor.description == "+10 defense"
-        assert armor.defense_bonus == 10
-        assert armor.health_bonus == 25
         assert armor.attack_bonus == 0
 
     def test_create_consumable(self):
         """Test create_consumable creates consumable with correct properties"""
         # Arrange & Act
-        potion = create_consumable("Health Potion", 50)
+        potion = create_consumable("Health Potion")
 
         # Assert
         assert potion.name == "Health Potion"
         assert potion.item_type == ItemType.CONSUMABLE
-        assert potion.description == "Restores 50 health"
-        assert potion.health_bonus == 50
+        assert potion.description == "Restores 30 health"
         assert potion.attack_bonus == 0
         assert potion.defense_bonus == 0
 
@@ -144,7 +128,6 @@ class TestCreateFunctions:
         assert misc.description == "Opens special doors"
         assert misc.attack_bonus == 0
         assert misc.defense_bonus == 0
-        assert misc.health_bonus == 0
 
     def test_create_town_portal(self):
         """Test create_town_portal creates town portal with correct properties"""
@@ -156,7 +139,6 @@ class TestCreateFunctions:
         assert portal.item_type == ItemType.CONSUMABLE
         assert "portal" in portal.description.lower()
         assert "town" in portal.description.lower()
-        assert portal.health_bonus == 0
         assert portal.attack_bonus == 0
         assert portal.defense_bonus == 0
 

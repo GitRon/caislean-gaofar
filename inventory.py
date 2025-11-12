@@ -99,15 +99,6 @@ class Inventory:
             bonus += self.armor_slot.defense_bonus
         return bonus
 
-    def get_total_health_bonus(self) -> int:
-        """Calculate total health bonus from all equipped items"""
-        bonus = 0
-        if self.weapon_slot:
-            bonus += self.weapon_slot.health_bonus
-        if self.armor_slot:
-            bonus += self.armor_slot.health_bonus
-        return bonus
-
     def has_space(self) -> bool:
         """Check if inventory has space for at least one more item."""
         # Check if any backpack slot is empty

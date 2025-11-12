@@ -515,8 +515,6 @@ class InventoryUI:
             lines.append(f"Attack: +{item.attack_bonus}")
         if item.defense_bonus > 0:
             lines.append(f"Defense: +{item.defense_bonus}")
-        if item.health_bonus > 0:
-            lines.append(f"Health: +{item.health_bonus}")
 
         # Calculate tooltip size
         padding = 10

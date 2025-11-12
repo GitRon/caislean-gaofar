@@ -174,7 +174,6 @@ class TestChest:
             ItemType.ARMOR,
             "Basic protection",
             defense_bonus=5,
-            health_bonus=10,
         )
 
         # Act
@@ -188,9 +187,7 @@ class TestChest:
     def test_generate_random_item_returns_consumable_type(self):
         """Test _generate_random_item can return consumable type items"""
         # Arrange
-        consumable_item = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores 50 HP", health_bonus=50
-        )
+        consumable_item = Item("Health Potion", ItemType.CONSUMABLE, "Restores 30 HP")
 
         # Act
         with mock.patch("random.choice", return_value=consumable_item):

@@ -59,7 +59,6 @@ class Shop:
             name="Health Potion",
             item_type=ItemType.CONSUMABLE,
             description="Restores 30 HP",
-            health_bonus=30,
             gold_value=25,
         )
         self.inventory.append(ShopItem(health_potion, quantity=999, infinite=True))
@@ -98,7 +97,6 @@ class Shop:
             item_type=ItemType.ARMOR,
             description="Strong chainmail armor",
             defense_bonus=5,
-            health_bonus=10,
             gold_value=80,
         )
         self.inventory.append(ShopItem(chainmail, quantity=2))

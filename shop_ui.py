@@ -325,8 +325,6 @@ class ShopUI:
             stats_text += f"+{item.attack_bonus} ATK  "
         if item.defense_bonus > 0:
             stats_text += f"+{item.defense_bonus} DEF  "
-        if item.health_bonus > 0:
-            stats_text += f"+{item.health_bonus} HP"
 
         if stats_text:
             stats_render = self.small_font.render(stats_text, True, (150, 200, 150))
@@ -375,8 +373,6 @@ class ShopUI:
             stats_text += f"+{item.attack_bonus} ATK  "
         if item.defense_bonus > 0:
             stats_text += f"+{item.defense_bonus} DEF  "
-        if item.health_bonus > 0:
-            stats_text += f"+{item.health_bonus} HP"
 
         if stats_text:
             stats_render = self.small_font.render(stats_text, True, (150, 200, 150))

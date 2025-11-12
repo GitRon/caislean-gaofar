@@ -350,9 +350,7 @@ class TestWarrior:
         warrior = Warrior(5, 5)
         warrior.health = 50
         # Add health potion to inventory
-        potion = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores 30 HP", health_bonus=30
-        )
+        potion = Item("Health Potion", ItemType.CONSUMABLE, "Restores 30 HP")
         warrior.inventory.add_item(potion)
         initial_potions = warrior.count_health_potions()
 
@@ -370,9 +368,7 @@ class TestWarrior:
         warrior = Warrior(5, 5)
         warrior.health = 90
         # Add health potion to inventory
-        potion = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores 30 HP", health_bonus=30
-        )
+        potion = Item("Health Potion", ItemType.CONSUMABLE, "Restores 30 HP")
         warrior.inventory.add_item(potion)
         initial_potions = warrior.count_health_potions()
 
@@ -405,9 +401,7 @@ class TestWarrior:
         warrior = Warrior(5, 5)
         warrior.health = warrior.max_health
         # Add health potion to inventory
-        potion = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores 30 HP", health_bonus=30
-        )
+        potion = Item("Health Potion", ItemType.CONSUMABLE, "Restores 30 HP")
         warrior.inventory.add_item(potion)
         initial_potions = warrior.count_health_potions()
 
@@ -434,15 +428,9 @@ class TestWarrior:
         """Test counting multiple health potions"""
         # Arrange
         warrior = Warrior(5, 5)
-        potion1 = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores HP", health_bonus=30
-        )
-        potion2 = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores HP", health_bonus=30
-        )
-        potion3 = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores HP", health_bonus=30
-        )
+        potion1 = Item("Health Potion", ItemType.CONSUMABLE, "Restores HP")
+        potion2 = Item("Health Potion", ItemType.CONSUMABLE, "Restores HP")
+        potion3 = Item("Health Potion", ItemType.CONSUMABLE, "Restores HP")
         warrior.inventory.add_item(potion1)
         warrior.inventory.add_item(potion2)
         warrior.inventory.add_item(potion3)
@@ -530,9 +518,7 @@ class TestWarrior:
         """Test counting town portals with one portal"""
         # Arrange
         warrior = Warrior(5, 5)
-        town_portal = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
-        )
+        town_portal = Item("Town Portal", ItemType.CONSUMABLE, "Opens a portal to town")
         warrior.inventory.add_item(town_portal)
 
         # Act
@@ -547,13 +533,13 @@ class TestWarrior:
         warrior = Warrior(5, 5)
         # Add 3 town portals
         town_portal1 = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town"
         )
         town_portal2 = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town"
         )
         town_portal3 = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town"
         )
         warrior.inventory.add_item(town_portal1)
         warrior.inventory.add_item(town_portal2)
@@ -569,12 +555,8 @@ class TestWarrior:
         """Test counting town portals with health potions in inventory"""
         # Arrange
         warrior = Warrior(5, 5)
-        health_potion = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores health", health_bonus=30
-        )
-        town_portal = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
-        )
+        health_potion = Item("Health Potion", ItemType.CONSUMABLE, "Restores health")
+        town_portal = Item("Town Portal", ItemType.CONSUMABLE, "Opens a portal to town")
         warrior.inventory.add_item(health_potion)
         warrior.inventory.add_item(town_portal)
         warrior.inventory.add_item(health_potion)
@@ -591,9 +573,7 @@ class TestWarrior:
         """Test using a town portal successfully"""
         # Arrange
         warrior = Warrior(5, 5)
-        town_portal = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
-        )
+        town_portal = Item("Town Portal", ItemType.CONSUMABLE, "Opens a portal to town")
         warrior.inventory.add_item(town_portal)
 
         # Act
@@ -620,13 +600,13 @@ class TestWarrior:
         warrior = Warrior(5, 5)
         # Add 3 town portals
         town_portal1 = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town"
         )
         town_portal2 = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town"
         )
         town_portal3 = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
+            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town"
         )
         warrior.inventory.add_item(town_portal1)
         warrior.inventory.add_item(town_portal2)
@@ -643,12 +623,8 @@ class TestWarrior:
         """Test that health potion count excludes town portals"""
         # Arrange
         warrior = Warrior(5, 5)
-        health_potion = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores health", health_bonus=30
-        )
-        town_portal = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
-        )
+        health_potion = Item("Health Potion", ItemType.CONSUMABLE, "Restores health")
+        town_portal = Item("Town Portal", ItemType.CONSUMABLE, "Opens a portal to town")
         warrior.inventory.add_item(health_potion)
         warrior.inventory.add_item(town_portal)
 
@@ -663,12 +639,8 @@ class TestWarrior:
         # Arrange
         warrior = Warrior(5, 5)
         warrior.health = 50  # Damage warrior
-        health_potion = Item(
-            "Health Potion", ItemType.CONSUMABLE, "Restores health", health_bonus=30
-        )
-        town_portal = Item(
-            "Town Portal", ItemType.CONSUMABLE, "Opens a portal to town", health_bonus=0
-        )
+        health_potion = Item("Health Potion", ItemType.CONSUMABLE, "Restores health")
+        town_portal = Item("Town Portal", ItemType.CONSUMABLE, "Opens a portal to town")
         warrior.inventory.add_item(town_portal)
         warrior.inventory.add_item(health_potion)
 

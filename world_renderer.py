@@ -40,6 +40,7 @@ class WorldRenderer:
         return_portal,
         message: str,
         fog_of_war=None,
+        temple=None,
     ):
         """
         Draw the playing state.
@@ -55,6 +56,7 @@ class WorldRenderer:
             return_portal: Return portal if present
             message: Current message to display
             fog_of_war: Fog of war system (optional)
+            temple: Temple instance (optional)
         """
         self.screen.fill(config.BLACK)
 
@@ -91,6 +93,10 @@ class WorldRenderer:
         # Draw shop building if in town
         if dungeon_manager.current_map_id == "town":
             self._draw_shop_building(camera, shop, warrior)
+
+            # Draw temple if present and in town
+            if temple:
+                self._draw_temple_with_camera(camera, temple)
 
         # Draw entities with camera offset
         self._draw_entities_with_camera(camera, warrior, entity_manager)
@@ -294,6 +300,24 @@ class WorldRenderer:
             portal.draw(self.screen)
             portal.grid_x = original_x
             portal.grid_y = original_y
+
+    def _draw_temple_with_camera(self, camera: Camera, temple):
+        """
+        Draw a temple with camera offset applied.
+
+        Args:
+            camera: The camera instance
+            temple: The temple to draw
+        """
+        if camera.is_visible(temple.grid_x, temple.grid_y):
+            original_x = temple.grid_x
+            original_y = temple.grid_y
+            screen_x, screen_y = camera.world_to_screen(original_x, original_y)
+            temple.grid_x = screen_x
+            temple.grid_y = screen_y
+            temple.draw(self.screen)
+            temple.grid_x = original_x
+            temple.grid_y = original_y
 
     def _draw_shop_building(self, camera: Camera, shop: Shop, warrior: Warrior):
         """
