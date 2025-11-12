@@ -206,8 +206,11 @@ class Game:
         # Find item at this position
         for ground_item in self.ground_items:
             if ground_item.grid_x == grid_x and ground_item.grid_y == grid_y:
-                # Check if it's a gold item (has gold_value > 0)
-                if ground_item.item.gold_value > 0:
+                # Check if it's a gold currency item (gold drops have "Gold" in name)
+                if (
+                    ground_item.item.item_type == ItemType.MISC
+                    and "Gold" in ground_item.item.name
+                ):
                     # Add gold to currency instead of inventory
                     self.warrior.add_gold(ground_item.item.gold_value)
                     self.ground_items.remove(ground_item)
@@ -632,8 +635,11 @@ class Game:
                 ground_item.grid_x == self.warrior.grid_x
                 and ground_item.grid_y == self.warrior.grid_y
             ):
-                # Check if it's a gold item (has gold_value > 0)
-                if ground_item.item.gold_value > 0:
+                # Check if it's a gold currency item (gold drops have "Gold" in name)
+                if (
+                    ground_item.item.item_type == ItemType.MISC
+                    and "Gold" in ground_item.item.name
+                ):
                     # Add gold to currency instead of inventory
                     self.warrior.add_gold(ground_item.item.gold_value)
                     self.ground_items.remove(ground_item)
