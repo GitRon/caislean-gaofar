@@ -200,13 +200,20 @@ class ShopUI:
         pygame.draw.rect(screen, (30, 30, 40), list_rect)
         pygame.draw.rect(screen, config.SHOP_BORDER_COLOR, list_rect, 2)
 
+        # Enable clipping to prevent overflow
+        original_clip = screen.get_clip()
+        screen.set_clip(list_rect)
+
         # Draw each item
         for i, shop_item in enumerate(available_items):
             item_y = list_y + 5 + i * (item_height + 5) - self.scroll_offset
             item_rect = pygame.Rect(
                 panel_x + self.padding + 5,
                 item_y,
-                self.panel_width - 2 * self.padding - 10,
+                self.panel_width
+                - 2 * self.padding
+                - 10
+                - 20,  # Leave space for scrollbar
                 item_height,
             )
 
@@ -215,7 +222,7 @@ class ShopUI:
                 continue
 
             # Check if item is within list bounds
-            if item_y + item_height > list_y + list_height:
+            if item_y > list_y + list_height:
                 break
 
             # Store rect for click detection
@@ -241,6 +248,14 @@ class ShopUI:
             self._draw_item_info(
                 screen, item_rect, shop_item.item, warrior.gold, shop_item
             )
+
+        # Restore original clipping
+        screen.set_clip(original_clip)
+
+        # Draw scrollbar if needed
+        self._draw_scrollbar(
+            screen, panel_x, list_y, list_height, len(available_items), item_height
+        )
 
     def _draw_sell_list(
         self,
@@ -269,13 +284,20 @@ class ShopUI:
         pygame.draw.rect(screen, (30, 30, 40), list_rect)
         pygame.draw.rect(screen, config.SHOP_BORDER_COLOR, list_rect, 2)
 
+        # Enable clipping to prevent overflow
+        original_clip = screen.get_clip()
+        screen.set_clip(list_rect)
+
         # Draw each item
         for i, item in enumerate(player_items):
             item_y = list_y + 5 + i * (item_height + 5) - self.scroll_offset
             item_rect = pygame.Rect(
                 panel_x + self.padding + 5,
                 item_y,
-                self.panel_width - 2 * self.padding - 10,
+                self.panel_width
+                - 2 * self.padding
+                - 10
+                - 20,  # Leave space for scrollbar
                 item_height,
             )
 
@@ -284,7 +306,7 @@ class ShopUI:
                 continue
 
             # Check if item is within list bounds
-            if item_y + item_height > list_y + list_height:
+            if item_y > list_y + list_height:
                 break
 
             # Store rect for click detection
@@ -308,6 +330,14 @@ class ShopUI:
 
             # Draw item info for selling
             self._draw_item_info_sell(screen, item_rect, item)
+
+        # Restore original clipping
+        screen.set_clip(original_clip)
+
+        # Draw scrollbar if needed
+        self._draw_scrollbar(
+            screen, panel_x, list_y, list_height, len(player_items), item_height
+        )
 
     def _draw_item_info(
         self,
@@ -545,6 +575,56 @@ class ShopUI:
         # Store button rects for click detection
         self.confirmation_dialog["yes_rect"] = yes_button_rect
         self.confirmation_dialog["no_rect"] = no_button_rect
+
+    def _draw_scrollbar(
+        self,
+        screen: pygame.Surface,
+        panel_x: int,
+        list_y: int,
+        list_height: int,
+        num_items: int,
+        item_height: int,
+    ):
+        """Draw scrollbar indicator if content is scrollable."""
+        # Calculate if scrollbar is needed
+        total_content_height = num_items * (item_height + 5)
+        if total_content_height <= list_height:
+            return  # No scrollbar needed
+
+        # Scrollbar dimensions
+        scrollbar_width = 12
+        scrollbar_x = panel_x + self.panel_width - self.padding - scrollbar_width - 5
+        scrollbar_track_rect = pygame.Rect(
+            scrollbar_x, list_y + 5, scrollbar_width, list_height - 10
+        )
+
+        # Draw scrollbar track
+        pygame.draw.rect(screen, (40, 40, 50), scrollbar_track_rect, border_radius=6)
+
+        # Calculate scrollbar thumb size and position
+        visible_ratio = list_height / total_content_height
+        thumb_height = max(30, int(scrollbar_track_rect.height * visible_ratio))
+
+        max_scroll = total_content_height - list_height
+        scroll_ratio = self.scroll_offset / max_scroll if max_scroll > 0 else 0
+        thumb_y = scrollbar_track_rect.y + scroll_ratio * (
+            scrollbar_track_rect.height - thumb_height
+        )
+
+        thumb_rect = pygame.Rect(scrollbar_x, thumb_y, scrollbar_width, thumb_height)
+
+        # Draw scrollbar thumb
+        pygame.draw.rect(screen, (100, 100, 120), thumb_rect, border_radius=6)
+        pygame.draw.rect(
+            screen, config.SHOP_BORDER_COLOR, thumb_rect, 1, border_radius=6
+        )
+
+        # Draw scroll hint text if at top
+        if self.scroll_offset == 0 and num_items > 4:
+            hint_text = self.small_font.render("Scroll ↓", True, (150, 150, 150))
+            hint_x = scrollbar_x - hint_text.get_width() - 10
+            hint_y = list_y + list_height - 25
+            screen.blit(hint_text, (hint_x, hint_y))
 
     def _wrap_text(self, text: str, max_width: int) -> list:
         """Wrap text to fit within max_width."""
