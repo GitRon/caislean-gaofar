@@ -369,6 +369,9 @@ class Game:
         if self.temple:
             self.temple.update(dt)
 
+        # Update attack effects
+        self.renderer.attack_effect_manager.update(dt)
+
         # Only update game logic when actively playing
         if self.state_manager.state != config.STATE_PLAYING:
             return
@@ -415,6 +418,7 @@ class Game:
             on_chest_opened=self._handle_chest_opened,
             on_item_picked=self._show_message,
             on_monster_death=self._handle_monster_death,
+            attack_effect_manager=self.renderer.attack_effect_manager,
         )
 
     def _check_dungeon_transition(self):
