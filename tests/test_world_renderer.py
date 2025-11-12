@@ -1038,3 +1038,179 @@ class TestWorldRenderer:
         # Assert
         warrior.draw.assert_called_once()
         monster.draw.assert_not_called()  # Dead monster not drawn
+
+    @patch("pygame.display.flip")
+    def test_draw_playing_state_with_temple_in_town(self, mock_flip):
+        """Test drawing temple when in town."""
+        # Arrange
+        screen = pygame.Surface((800, 600))
+        renderer = WorldRenderer(screen)
+
+        world_map = Mock()
+        world_map.draw = Mock()
+
+        camera = Mock()
+        camera.x = 0
+        camera.y = 0
+        camera.viewport_width = 800
+        camera.viewport_height = 600
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = []
+        entity_manager.monsters = []
+        entity_manager.get_nearest_alive_monster.return_value = None
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.health = 100
+        warrior.max_health = 100
+        warrior.gold = 50
+        warrior.draw = Mock()
+        warrior.inventory = Mock()
+        warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "town"
+
+        shop = Mock()
+        shop.grid_x = 4
+        shop.grid_y = 3
+
+        temple = Mock()
+        temple.grid_x = 8
+        temple.grid_y = 1
+        temple.draw = Mock()
+
+        # Act
+        with patch.object(renderer, "_draw_temple_with_camera") as mock_draw_temple:
+            renderer.draw_playing_state(
+                world_map=world_map,
+                camera=camera,
+                entity_manager=entity_manager,
+                warrior=warrior,
+                dungeon_manager=dungeon_manager,
+                shop=shop,
+                active_portal=None,
+                return_portal=None,
+                message="",
+                fog_of_war=None,
+                temple=temple,
+            )
+
+            # Assert
+            mock_draw_temple.assert_called_once_with(camera, temple)
+
+    @patch("pygame.display.flip")
+    def test_draw_playing_state_without_temple(self, mock_flip):
+        """Test drawing when temple is None."""
+        # Arrange
+        screen = pygame.Surface((800, 600))
+        renderer = WorldRenderer(screen)
+
+        world_map = Mock()
+        world_map.draw = Mock()
+
+        camera = Mock()
+        camera.x = 0
+        camera.y = 0
+        camera.viewport_width = 800
+        camera.viewport_height = 600
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = []
+        entity_manager.monsters = []
+        entity_manager.get_nearest_alive_monster.return_value = None
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.health = 100
+        warrior.max_health = 100
+        warrior.gold = 50
+        warrior.draw = Mock()
+        warrior.inventory = Mock()
+        warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "town"
+
+        shop = Mock()
+        shop.grid_x = 4
+        shop.grid_y = 3
+
+        # Act
+        with patch.object(renderer, "_draw_temple_with_camera") as mock_draw_temple:
+            renderer.draw_playing_state(
+                world_map=world_map,
+                camera=camera,
+                entity_manager=entity_manager,
+                warrior=warrior,
+                dungeon_manager=dungeon_manager,
+                shop=shop,
+                active_portal=None,
+                return_portal=None,
+                message="",
+                fog_of_war=None,
+                temple=None,
+            )
+
+            # Assert - temple drawing should not be called
+            mock_draw_temple.assert_not_called()
+
+    def test_draw_temple_with_camera(self):
+        """Test drawing temple with camera transformation."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (20, 30)
+
+        temple = Mock()
+        temple.grid_x = 8
+        temple.grid_y = 1
+        temple.draw = Mock()
+
+        # Act
+        renderer._draw_temple_with_camera(camera, temple)
+
+        # Assert
+        temple.draw.assert_called_once_with(screen)
+        assert temple.grid_x == 8  # Restored
+        assert temple.grid_y == 1
+
+    def test_draw_temple_not_visible(self):
+        """Test that temple is not drawn when not visible."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = False
+
+        temple = Mock()
+        temple.grid_x = 8
+        temple.grid_y = 1
+        temple.draw = Mock()
+
+        # Act
+        renderer._draw_temple_with_camera(camera, temple)
+
+        # Assert
+        temple.draw.assert_not_called()
