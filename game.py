@@ -649,17 +649,20 @@ class Game:
             item_type=ItemType.WEAPON,
             description="A basic short sword",
             attack_bonus=3,
+            gold_value=30,
         )
         woolen_tunic = Item(
             name="Woolen Tunic",
             item_type=ItemType.ARMOR,
             description="A simple woolen tunic",
             defense_bonus=1,
+            gold_value=10,
         )
         health_potion = Item(
             name="Health Potion",
             item_type=ItemType.CONSUMABLE,
             description="Restores 30 HP",
+            gold_value=30,
         )
 
         # Equip starting items (they'll auto-equip to appropriate slots)
