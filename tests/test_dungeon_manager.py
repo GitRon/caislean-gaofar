@@ -90,15 +90,26 @@ class TestDungeonManager:
         manager = DungeonManager(map_path)
         manager.load_world_map()
         dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
-        manager.load_dungeon("dark_cave", dungeon_path)
+        manager.load_dungeon("forgotten_tomb", dungeon_path)
 
         # Check dungeon entrance location (from overworld.json)
-        dungeon_id = manager.get_dungeon_at_position(11, 15)
-        assert dungeon_id == "dark_cave"
+        dungeon_id = manager.get_dungeon_at_position(12, 12)
+        assert dungeon_id == "forgotten_tomb"
 
         # Check non-dungeon location
         dungeon_id = manager.get_dungeon_at_position(5, 5)
         assert dungeon_id is None
+
+    def test_get_dungeon_at_position_not_loaded(self):
+        """Test finding dungeon entrance when dungeon not loaded yet."""
+        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+        # Don't load the dungeon, just check the position
+
+        # Check dungeon entrance location (entrance exists but dungeon not loaded)
+        dungeon_id = manager.get_dungeon_at_position(12, 12)
+        assert dungeon_id is None  # Should return None because dungeon not loaded
 
     def test_get_dungeon_at_position_when_in_dungeon(self):
         """Test that dungeon detection doesn't work when already in dungeon."""
@@ -208,23 +219,24 @@ class TestDungeonManager:
 
         # Load both dungeons
         manager.load_dungeon(
-            "dark_cave", config.resource_path(os.path.join("maps", "dark_cave.json"))
+            "forgotten_tomb",
+            config.resource_path(os.path.join("maps", "dark_cave.json")),
         )
         manager.load_dungeon(
-            "ancient_castle",
+            "mystic_grotto",
             config.resource_path(os.path.join("maps", "ancient_castle.json")),
         )
 
         assert len(manager.dungeon_maps) == 2
-        assert "dark_cave" in manager.dungeon_maps
-        assert "ancient_castle" in manager.dungeon_maps
+        assert "forgotten_tomb" in manager.dungeon_maps
+        assert "mystic_grotto" in manager.dungeon_maps
 
         # Check different entrance locations
-        dark_cave_id = manager.get_dungeon_at_position(11, 15)
-        assert dark_cave_id == "dark_cave"
+        forgotten_tomb_id = manager.get_dungeon_at_position(12, 12)
+        assert forgotten_tomb_id == "forgotten_tomb"
 
-        ancient_castle_id = manager.get_dungeon_at_position(32, 21)
-        assert ancient_castle_id == "ancient_castle"
+        mystic_grotto_id = manager.get_dungeon_at_position(13, 13)
+        assert mystic_grotto_id == "mystic_grotto"
 
     def test_dungeon_state_preservation(self):
         """Test that return location is preserved correctly."""
