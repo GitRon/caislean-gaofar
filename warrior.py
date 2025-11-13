@@ -367,8 +367,20 @@ class Warrior(Entity):
 
         return {"success": False}
 
-    def draw(self, screen: pygame.Surface):
-        """Draw the warrior as a human player character."""
+    def draw(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
+        """
+        Draw the warrior as a human player character.
+
+        Args:
+            screen: The pygame screen surface
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+        """
         # Define colors for the human character
         SKIN_COLOR = (255, 220, 177)  # Flesh tone
         ARMOR_COLOR = (70, 130, 180)  # Steel blue armor
@@ -377,8 +389,12 @@ class Warrior(Entity):
         SWORD_COLOR = (192, 192, 192)  # Silver sword
         SWORD_HANDLE = (139, 69, 19)  # Brown handle
 
-        center_x = self.x + self.size // 2
-        center_y = self.y + self.size // 2
+        # Calculate screen coordinates with camera offset
+        screen_x = self.get_screen_x(camera_offset_x)
+        screen_y = self.get_screen_y(camera_offset_y)
+
+        center_x = screen_x + self.size // 2
+        center_y = screen_y + self.size // 2
 
         # Calculate scaled dimensions based on tile size
         scale = self.size / 50  # Base scale on 50px tiles
@@ -560,4 +576,4 @@ class Warrior(Entity):
         )
 
         # Draw health bar on top
-        self.draw_health_bar(screen)
+        self.draw_health_bar(screen, camera_offset_x, camera_offset_y)

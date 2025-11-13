@@ -117,26 +117,42 @@ class BaseMonster(Entity):
                 # If blocked, try horizontal
                 self.move(dx, 0, world_map)
 
-    def draw(self, screen: pygame.Surface):
-        """Draw the monster using its specific renderer."""
+    def draw(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
+        """
+        Draw the monster using its specific renderer.
+
+        Args:
+            screen: The pygame screen surface
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+        """
         # Increment frame counter for animations
         self.frame_count += 1
+
+        # Calculate screen coordinates with camera offset
+        screen_x = self.get_screen_x(camera_offset_x)
+        screen_y = self.get_screen_y(camera_offset_y)
 
         # Get the appropriate rendering function for this monster type
         renderer = MONSTER_RENDERERS.get(self.monster_type)
 
         if renderer:
             # Use custom renderer - pass center position of entity
-            center_x = int(self.x + self.size / 2)
-            center_y = int(self.y + self.size / 2)
+            center_x = int(screen_x + self.size / 2)
+            center_y = int(screen_y + self.size / 2)
             renderer(screen, center_x, center_y, self.size, self.frame_count)
         else:
             # Fallback to original simple rectangle + eyes if type not found
-            super().draw(screen)
+            super().draw(screen, camera_offset_x, camera_offset_y)
             eye_size = 6
-            left_eye_x = int(self.x + self.size * 0.3)
-            right_eye_x = int(self.x + self.size * 0.7)
-            eye_y = int(self.y + self.size * 0.3)
+            left_eye_x = int(screen_x + self.size * 0.3)
+            right_eye_x = int(screen_x + self.size * 0.7)
+            eye_y = int(screen_y + self.size * 0.3)
             pygame.draw.circle(screen, config.YELLOW, (left_eye_x, eye_y), eye_size)
             pygame.draw.circle(screen, config.YELLOW, (right_eye_x, eye_y), eye_size)
             pygame.draw.circle(screen, config.BLACK, (left_eye_x, eye_y), eye_size // 2)
@@ -145,4 +161,4 @@ class BaseMonster(Entity):
             )
 
         # Draw health bar on top of custom render
-        self.draw_health_bar(screen)
+        self.draw_health_bar(screen, camera_offset_x, camera_offset_y)

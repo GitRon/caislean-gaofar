@@ -63,6 +63,30 @@ class Entity:
         """Get the center position of the entity in pixels."""
         return (self.x + self.size / 2, self.y + self.size / 2)
 
+    def get_screen_x(self, camera_offset_x: int = 0) -> int:
+        """
+        Get the screen pixel x coordinate with camera offset applied.
+
+        Args:
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel x coordinate
+        """
+        return (self.grid_x - camera_offset_x) * config.TILE_SIZE
+
+    def get_screen_y(self, camera_offset_y: int = 0) -> int:
+        """
+        Get the screen pixel y coordinate with camera offset applied.
+
+        Args:
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel y coordinate
+        """
+        return (self.grid_y - camera_offset_y) * config.TILE_SIZE
+
     def grid_distance_to(self, other: "Entity") -> int:
         """Calculate Manhattan distance to another entity in tiles."""
         return Grid.manhattan_distance(
@@ -132,20 +156,50 @@ class Entity:
                 return True
         return False
 
-    def draw(self, screen: pygame.Surface):
-        """Draw the entity on the screen."""
+    def draw(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
+        """
+        Draw the entity on the screen.
+
+        Args:
+            screen: The pygame screen surface
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+        """
+        # Calculate screen coordinates with camera offset
+        screen_x = self.get_screen_x(camera_offset_x)
+        screen_y = self.get_screen_y(camera_offset_y)
+
         # Draw entity
-        pygame.draw.rect(screen, self.color, self.get_rect())
+        pygame.draw.rect(
+            screen, self.color, pygame.Rect(screen_x, screen_y, self.size, self.size)
+        )
 
         # Draw health bar
-        self.draw_health_bar(screen)
+        self.draw_health_bar(screen, camera_offset_x, camera_offset_y)
 
-    def draw_health_bar(self, screen: pygame.Surface):
-        """Draw health bar above the entity."""
+    def draw_health_bar(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
+        """
+        Draw health bar above the entity.
+
+        Args:
+            screen: The pygame screen surface
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+        """
         bar_width = self.size
         bar_height = 5
-        bar_x = self.x
-        bar_y = self.y - 10
+        bar_x = self.get_screen_x(camera_offset_x)
+        bar_y = self.get_screen_y(camera_offset_y) - 10
 
         # Background (red)
         pygame.draw.rect(screen, config.DARK_RED, (bar_x, bar_y, bar_width, bar_height))

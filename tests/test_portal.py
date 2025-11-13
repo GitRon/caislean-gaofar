@@ -54,16 +54,22 @@ class TestPortal:
 
         assert portal.animation_time == pytest.approx(0.6)
 
-    def test_portal_draw_updates_position(self, screen):
-        """Test draw method updates position based on grid coordinates."""
-        portal = Portal(2, 3, False)
+    def test_portal_screen_coordinates_with_camera_offset(self, screen):
+        """Test portal calculates screen coordinates correctly with camera offset."""
+        portal = Portal(10, 15, False)
 
-        # Change grid position
-        portal.grid_x = 5
-        portal.draw(screen)
+        # Test without camera offset
+        assert portal.get_screen_x(0) == 10 * config.TILE_SIZE
+        assert portal.get_screen_y(0) == 15 * config.TILE_SIZE
 
-        # Position should be updated during draw
-        assert portal.x == 5 * config.TILE_SIZE
+        # Test with camera offset
+        assert portal.get_screen_x(3) == 7 * config.TILE_SIZE
+        assert portal.get_screen_y(5) == 10 * config.TILE_SIZE
+
+        # Verify draw doesn't mutate position
+        portal.draw(screen, 3, 5)
+        assert portal.x == 10 * config.TILE_SIZE  # Should remain unchanged
+        assert portal.y == 15 * config.TILE_SIZE  # Should remain unchanged
 
     def test_portal_draw_town_portal(self, screen):
         """Test drawing a town portal (not return)."""
