@@ -6,7 +6,7 @@ import pygame
 import random
 from typing import Optional
 from caislean_gaofar.objects.item import Item, ItemType
-from caislean_gaofar.core.config import TILE_SIZE, COLOR_CHEST, GOLD
+from caislean_gaofar.core.config import TILE_SIZE
 from caislean_gaofar.utils.grid import Grid
 
 
