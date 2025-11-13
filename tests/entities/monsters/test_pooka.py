@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.pooka import Pooka
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.pooka import Pooka
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestPooka:

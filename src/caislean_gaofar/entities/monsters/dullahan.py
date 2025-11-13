@@ -2,8 +2,8 @@
 
 import pygame
 import math
-from monsters.base_monster import BaseMonster
-import visual_components
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
+from caislean_gaofar.ui import visual_components
 
 
 class Dullahan(BaseMonster):

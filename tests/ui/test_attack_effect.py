@@ -2,7 +2,7 @@
 
 import pytest
 import pygame
-from attack_effect import AttackEffect, AttackEffectManager
+from caislean_gaofar.ui.attack_effect import AttackEffect, AttackEffectManager
 
 
 class TestAttackEffect:

@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.banshee import Banshee
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.banshee import Banshee
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestBanshee:

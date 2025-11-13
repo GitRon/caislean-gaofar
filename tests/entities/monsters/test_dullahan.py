@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.dullahan import Dullahan
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.dullahan import Dullahan
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestDullahan:

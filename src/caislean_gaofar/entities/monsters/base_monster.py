@@ -1,8 +1,8 @@
 """Base Monster class - shared logic for all monster types."""
 
 import pygame
-from entity import Entity
-import config
+from caislean_gaofar.entities.entity import Entity
+from caislean_gaofar.core import config
 
 
 class BaseMonster(Entity):

@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.changeling import Changeling
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.changeling import Changeling
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestChangeling:

@@ -2,7 +2,7 @@
 
 import pygame
 import pytest
-import visual_components
+from caislean_gaofar.ui import visual_components
 
 
 class TestVisualComponents:

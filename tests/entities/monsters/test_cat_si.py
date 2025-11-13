@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.cat_si import CatSi
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.cat_si import CatSi
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestCatSi:

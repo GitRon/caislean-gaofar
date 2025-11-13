@@ -3,10 +3,10 @@
 import pytest
 from unittest.mock import Mock, patch
 import pygame
-from monsters.base_monster import BaseMonster
-from entity import Entity
-from warrior import Warrior
-import config
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.entity import Entity
+from caislean_gaofar.entities.warrior import Warrior
+from caislean_gaofar.core import config
 
 
 @pytest.fixture

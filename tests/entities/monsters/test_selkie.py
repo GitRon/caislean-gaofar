@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.selkie import Selkie
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.selkie import Selkie
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestSelkie:

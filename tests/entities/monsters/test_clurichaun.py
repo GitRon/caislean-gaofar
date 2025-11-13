@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.clurichaun import Clurichaun
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.clurichaun import Clurichaun
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestClurichaun:

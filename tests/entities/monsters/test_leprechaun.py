@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.leprechaun import Leprechaun
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.leprechaun import Leprechaun
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestLeprechaun:

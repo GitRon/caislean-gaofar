@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.merrow import Merrow
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.merrow import Merrow
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestMerrow:

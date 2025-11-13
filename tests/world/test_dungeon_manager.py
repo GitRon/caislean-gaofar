@@ -2,8 +2,8 @@
 
 import pytest
 import os
-from dungeon_manager import DungeonManager
-import config
+from caislean_gaofar.world.dungeon_manager import DungeonManager
+from caislean_gaofar.core import config
 
 
 class TestDungeonManager:
@@ -19,7 +19,7 @@ class TestDungeonManager:
 
     def test_load_world_map(self):
         """Test loading world map."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
 
@@ -34,7 +34,7 @@ class TestDungeonManager:
     def test_load_dungeon(self):
         """Test loading a dungeon map."""
         manager = DungeonManager()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave", dungeon_path)
 
         assert "dark_cave" in manager.dungeon_maps
@@ -43,7 +43,7 @@ class TestDungeonManager:
 
     def test_get_current_map_world(self):
         """Test getting current map when in world."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
 
@@ -52,10 +52,10 @@ class TestDungeonManager:
 
     def test_get_current_map_dungeon(self):
         """Test getting current map when in dungeon."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -67,10 +67,10 @@ class TestDungeonManager:
 
     def test_is_in_dungeon(self):
         """Test checking if currently in a dungeon."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Initially in world
@@ -86,10 +86,10 @@ class TestDungeonManager:
 
     def test_get_dungeon_at_position(self):
         """Test finding dungeon at position."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave_1", dungeon_path)
 
         # Check dungeon entrance location (from overworld.json)
@@ -102,7 +102,7 @@ class TestDungeonManager:
 
     def test_get_dungeon_at_position_not_loaded(self):
         """Test finding dungeon entrance when dungeon not loaded yet."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
         # Don't load the dungeon, just check the position
@@ -113,10 +113,10 @@ class TestDungeonManager:
 
     def test_get_dungeon_at_position_when_in_dungeon(self):
         """Test that dungeon detection doesn't work when already in dungeon."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -128,10 +128,10 @@ class TestDungeonManager:
 
     def test_enter_dungeon(self):
         """Test entering a dungeon."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -146,7 +146,7 @@ class TestDungeonManager:
 
     def test_enter_dungeon_invalid_id(self):
         """Test entering a dungeon with invalid ID raises error."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
 
@@ -155,10 +155,10 @@ class TestDungeonManager:
 
     def test_exit_dungeon(self):
         """Test exiting a dungeon."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -176,7 +176,7 @@ class TestDungeonManager:
 
     def test_exit_dungeon_when_not_in_dungeon(self):
         """Test exiting dungeon when not in one returns None."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
 
@@ -185,10 +185,10 @@ class TestDungeonManager:
 
     def test_check_for_exit(self):
         """Test checking for exit tile in dungeon."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -204,7 +204,7 @@ class TestDungeonManager:
 
     def test_check_for_exit_when_not_in_dungeon(self):
         """Test exit check returns False when not in dungeon."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
 
@@ -213,18 +213,18 @@ class TestDungeonManager:
 
     def test_multiple_dungeons(self):
         """Test managing multiple dungeons."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
 
         # Load both dungeons
         manager.load_dungeon(
             "dark_cave_1",
-            config.resource_path(os.path.join("maps", "dark_cave.json")),
+            config.resource_path(os.path.join("data", "maps", "dark_cave.json")),
         )
         manager.load_dungeon(
             "mystic_grotto",
-            config.resource_path(os.path.join("maps", "dark_cave.json")),
+            config.resource_path(os.path.join("data", "maps", "dark_cave.json")),
         )
 
         assert len(manager.dungeon_maps) == 2
@@ -240,10 +240,10 @@ class TestDungeonManager:
 
     def test_dungeon_state_preservation(self):
         """Test that return location is preserved correctly."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Test first entry/exit
@@ -269,10 +269,10 @@ class TestDungeonManager:
 
     def test_check_for_exit_invalid_position(self):
         """Test exit check with invalid position returns False."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -288,7 +288,7 @@ class TestDungeonManager:
     def test_load_dungeon_entrance_without_explicit_id(self):
         """Test loading dungeon entrances when id is not provided in spawn data."""
         # Create a manager and manually modify world map to test fallback ID generation
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
 
@@ -297,7 +297,7 @@ class TestDungeonManager:
 
     def test_get_dungeon_at_position_dungeon_not_loaded(self):
         """Test that dungeon entrance returns None if dungeon not loaded."""
-        map_path = config.resource_path(os.path.join("maps", "overworld.json"))
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
 

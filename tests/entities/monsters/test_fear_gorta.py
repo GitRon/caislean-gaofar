@@ -3,8 +3,8 @@
 import pygame
 import pytest
 
-from monsters.fear_gorta import FearGorta
-from monsters.base_monster import BaseMonster
+from caislean_gaofar.entities.monsters.fear_gorta import FearGorta
+from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class TestFearGorta:
