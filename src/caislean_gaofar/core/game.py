@@ -68,7 +68,9 @@ class Game:
         self.dungeon_manager.load_dungeon("ancient_keep", ancient_castle_path)
 
         # Town
-        self.dungeon_manager.load_dungeon("town", os.path.join("data", "maps", "town.json"))
+        self.dungeon_manager.load_dungeon(
+            "town", os.path.join("data", "maps", "town.json")
+        )
 
         # Get current map (initially world map)
         self.world_map = self.dungeon_manager.get_current_map()

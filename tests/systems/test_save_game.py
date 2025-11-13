@@ -358,7 +358,10 @@ def test_save_game_handles_exception(temp_save_dir):
     game.warrior.grid_y = 10
 
     # Make json.dump raise an exception
-    with patch("caislean_gaofar.systems.save_game.json.dump", side_effect=Exception("Test error")):
+    with patch(
+        "caislean_gaofar.systems.save_game.json.dump",
+        side_effect=Exception("Test error"),
+    ):
         result = SaveGame.save_game(game, "test_error")
         assert result is False
 
@@ -383,7 +386,10 @@ def test_delete_save_handles_exception(temp_save_dir):
     with open(filepath, "w") as f:
         json.dump({"test": "data"}, f)
 
-    with patch("caislean_gaofar.systems.save_game.os.remove", side_effect=Exception("Test error")):
+    with patch(
+        "caislean_gaofar.systems.save_game.os.remove",
+        side_effect=Exception("Test error"),
+    ):
         result = SaveGame.delete_save("test")
         assert result is False
 

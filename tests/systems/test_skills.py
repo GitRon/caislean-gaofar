@@ -1,7 +1,12 @@
 """Tests for skills.py - Skills system"""
 
 from unittest.mock import patch
-from caislean_gaofar.systems.skills import Skill, SkillType, SkillManager, WARRIOR_SKILLS
+from caislean_gaofar.systems.skills import (
+    Skill,
+    SkillType,
+    SkillManager,
+    WARRIOR_SKILLS,
+)
 
 
 class TestSkill:

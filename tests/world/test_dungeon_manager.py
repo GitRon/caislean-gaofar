@@ -34,7 +34,9 @@ class TestDungeonManager:
     def test_load_dungeon(self):
         """Test loading a dungeon map."""
         manager = DungeonManager()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave", dungeon_path)
 
         assert "dark_cave" in manager.dungeon_maps
@@ -55,7 +57,9 @@ class TestDungeonManager:
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -70,7 +74,9 @@ class TestDungeonManager:
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Initially in world
@@ -89,7 +95,9 @@ class TestDungeonManager:
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave_1", dungeon_path)
 
         # Check dungeon entrance location (from overworld.json)
@@ -116,7 +124,9 @@ class TestDungeonManager:
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -131,7 +141,9 @@ class TestDungeonManager:
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -158,7 +170,9 @@ class TestDungeonManager:
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -188,7 +202,9 @@ class TestDungeonManager:
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon
@@ -243,7 +259,9 @@ class TestDungeonManager:
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Test first entry/exit
@@ -272,7 +290,9 @@ class TestDungeonManager:
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
-        dungeon_path = config.resource_path(os.path.join("data", "maps", "dark_cave.json"))
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
         manager.load_dungeon("dark_cave", dungeon_path)
 
         # Enter dungeon

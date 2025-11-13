@@ -34,7 +34,9 @@ def test_main_menu_init(mock_screen):
 
 def test_load_save_files_empty(main_menu):
     """Test loading save files when none exist."""
-    with patch("caislean_gaofar.ui.main_menu.SaveGame.list_save_files", return_value=[]):
+    with patch(
+        "caislean_gaofar.ui.main_menu.SaveGame.list_save_files", return_value=[]
+    ):
         main_menu.load_save_files()
         assert main_menu.save_files == []
 
@@ -45,7 +47,9 @@ def test_load_save_files_with_data(main_menu):
         {"filename": "save1", "timestamp": "2024-01-01T12:00:00"},
         {"filename": "save2", "timestamp": "2024-01-02T12:00:00"},
     ]
-    with patch("caislean_gaofar.ui.main_menu.SaveGame.list_save_files", return_value=mock_saves):
+    with patch(
+        "caislean_gaofar.ui.main_menu.SaveGame.list_save_files", return_value=mock_saves
+    ):
         main_menu.load_save_files()
         assert main_menu.save_files == mock_saves
 
@@ -65,7 +69,9 @@ def test_select_load_game(main_menu):
     main_menu.save_files = [{"filename": "test_save"}]
     main_menu.selected_option = 1
 
-    with patch("caislean_gaofar.ui.main_menu.SaveGame.load_game", return_value=mock_save_data):
+    with patch(
+        "caislean_gaofar.ui.main_menu.SaveGame.load_game", return_value=mock_save_data
+    ):
         main_menu.select_option()
 
         assert main_menu.result == ("load", mock_save_data)
@@ -93,8 +99,13 @@ def test_delete_selected_save(main_menu):
     main_menu.save_files = mock_saves.copy()
     main_menu.selected_option = 1  # Select first save (index 0)
 
-    with patch("caislean_gaofar.ui.main_menu.SaveGame.delete_save", return_value=True) as mock_delete:
-        with patch("caislean_gaofar.ui.main_menu.SaveGame.list_save_files", return_value=[mock_saves[1]]):
+    with patch(
+        "caislean_gaofar.ui.main_menu.SaveGame.delete_save", return_value=True
+    ) as mock_delete:
+        with patch(
+            "caislean_gaofar.ui.main_menu.SaveGame.list_save_files",
+            return_value=[mock_saves[1]],
+        ):
             main_menu.delete_selected_save()
             mock_delete.assert_called_once_with("save1")
             assert len(main_menu.save_files) == 1
@@ -116,7 +127,9 @@ def test_delete_adjusts_selection_when_needed(main_menu):
     main_menu.selected_option = 1  # Only save
 
     with patch("caislean_gaofar.ui.main_menu.SaveGame.delete_save", return_value=True):
-        with patch("caislean_gaofar.ui.main_menu.SaveGame.list_save_files", return_value=[]):
+        with patch(
+            "caislean_gaofar.ui.main_menu.SaveGame.list_save_files", return_value=[]
+        ):
             main_menu.delete_selected_save()
             # Selection should be adjusted to 0 (no saves left)
             assert main_menu.selected_option == 0
