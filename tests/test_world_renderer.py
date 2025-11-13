@@ -1833,3 +1833,85 @@ class TestWorldRenderer:
             mock_cave.assert_not_called()
             mock_castle.assert_not_called()
             mock_dungeon.assert_not_called()
+
+    @patch("pygame.draw.rect")
+    def test_draw_dungeons_name_display_with_multiple_spawns(self, mock_draw_rect):
+        """Test dungeon name display when spawn data has multiple entries."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "C", "."],  # Cave entrance at (1, 1)
+            [".", ".", "."],
+        ]
+        # Multiple spawns - the matching one is NOT first
+        world_map.get_entity_spawns.return_value = [
+            {"id": "other_dungeon", "name": "Other Cave", "x": 0, "y": 0},
+            {"id": "another_dungeon", "name": "Another Cave", "x": 2, "y": 2},
+            {"id": "cave_dungeon", "name": "Dark Cave", "x": 1, "y": 1},  # Match
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"cave_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 1  # On the dungeon entrance
+        warrior.grid_y = 1  # Distance = 0
+
+        # Act
+        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert - text should still be drawn (matching spawn found)
+            mock_draw_cave.assert_called_once()
+            assert mock_draw_rect.call_count >= 1  # Background for text
+            assert screen.blit.call_count >= 1  # Text rendered
+
+    @patch("pygame.draw.rect")
+    def test_draw_dungeons_name_display_no_matching_spawn(self, mock_draw_rect):
+        """Test dungeon name display when no matching spawn data exists."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "C", "."],  # Cave entrance at (1, 1)
+            [".", ".", "."],
+        ]
+        # Spawns exist but none match the dungeon_id
+        world_map.get_entity_spawns.return_value = [
+            {"id": "other_dungeon", "name": "Other Cave", "x": 0, "y": 0},
+            {"id": "another_dungeon", "name": "Another Cave", "x": 2, "y": 2},
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"cave_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 1  # On the dungeon entrance
+        warrior.grid_y = 1  # Distance = 0
+
+        # Act
+        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert - cave drawn but no text (no matching spawn data)
+            mock_draw_cave.assert_called_once()
+            # No text background or text should be drawn since no match found
+            mock_draw_rect.assert_not_called()
+            screen.blit.assert_not_called()
