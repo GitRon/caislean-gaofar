@@ -1,7 +1,11 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "claude-pytest"
+name = "caislean-gaofar"
 version = "0.1.0"
-description = "Add your description here"
+description = "PyGame-based action RPG inspired by Castle of the Winds"
 requires-python = ">=3.13"
 dependencies = [
     "pygame>=2.6.1",
@@ -9,6 +13,9 @@ dependencies = [
     "pytest-cov>=4.1.0",
     "pytest-mock>=3.12.0",
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -20,7 +27,7 @@ addopts = [
 ]
 
 [tool.coverage.run]
-source = ["."]
+source = ["src/caislean_gaofar"]
 branch = true
 omit = [
     "tests/*",
@@ -28,11 +35,11 @@ omit = [
     ".venv/*",
     "venv/*",
     # UI/Rendering code excluded from 100% requirement
-    "game.py",
-    "inventory_ui.py",
-    "shop_ui.py",
-    "monster_renderer.py",
-    "main_menu.py",
+    "src/caislean_gaofar/core/game.py",
+    "src/caislean_gaofar/ui/inventory_ui.py",
+    "src/caislean_gaofar/ui/shop_ui.py",
+    "src/caislean_gaofar/ui/monster_renderer.py",
+    "src/caislean_gaofar/ui/main_menu.py",
 ]
 
 [tool.coverage.report]
