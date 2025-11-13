@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Convenience script to run the game with proper environment."""
+
 import subprocess
 import sys
 
