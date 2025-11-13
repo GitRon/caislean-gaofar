@@ -1,11 +1,22 @@
 """Tests for Leprechaun monster class"""
 
+import pygame
+import pytest
+
 from monsters.leprechaun import Leprechaun
 from monsters.base_monster import BaseMonster
 
 
 class TestLeprechaun:
     """Tests for Leprechaun monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_leprechaun_initialization(self):
         """Test Leprechaun can be initialized"""
@@ -67,3 +78,21 @@ class TestLeprechaun:
         # Assert
         assert leprechaun.is_alive is True
         assert leprechaun.health == leprechaun.max_health
+
+    def test_leprechaun_draw_body(self):
+        """Test Leprechaun draw_body renders without error"""
+        # Arrange
+        leprechaun = Leprechaun(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        leprechaun.draw_body(screen, 400, 300)
+
+    def test_leprechaun_draw_details(self):
+        """Test Leprechaun draw_details renders without error"""
+        # Arrange
+        leprechaun = Leprechaun(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        leprechaun.draw_details(screen, 400, 300)
