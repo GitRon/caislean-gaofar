@@ -1,11 +1,22 @@
 """Tests for Pooka monster class"""
 
+import pygame
+import pytest
+
 from monsters.pooka import Pooka
 from monsters.base_monster import BaseMonster
 
 
 class TestPooka:
     """Tests for Pooka monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_pooka_initialization(self):
         """Test Pooka can be initialized"""
@@ -67,3 +78,21 @@ class TestPooka:
         # Assert
         assert pooka.is_alive is True
         assert pooka.health == pooka.max_health
+
+    def test_pooka_draw_body(self):
+        """Test Pooka draw_body renders without error"""
+        # Arrange
+        pooka = Pooka(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        pooka.draw_body(screen, 400, 300)
+
+    def test_pooka_draw_details(self):
+        """Test Pooka draw_details renders without error"""
+        # Arrange
+        pooka = Pooka(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        pooka.draw_details(screen, 400, 300)
