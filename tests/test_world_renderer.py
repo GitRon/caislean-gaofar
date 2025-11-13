@@ -158,7 +158,9 @@ class TestWorldRenderer:
         )
 
         # Assert
-        world_map.draw.assert_called_once_with(screen, 0, 0, 800, 600, fog_of_war)
+        world_map.draw.assert_called_once_with(
+            screen, 0, 0, 800, 600, fog_of_war, "test"
+        )
 
     @patch("pygame.display.flip")
     def test_draw_playing_state_with_message(self, mock_flip):
@@ -790,6 +792,9 @@ class TestWorldRenderer:
 
         fog_of_war = Mock()
 
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "test_dungeon"
+
         # Act
         renderer.draw_inventory_state(
             world_map=world_map,
@@ -797,10 +802,13 @@ class TestWorldRenderer:
             entity_manager=entity_manager,
             warrior=warrior,
             fog_of_war=fog_of_war,
+            dungeon_manager=dungeon_manager,
         )
 
         # Assert
-        world_map.draw.assert_called_once_with(screen, 0, 0, 800, 600, fog_of_war)
+        world_map.draw.assert_called_once_with(
+            screen, 0, 0, 800, 600, fog_of_war, "test_dungeon"
+        )
 
     @patch("pygame.display.flip")
     def test_draw_inventory_state_with_nearest_monster(self, mock_flip):
@@ -1336,6 +1344,272 @@ class TestWorldRenderer:
         assert effect.x == 5 * config.TILE_SIZE + 25  # Restored
         assert effect.y == 10 * config.TILE_SIZE + 30  # Restored
         effect.draw.assert_called_once_with(screen)
+
+    def test_draw_world_objects_with_fog_chest_hidden(self):
+        """Test that chests hidden by fog of war are not drawn."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        chest = Mock()
+        chest.grid_x = 5
+        chest.grid_y = 10
+        chest.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.chests = [chest]
+        entity_manager.ground_items = []
+
+        fog_of_war = Mock()
+        fog_of_war.is_fog_enabled_for_map.return_value = True
+        fog_of_war.is_visible.return_value = False  # Chest not visible due to fog
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "dark_cave"
+
+        # Act
+        renderer._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
+
+        # Assert
+        chest.draw.assert_not_called()  # Chest should not be drawn due to fog
+
+    def test_draw_world_objects_with_fog_ground_item_hidden(self):
+        """Test that ground items hidden by fog of war are not drawn."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        ground_item = Mock()
+        ground_item.grid_x = 7
+        ground_item.grid_y = 12
+        ground_item.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = [ground_item]
+
+        fog_of_war = Mock()
+        fog_of_war.is_fog_enabled_for_map.return_value = True
+        fog_of_war.is_visible.return_value = False  # Ground item not visible due to fog
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "ancient_castle"
+
+        # Act
+        renderer._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
+
+        # Assert
+        ground_item.draw.assert_not_called()  # Ground item should not be drawn due to fog
+
+    def test_draw_entities_with_fog_monster_hidden(self):
+        """Test that monsters hidden by fog of war are not drawn."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (15, 25)
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.draw = Mock()
+
+        monster = Mock()
+        monster.is_alive = True
+        monster.grid_x = 7
+        monster.grid_y = 12
+        monster.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.monsters = [monster]
+
+        fog_of_war = Mock()
+        fog_of_war.is_fog_enabled_for_map.return_value = True
+        fog_of_war.is_visible.return_value = False  # Monster not visible due to fog
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "dark_cave"
+
+        # Act
+        renderer._draw_entities_with_camera(
+            camera, warrior, entity_manager, fog_of_war, dungeon_manager
+        )
+
+        # Assert
+        warrior.draw.assert_called_once()  # Warrior always drawn
+        monster.draw.assert_not_called()  # Monster should not be drawn due to fog
+
+    def test_draw_world_objects_with_fog_enabled_and_visible(self):
+        """Test that objects visible in fog are drawn correctly."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        chest = Mock()
+        chest.grid_x = 5
+        chest.grid_y = 10
+        chest.draw = Mock()
+
+        ground_item = Mock()
+        ground_item.grid_x = 7
+        ground_item.grid_y = 12
+        ground_item.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.chests = [chest]
+        entity_manager.ground_items = [ground_item]
+
+        fog_of_war = Mock()
+        fog_of_war.is_fog_enabled_for_map.return_value = True
+        fog_of_war.is_visible.return_value = True  # Objects visible in fog
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "dark_cave"
+
+        # Act
+        renderer._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
+
+        # Assert
+        chest.draw.assert_called_once_with(screen)
+        ground_item.draw.assert_called_once_with(screen)
+        assert chest.grid_x == 5  # Restored
+        assert ground_item.grid_x == 7  # Restored
+
+    def test_draw_entities_with_fog_enabled_and_visible(self):
+        """Test that monsters visible in fog are drawn correctly."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (15, 25)
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.draw = Mock()
+
+        monster = Mock()
+        monster.is_alive = True
+        monster.grid_x = 7
+        monster.grid_y = 12
+        monster.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.monsters = [monster]
+
+        fog_of_war = Mock()
+        fog_of_war.is_fog_enabled_for_map.return_value = True
+        fog_of_war.is_visible.return_value = True  # Monster visible in fog
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "dark_cave"
+
+        # Act
+        renderer._draw_entities_with_camera(
+            camera, warrior, entity_manager, fog_of_war, dungeon_manager
+        )
+
+        # Assert
+        warrior.draw.assert_called_once_with(screen)
+        monster.draw.assert_called_once_with(screen)
+        assert warrior.grid_x == 5  # Restored
+        assert monster.grid_x == 7  # Restored
+
+    def test_draw_world_objects_with_fog_disabled_map(self):
+        """Test that fog checks are skipped on maps with fog disabled."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        chest = Mock()
+        chest.grid_x = 5
+        chest.grid_y = 10
+        chest.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.chests = [chest]
+        entity_manager.ground_items = []
+
+        fog_of_war = Mock()
+        fog_of_war.is_fog_enabled_for_map.return_value = False  # Fog disabled
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "world"  # Overworld map
+
+        # Act
+        renderer._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
+
+        # Assert
+        chest.draw.assert_called_once_with(screen)
+        fog_of_war.is_visible.assert_not_called()  # Fog check skipped
+
+    def test_draw_entities_with_fog_disabled_map(self):
+        """Test that fog checks are skipped on maps with fog disabled."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (15, 25)
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.draw = Mock()
+
+        monster = Mock()
+        monster.is_alive = True
+        monster.grid_x = 7
+        monster.grid_y = 12
+        monster.draw = Mock()
+
+        entity_manager = Mock()
+        entity_manager.monsters = [monster]
+
+        fog_of_war = Mock()
+        fog_of_war.is_fog_enabled_for_map.return_value = False  # Fog disabled
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "world"  # Overworld map
+
+        # Act
+        renderer._draw_entities_with_camera(
+            camera, warrior, entity_manager, fog_of_war, dungeon_manager
+        )
+
+        # Assert
+        warrior.draw.assert_called_once_with(screen)
+        monster.draw.assert_called_once_with(screen)
+        fog_of_war.is_visible.assert_not_called()  # Fog check skipped
 
     @patch("pygame.display.flip")
     def test_draw_playing_state_with_dungeons_on_world_map(self, mock_flip):

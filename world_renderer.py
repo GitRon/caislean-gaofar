@@ -71,6 +71,7 @@ class WorldRenderer:
                 camera.viewport_width,
                 camera.viewport_height,
                 fog_of_war,
+                dungeon_manager.current_map_id,
             )
         else:
             world_map.draw(
@@ -82,7 +83,9 @@ class WorldRenderer:
             )
 
         # Draw world objects (chests and ground items) with camera offset
-        self._draw_world_objects_with_camera(camera, entity_manager)
+        self._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
 
         # Draw active portal if present (only when NOT in town)
         if active_portal and dungeon_manager.current_map_id != "town":
@@ -105,7 +108,9 @@ class WorldRenderer:
             self._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
         # Draw entities with camera offset
-        self._draw_entities_with_camera(camera, warrior, entity_manager)
+        self._draw_entities_with_camera(
+            camera, warrior, entity_manager, fog_of_war, dungeon_manager
+        )
 
         # Draw attack effects with camera offset
         self._draw_attack_effects_with_camera(camera)
@@ -131,6 +136,7 @@ class WorldRenderer:
         entity_manager: EntityManager,
         warrior: Warrior,
         fog_of_war=None,
+        dungeon_manager=None,
     ):
         """
         Draw the inventory state.
@@ -141,11 +147,12 @@ class WorldRenderer:
             entity_manager: The entity manager
             warrior: The warrior entity
             fog_of_war: Fog of war system (optional)
+            dungeon_manager: The dungeon manager (optional)
         """
         self.screen.fill(config.BLACK)
 
         # Draw the game in the background
-        if fog_of_war:
+        if fog_of_war and dungeon_manager:
             world_map.draw(
                 self.screen,
                 camera.x,
@@ -153,6 +160,7 @@ class WorldRenderer:
                 camera.viewport_width,
                 camera.viewport_height,
                 fog_of_war,
+                dungeon_manager.current_map_id,
             )
         else:
             world_map.draw(
@@ -162,8 +170,12 @@ class WorldRenderer:
                 camera.viewport_width,
                 camera.viewport_height,
             )
-        self._draw_world_objects_with_camera(camera, entity_manager)
-        self._draw_entities_with_camera(camera, warrior, entity_manager)
+        self._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
+        self._draw_entities_with_camera(
+            camera, warrior, entity_manager, fog_of_war, dungeon_manager
+        )
         nearest_monster = entity_manager.get_nearest_alive_monster(warrior)
         if nearest_monster:
             self.combat_system.draw_combat_ui(self.screen, warrior, nearest_monster)
@@ -225,7 +237,11 @@ class WorldRenderer:
         pygame.display.flip()
 
     def _draw_world_objects_with_camera(
-        self, camera: Camera, entity_manager: EntityManager
+        self,
+        camera: Camera,
+        entity_manager: EntityManager,
+        fog_of_war=None,
+        dungeon_manager=None,
     ):
         """
         Draw chests and ground items with camera offset applied.
@@ -233,10 +249,25 @@ class WorldRenderer:
         Args:
             camera: The camera instance
             entity_manager: The entity manager
+            fog_of_war: Fog of war system (optional)
+            dungeon_manager: The dungeon manager (optional)
         """
+        # Check if fog of war is enabled for current map
+        fog_enabled = (
+            fog_of_war
+            and dungeon_manager
+            and fog_of_war.is_fog_enabled_for_map(dungeon_manager.current_map_id)
+        )
+
         # Draw chests
         for chest in entity_manager.chests:
             if camera.is_visible(chest.grid_x, chest.grid_y):
+                # Check fog of war visibility
+                if fog_enabled and not fog_of_war.is_visible(
+                    chest.grid_x, chest.grid_y
+                ):
+                    continue
+
                 original_x = chest.grid_x
                 original_y = chest.grid_y
                 screen_x, screen_y = camera.world_to_screen(original_x, original_y)
@@ -249,6 +280,12 @@ class WorldRenderer:
         # Draw ground items
         for ground_item in entity_manager.ground_items:
             if camera.is_visible(ground_item.grid_x, ground_item.grid_y):
+                # Check fog of war visibility
+                if fog_enabled and not fog_of_war.is_visible(
+                    ground_item.grid_x, ground_item.grid_y
+                ):
+                    continue
+
                 original_x = ground_item.grid_x
                 original_y = ground_item.grid_y
                 screen_x, screen_y = camera.world_to_screen(original_x, original_y)
@@ -259,7 +296,12 @@ class WorldRenderer:
                 ground_item.grid_y = original_y
 
     def _draw_entities_with_camera(
-        self, camera: Camera, warrior: Warrior, entity_manager: EntityManager
+        self,
+        camera: Camera,
+        warrior: Warrior,
+        entity_manager: EntityManager,
+        fog_of_war=None,
+        dungeon_manager=None,
     ):
         """
         Draw all entities with camera offset applied.
@@ -268,8 +310,17 @@ class WorldRenderer:
             camera: The camera instance
             warrior: The warrior entity
             entity_manager: The entity manager
+            fog_of_war: Fog of war system (optional)
+            dungeon_manager: The dungeon manager (optional)
         """
-        # Draw warrior
+        # Check if fog of war is enabled for current map
+        fog_enabled = (
+            fog_of_war
+            and dungeon_manager
+            and fog_of_war.is_fog_enabled_for_map(dungeon_manager.current_map_id)
+        )
+
+        # Draw warrior (always visible)
         if camera.is_visible(warrior.grid_x, warrior.grid_y):
             original_x = warrior.grid_x
             original_y = warrior.grid_y
@@ -283,6 +334,12 @@ class WorldRenderer:
         # Draw monsters
         for monster in entity_manager.monsters:
             if monster.is_alive and camera.is_visible(monster.grid_x, monster.grid_y):
+                # Check fog of war visibility
+                if fog_enabled and not fog_of_war.is_visible(
+                    monster.grid_x, monster.grid_y
+                ):
+                    continue
+
                 original_x = monster.grid_x
                 original_y = monster.grid_y
                 screen_x, screen_y = camera.world_to_screen(original_x, original_y)
