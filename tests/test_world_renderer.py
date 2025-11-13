@@ -1261,9 +1261,7 @@ class TestWorldRenderer:
         shop.grid_y = 1
 
         # Act
-        with patch.object(
-            renderer, "_draw_dungeons_with_camera"
-        ) as mock_draw_dungeons:
+        with patch.object(renderer, "_draw_dungeons_with_camera") as mock_draw_dungeons:
             renderer.draw_playing_state(
                 world_map=world_map,
                 camera=camera,
@@ -1533,11 +1531,11 @@ class TestWorldRenderer:
         warrior.grid_y = 10
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_cave, patch.object(
-            renderer, "_draw_castle_entrance"
-        ) as mock_castle, patch.object(
-            renderer, "_draw_dungeon_entrance"
-        ) as mock_dungeon:
+        with (
+            patch.object(renderer, "_draw_cave_entrance") as mock_cave,
+            patch.object(renderer, "_draw_castle_entrance") as mock_castle,
+            patch.object(renderer, "_draw_dungeon_entrance") as mock_dungeon,
+        ):
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert - all three types should be drawn
@@ -1653,9 +1651,10 @@ class TestWorldRenderer:
         warrior.grid_y = 1
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_cave, patch.object(
-            renderer, "_draw_castle_entrance"
-        ) as mock_castle:
+        with (
+            patch.object(renderer, "_draw_cave_entrance") as mock_cave,
+            patch.object(renderer, "_draw_castle_entrance") as mock_castle,
+        ):
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert - both dungeons drawn
@@ -1695,11 +1694,11 @@ class TestWorldRenderer:
         warrior.grid_y = 10
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_cave, patch.object(
-            renderer, "_draw_castle_entrance"
-        ) as mock_castle, patch.object(
-            renderer, "_draw_dungeon_entrance"
-        ) as mock_dungeon:
+        with (
+            patch.object(renderer, "_draw_cave_entrance") as mock_cave,
+            patch.object(renderer, "_draw_castle_entrance") as mock_castle,
+            patch.object(renderer, "_draw_dungeon_entrance") as mock_dungeon,
+        ):
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert - no drawing methods should be called for unknown type
