@@ -158,7 +158,9 @@ class TestWorldRenderer:
         )
 
         # Assert
-        world_map.draw.assert_called_once_with(screen, 0, 0, 800, 600, fog_of_war, "test")
+        world_map.draw.assert_called_once_with(
+            screen, 0, 0, 800, 600, fog_of_war, "test"
+        )
 
     @patch("pygame.display.flip")
     def test_draw_playing_state_with_message(self, mock_flip):
@@ -804,7 +806,9 @@ class TestWorldRenderer:
         )
 
         # Assert
-        world_map.draw.assert_called_once_with(screen, 0, 0, 800, 600, fog_of_war, "test_dungeon")
+        world_map.draw.assert_called_once_with(
+            screen, 0, 0, 800, 600, fog_of_war, "test_dungeon"
+        )
 
     @patch("pygame.display.flip")
     def test_draw_inventory_state_with_nearest_monster(self, mock_flip):

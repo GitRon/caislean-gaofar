@@ -83,7 +83,9 @@ class WorldRenderer:
             )
 
         # Draw world objects (chests and ground items) with camera offset
-        self._draw_world_objects_with_camera(camera, entity_manager, fog_of_war, dungeon_manager)
+        self._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
 
         # Draw active portal if present (only when NOT in town)
         if active_portal and dungeon_manager.current_map_id != "town":
@@ -102,7 +104,9 @@ class WorldRenderer:
                 self._draw_temple_with_camera(camera, temple)
 
         # Draw entities with camera offset
-        self._draw_entities_with_camera(camera, warrior, entity_manager, fog_of_war, dungeon_manager)
+        self._draw_entities_with_camera(
+            camera, warrior, entity_manager, fog_of_war, dungeon_manager
+        )
 
         # Draw attack effects with camera offset
         self._draw_attack_effects_with_camera(camera)
@@ -162,8 +166,12 @@ class WorldRenderer:
                 camera.viewport_width,
                 camera.viewport_height,
             )
-        self._draw_world_objects_with_camera(camera, entity_manager, fog_of_war, dungeon_manager)
-        self._draw_entities_with_camera(camera, warrior, entity_manager, fog_of_war, dungeon_manager)
+        self._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
+        self._draw_entities_with_camera(
+            camera, warrior, entity_manager, fog_of_war, dungeon_manager
+        )
         nearest_monster = entity_manager.get_nearest_alive_monster(warrior)
         if nearest_monster:
             self.combat_system.draw_combat_ui(self.screen, warrior, nearest_monster)
@@ -225,7 +233,11 @@ class WorldRenderer:
         pygame.display.flip()
 
     def _draw_world_objects_with_camera(
-        self, camera: Camera, entity_manager: EntityManager, fog_of_war=None, dungeon_manager=None
+        self,
+        camera: Camera,
+        entity_manager: EntityManager,
+        fog_of_war=None,
+        dungeon_manager=None,
     ):
         """
         Draw chests and ground items with camera offset applied.
@@ -247,7 +259,9 @@ class WorldRenderer:
         for chest in entity_manager.chests:
             if camera.is_visible(chest.grid_x, chest.grid_y):
                 # Check fog of war visibility
-                if fog_enabled and not fog_of_war.is_visible(chest.grid_x, chest.grid_y):
+                if fog_enabled and not fog_of_war.is_visible(
+                    chest.grid_x, chest.grid_y
+                ):
                     continue
 
                 original_x = chest.grid_x
@@ -263,7 +277,9 @@ class WorldRenderer:
         for ground_item in entity_manager.ground_items:
             if camera.is_visible(ground_item.grid_x, ground_item.grid_y):
                 # Check fog of war visibility
-                if fog_enabled and not fog_of_war.is_visible(ground_item.grid_x, ground_item.grid_y):
+                if fog_enabled and not fog_of_war.is_visible(
+                    ground_item.grid_x, ground_item.grid_y
+                ):
                     continue
 
                 original_x = ground_item.grid_x
@@ -276,7 +292,12 @@ class WorldRenderer:
                 ground_item.grid_y = original_y
 
     def _draw_entities_with_camera(
-        self, camera: Camera, warrior: Warrior, entity_manager: EntityManager, fog_of_war=None, dungeon_manager=None
+        self,
+        camera: Camera,
+        warrior: Warrior,
+        entity_manager: EntityManager,
+        fog_of_war=None,
+        dungeon_manager=None,
     ):
         """
         Draw all entities with camera offset applied.
@@ -310,7 +331,9 @@ class WorldRenderer:
         for monster in entity_manager.monsters:
             if monster.is_alive and camera.is_visible(monster.grid_x, monster.grid_y):
                 # Check fog of war visibility
-                if fog_enabled and not fog_of_war.is_visible(monster.grid_x, monster.grid_y):
+                if fog_enabled and not fog_of_war.is_visible(
+                    monster.grid_x, monster.grid_y
+                ):
                     continue
 
                 original_x = monster.grid_x
