@@ -441,7 +441,7 @@ class ShopUI:
 
     def _draw_instructions(self, screen: pygame.Surface, panel_x: int, panel_y: int):
         """Draw control instructions."""
-        instructions = "Press ESC or I to close shop"
+        instructions = "Press S or I to close shop"
         text = self.small_font.render(instructions, True, (180, 180, 180))
         text_x = panel_x + self.padding
         text_y = panel_y + self.panel_height - 25

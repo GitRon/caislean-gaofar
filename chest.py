@@ -87,46 +87,92 @@ class Chest:
         # Define the item pool for chest generation
         item_pool = [
             # Weapons
-            Item("Iron Sword", ItemType.WEAPON, "A basic sword", attack_bonus=10),
-            Item("Steel Sword", ItemType.WEAPON, "A stronger sword", attack_bonus=20),
-            Item("Battle Axe", ItemType.WEAPON, "A heavy axe", attack_bonus=25),
-            Item("Dagger", ItemType.WEAPON, "A quick blade", attack_bonus=8),
-            Item("Mace", ItemType.WEAPON, "A blunt weapon", attack_bonus=15),
+            Item(
+                "Iron Sword",
+                ItemType.WEAPON,
+                "A basic sword",
+                attack_bonus=10,
+                gold_value=100,
+            ),
+            Item(
+                "Steel Sword",
+                ItemType.WEAPON,
+                "A stronger sword",
+                attack_bonus=20,
+                gold_value=200,
+            ),
+            Item(
+                "Battle Axe",
+                ItemType.WEAPON,
+                "A heavy axe",
+                attack_bonus=25,
+                gold_value=250,
+            ),
+            Item(
+                "Dagger",
+                ItemType.WEAPON,
+                "A quick blade",
+                attack_bonus=8,
+                gold_value=80,
+            ),
+            Item(
+                "Mace",
+                ItemType.WEAPON,
+                "A blunt weapon",
+                attack_bonus=15,
+                gold_value=150,
+            ),
             # Armor
             Item(
                 "Leather Armor",
                 ItemType.ARMOR,
                 "Basic protection",
                 defense_bonus=5,
+                gold_value=50,
             ),
             Item(
                 "Chain Mail",
                 ItemType.ARMOR,
                 "Metal armor",
                 defense_bonus=10,
+                gold_value=100,
             ),
             Item(
                 "Plate Armor",
                 ItemType.ARMOR,
                 "Heavy armor",
                 defense_bonus=15,
+                gold_value=150,
             ),
-            Item("Shield", ItemType.ARMOR, "A sturdy shield", defense_bonus=8),
+            Item(
+                "Shield",
+                ItemType.ARMOR,
+                "A sturdy shield",
+                defense_bonus=8,
+                gold_value=80,
+            ),
             # Consumables
-            Item("Health Potion", ItemType.CONSUMABLE, "Restores 30 HP"),
+            Item(
+                "Health Potion",
+                ItemType.CONSUMABLE,
+                "Restores 30 HP",
+                gold_value=30,
+            ),
             Item(
                 "Minor Health Potion",
                 ItemType.CONSUMABLE,
                 "Restores 30 HP",
+                gold_value=25,
             ),
             Item(
                 "Greater Health Potion",
                 ItemType.CONSUMABLE,
                 "Restores 30 HP",
+                gold_value=50,
             ),
             # Misc
-            Item("Ancient Key", ItemType.MISC, "Opens something?"),
-            Item("Magic Scroll", ItemType.MISC, "Mysterious writings"),
+            Item("Ancient Key", ItemType.MISC, "Opens something?", gold_value=50),
+            Item("Magic Scroll", ItemType.MISC, "Mysterious writings", gold_value=75),
         ]
 
         return random.choice(item_pool)

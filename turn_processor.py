@@ -1,8 +1,11 @@
 """Turn processing system for managing game turns and actions."""
 
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 from warrior import Warrior
 from entity_manager import EntityManager
+
+if TYPE_CHECKING:
+    from attack_effect import AttackEffectManager
 
 
 class TurnProcessor:
@@ -22,6 +25,7 @@ class TurnProcessor:
         on_chest_opened: Callable,
         on_item_picked: Callable,
         on_monster_death: Callable,
+        attack_effect_manager: "AttackEffectManager" = None,
     ):
         """
         Process one complete turn (hero then monsters).
@@ -35,6 +39,7 @@ class TurnProcessor:
             on_chest_opened: Callback when chest is opened
             on_item_picked: Callback when item is picked up
             on_monster_death: Callback when monster dies
+            attack_effect_manager: Optional attack effect manager for visual effects
         """
         # Hero turn
         warrior.on_turn_start()
@@ -42,7 +47,20 @@ class TurnProcessor:
         # Find nearest monster for targeting
         nearest_monster = entity_manager.get_nearest_alive_monster(warrior)
 
-        warrior.execute_turn(nearest_monster, world_map)
+        result = warrior.execute_turn(nearest_monster, world_map)
+
+        # Trigger attack visual effect if warrior attacked successfully
+        if (
+            attack_effect_manager
+            and result.get("success")
+            and nearest_monster
+            and result.get("damage", 0) > 0
+        ):
+            # Get center position of target for effect
+            target_x = nearest_monster.x + nearest_monster.size / 2
+            target_y = nearest_monster.y + nearest_monster.size / 2
+            is_crit = result.get("crit", False)
+            attack_effect_manager.add_effect(target_x, target_y, is_crit)
 
         # Check for dungeon entrance/exit after warrior moves
         on_dungeon_transition()
@@ -71,7 +89,21 @@ class TurnProcessor:
         for monster in entity_manager.monsters:
             if monster.is_alive:
                 monster.on_turn_start()
+
+                # Check if monster will attack (in range and can attack)
+                can_attack = (
+                    monster.grid_distance_to(warrior) <= monster.attack_range
+                    and monster.can_attack()
+                )
+
                 monster.execute_turn(warrior, world_map)
+
+                # Trigger attack visual effect if monster attacked
+                if attack_effect_manager and can_attack and warrior.is_alive:
+                    # Get center position of warrior for effect
+                    target_x = warrior.x + warrior.size / 2
+                    target_y = warrior.y + warrior.size / 2
+                    attack_effect_manager.add_effect(target_x, target_y, False)
 
         # Wait for next player input
         self.waiting_for_player_input = True

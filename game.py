@@ -379,6 +379,9 @@ class Game:
         if self.temple:
             self.temple.update(dt)
 
+        # Update attack effects
+        self.renderer.attack_effect_manager.update(dt)
+
         # Only update game logic when actively playing
         if self.state_manager.state != config.STATE_PLAYING:
             return
@@ -425,6 +428,7 @@ class Game:
             on_chest_opened=self._handle_chest_opened,
             on_item_picked=self._show_message,
             on_monster_death=self._handle_monster_death,
+            attack_effect_manager=self.renderer.attack_effect_manager,
         )
 
     def _check_dungeon_transition(self):
@@ -659,17 +663,20 @@ class Game:
             item_type=ItemType.WEAPON,
             description="A basic short sword",
             attack_bonus=3,
+            gold_value=30,
         )
         woolen_tunic = Item(
             name="Woolen Tunic",
             item_type=ItemType.ARMOR,
             description="A simple woolen tunic",
             defense_bonus=1,
+            gold_value=10,
         )
         health_potion = Item(
             name="Health Potion",
             item_type=ItemType.CONSUMABLE,
             description="Restores 30 HP",
+            gold_value=30,
         )
 
         # Equip starting items (they'll auto-equip to appropriate slots)

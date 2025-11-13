@@ -1215,6 +1215,127 @@ class TestWorldRenderer:
         # Assert
         temple.draw.assert_not_called()
 
+    def test_draw_attack_effects_with_camera_visible(self):
+        """Test drawing attack effects with camera when visible."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        # Add a mock effect
+        effect = Mock()
+        effect.x = 150  # grid 3, offset 0 (150 / 50 = 3)
+        effect.y = 250  # grid 5, offset 0 (250 / 50 = 5)
+        effect.draw = Mock()
+        renderer.attack_effect_manager.effects = [effect]
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        # Act
+        renderer._draw_attack_effects_with_camera(camera)
+
+        # Assert
+        camera.is_visible.assert_called_once()
+        effect.draw.assert_called_once_with(screen)
+        # Position should be restored
+        assert effect.x == 150
+        assert effect.y == 250
+
+    def test_draw_attack_effects_with_camera_not_visible(self):
+        """Test drawing attack effects with camera when not visible."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        # Add a mock effect
+        effect = Mock()
+        effect.x = 150
+        effect.y = 250
+        effect.draw = Mock()
+        renderer.attack_effect_manager.effects = [effect]
+
+        camera = Mock()
+        camera.is_visible.return_value = False
+
+        # Act
+        renderer._draw_attack_effects_with_camera(camera)
+
+        # Assert
+        camera.is_visible.assert_called_once()
+        effect.draw.assert_not_called()  # Not drawn because not visible
+
+    def test_draw_attack_effects_with_camera_multiple_effects(self):
+        """Test drawing multiple attack effects with camera."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        # Add multiple mock effects
+        effect1 = Mock()
+        effect1.x = 100
+        effect1.y = 200
+        effect1.draw = Mock()
+
+        effect2 = Mock()
+        effect2.x = 300
+        effect2.y = 400
+        effect2.draw = Mock()
+
+        renderer.attack_effect_manager.effects = [effect1, effect2]
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        # Act
+        renderer._draw_attack_effects_with_camera(camera)
+
+        # Assert
+        effect1.draw.assert_called_once_with(screen)
+        effect2.draw.assert_called_once_with(screen)
+
+    def test_draw_attack_effects_with_camera_no_effects(self):
+        """Test drawing attack effects with camera when there are no effects."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+        renderer.attack_effect_manager.effects = []
+
+        camera = Mock()
+
+        # Act
+        renderer._draw_attack_effects_with_camera(camera)
+
+        # Assert - should not crash
+        camera.is_visible.assert_not_called()
+
+    def test_draw_attack_effects_with_camera_position_conversion(self):
+        """Test that attack effect positions are correctly converted with camera offset."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        # Add effect at grid position (5, 10) with offset (25, 30)
+        effect = Mock()
+        effect.x = 5 * config.TILE_SIZE + 25  # 275
+        effect.y = 10 * config.TILE_SIZE + 30  # 530
+        effect.draw = Mock()
+        renderer.attack_effect_manager.effects = [effect]
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (2, 3)  # Screen grid position
+
+        # Act
+        renderer._draw_attack_effects_with_camera(camera)
+
+        # Assert
+        # Effect should have been temporarily moved to screen position during draw
+        # Then restored to original position after draw
+        assert effect.x == 5 * config.TILE_SIZE + 25  # Restored
+        assert effect.y == 10 * config.TILE_SIZE + 30  # Restored
+        effect.draw.assert_called_once_with(screen)
     @patch("pygame.display.flip")
     def test_draw_playing_state_with_dungeons_on_world_map(self, mock_flip):
         """Test drawing dungeon icons when on world map."""
