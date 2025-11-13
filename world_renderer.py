@@ -268,14 +268,7 @@ class WorldRenderer:
                 ):
                     continue
 
-                original_x = chest.grid_x
-                original_y = chest.grid_y
-                screen_x, screen_y = camera.world_to_screen(original_x, original_y)
-                chest.grid_x = screen_x
-                chest.grid_y = screen_y
-                chest.draw(self.screen)
-                chest.grid_x = original_x
-                chest.grid_y = original_y
+                chest.draw(self.screen, camera.x, camera.y)
 
         # Draw ground items
         for ground_item in entity_manager.ground_items:
@@ -286,14 +279,7 @@ class WorldRenderer:
                 ):
                     continue
 
-                original_x = ground_item.grid_x
-                original_y = ground_item.grid_y
-                screen_x, screen_y = camera.world_to_screen(original_x, original_y)
-                ground_item.grid_x = screen_x
-                ground_item.grid_y = screen_y
-                ground_item.draw(self.screen)
-                ground_item.grid_x = original_x
-                ground_item.grid_y = original_y
+                ground_item.draw(self.screen, camera.x, camera.y)
 
     def _draw_entities_with_camera(
         self,
@@ -322,14 +308,7 @@ class WorldRenderer:
 
         # Draw warrior (always visible)
         if camera.is_visible(warrior.grid_x, warrior.grid_y):
-            original_x = warrior.grid_x
-            original_y = warrior.grid_y
-            screen_x, screen_y = camera.world_to_screen(original_x, original_y)
-            warrior.grid_x = screen_x
-            warrior.grid_y = screen_y
-            warrior.draw(self.screen)
-            warrior.grid_x = original_x
-            warrior.grid_y = original_y
+            warrior.draw(self.screen, camera.x, camera.y)
 
         # Draw monsters
         for monster in entity_manager.monsters:
@@ -340,14 +319,7 @@ class WorldRenderer:
                 ):
                     continue
 
-                original_x = monster.grid_x
-                original_y = monster.grid_y
-                screen_x, screen_y = camera.world_to_screen(original_x, original_y)
-                monster.grid_x = screen_x
-                monster.grid_y = screen_y
-                monster.draw(self.screen)
-                monster.grid_x = original_x
-                monster.grid_y = original_y
+                monster.draw(self.screen, camera.x, camera.y)
 
     def _draw_portal_with_camera(self, camera: Camera, portal):
         """
@@ -358,14 +330,7 @@ class WorldRenderer:
             portal: The portal to draw
         """
         if camera.is_visible(portal.grid_x, portal.grid_y):
-            original_x = portal.grid_x
-            original_y = portal.grid_y
-            screen_x, screen_y = camera.world_to_screen(original_x, original_y)
-            portal.grid_x = screen_x
-            portal.grid_y = screen_y
-            portal.draw(self.screen)
-            portal.grid_x = original_x
-            portal.grid_y = original_y
+            portal.draw(self.screen, camera.x, camera.y)
 
     def _draw_temple_with_camera(self, camera: Camera, temple):
         """
@@ -376,14 +341,7 @@ class WorldRenderer:
             temple: The temple to draw
         """
         if camera.is_visible(temple.grid_x, temple.grid_y):
-            original_x = temple.grid_x
-            original_y = temple.grid_y
-            screen_x, screen_y = camera.world_to_screen(original_x, original_y)
-            temple.grid_x = screen_x
-            temple.grid_y = screen_y
-            temple.draw(self.screen)
-            temple.grid_x = original_x
-            temple.grid_y = original_y
+            temple.draw(self.screen, camera.x, camera.y)
 
     def _draw_shop_building(self, camera: Camera, shop: Shop, warrior: Warrior):
         """

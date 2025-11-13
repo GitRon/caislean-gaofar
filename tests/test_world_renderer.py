@@ -328,7 +328,8 @@ class TestWorldRenderer:
 
         camera = Mock()
         camera.is_visible.return_value = True
-        camera.world_to_screen.return_value = (10, 20)
+        camera.x = 2
+        camera.y = 3
 
         chest = Mock()
         chest.grid_x = 5
@@ -348,9 +349,10 @@ class TestWorldRenderer:
         renderer._draw_world_objects_with_camera(camera, entity_manager)
 
         # Assert
-        chest.draw.assert_called_once_with(screen)
-        ground_item.draw.assert_called_once_with(screen)
-        assert chest.grid_x == 5  # Restored after drawing
+        chest.draw.assert_called_once_with(screen, camera.x, camera.y)
+        ground_item.draw.assert_called_once_with(screen, camera.x, camera.y)
+        # Verify positions are not mutated
+        assert chest.grid_x == 5
         assert chest.grid_y == 10
         assert ground_item.grid_x == 7
         assert ground_item.grid_y == 12
@@ -363,7 +365,8 @@ class TestWorldRenderer:
 
         camera = Mock()
         camera.is_visible.return_value = True
-        camera.world_to_screen.return_value = (15, 25)
+        camera.x = 2
+        camera.y = 3
 
         warrior = Mock()
         warrior.grid_x = 5
@@ -383,9 +386,10 @@ class TestWorldRenderer:
         renderer._draw_entities_with_camera(camera, warrior, entity_manager)
 
         # Assert
-        warrior.draw.assert_called_once_with(screen)
-        monster.draw.assert_called_once_with(screen)
-        assert warrior.grid_x == 5  # Restored
+        warrior.draw.assert_called_once_with(screen, camera.x, camera.y)
+        monster.draw.assert_called_once_with(screen, camera.x, camera.y)
+        # Verify positions are not mutated
+        assert warrior.grid_x == 5
         assert warrior.grid_y == 10
         assert monster.grid_x == 7
         assert monster.grid_y == 12
@@ -398,7 +402,8 @@ class TestWorldRenderer:
 
         camera = Mock()
         camera.is_visible.return_value = True
-        camera.world_to_screen.return_value = (20, 30)
+        camera.x = 2
+        camera.y = 3
 
         portal = Mock()
         portal.grid_x = 10
@@ -409,8 +414,9 @@ class TestWorldRenderer:
         renderer._draw_portal_with_camera(camera, portal)
 
         # Assert
-        portal.draw.assert_called_once_with(screen)
-        assert portal.grid_x == 10  # Restored
+        portal.draw.assert_called_once_with(screen, camera.x, camera.y)
+        # Verify positions are not mutated
+        assert portal.grid_x == 10
         assert portal.grid_y == 15
 
     def test_draw_portal_not_visible(self):
@@ -1188,7 +1194,8 @@ class TestWorldRenderer:
 
         camera = Mock()
         camera.is_visible.return_value = True
-        camera.world_to_screen.return_value = (20, 30)
+        camera.x = 2
+        camera.y = 3
 
         temple = Mock()
         temple.grid_x = 8
@@ -1199,8 +1206,9 @@ class TestWorldRenderer:
         renderer._draw_temple_with_camera(camera, temple)
 
         # Assert
-        temple.draw.assert_called_once_with(screen)
-        assert temple.grid_x == 8  # Restored
+        temple.draw.assert_called_once_with(screen, camera.x, camera.y)
+        # Verify positions are not mutated
+        assert temple.grid_x == 8
         assert temple.grid_y == 1
 
     def test_draw_temple_not_visible(self):
@@ -1461,7 +1469,8 @@ class TestWorldRenderer:
 
         camera = Mock()
         camera.is_visible.return_value = True
-        camera.world_to_screen.return_value = (10, 20)
+        camera.x = 2
+        camera.y = 3
 
         chest = Mock()
         chest.grid_x = 5
@@ -1490,10 +1499,11 @@ class TestWorldRenderer:
         )
 
         # Assert
-        chest.draw.assert_called_once_with(screen)
-        ground_item.draw.assert_called_once_with(screen)
-        assert chest.grid_x == 5  # Restored
-        assert ground_item.grid_x == 7  # Restored
+        chest.draw.assert_called_once_with(screen, camera.x, camera.y)
+        ground_item.draw.assert_called_once_with(screen, camera.x, camera.y)
+        # Verify positions are not mutated
+        assert chest.grid_x == 5
+        assert ground_item.grid_x == 7
 
     def test_draw_entities_with_fog_enabled_and_visible(self):
         """Test that monsters visible in fog are drawn correctly."""
@@ -1503,7 +1513,8 @@ class TestWorldRenderer:
 
         camera = Mock()
         camera.is_visible.return_value = True
-        camera.world_to_screen.return_value = (15, 25)
+        camera.x = 2
+        camera.y = 3
 
         warrior = Mock()
         warrior.grid_x = 5
@@ -1532,10 +1543,11 @@ class TestWorldRenderer:
         )
 
         # Assert
-        warrior.draw.assert_called_once_with(screen)
-        monster.draw.assert_called_once_with(screen)
-        assert warrior.grid_x == 5  # Restored
-        assert monster.grid_x == 7  # Restored
+        warrior.draw.assert_called_once_with(screen, camera.x, camera.y)
+        monster.draw.assert_called_once_with(screen, camera.x, camera.y)
+        # Verify positions are not mutated
+        assert warrior.grid_x == 5
+        assert monster.grid_x == 7
 
     def test_draw_world_objects_with_fog_disabled_map(self):
         """Test that fog checks are skipped on maps with fog disabled."""
@@ -1545,7 +1557,8 @@ class TestWorldRenderer:
 
         camera = Mock()
         camera.is_visible.return_value = True
-        camera.world_to_screen.return_value = (10, 20)
+        camera.x = 2
+        camera.y = 3
 
         chest = Mock()
         chest.grid_x = 5
@@ -1568,7 +1581,7 @@ class TestWorldRenderer:
         )
 
         # Assert
-        chest.draw.assert_called_once_with(screen)
+        chest.draw.assert_called_once_with(screen, camera.x, camera.y)
         fog_of_war.is_visible.assert_not_called()  # Fog check skipped
 
     def test_draw_entities_with_fog_disabled_map(self):
@@ -1579,7 +1592,8 @@ class TestWorldRenderer:
 
         camera = Mock()
         camera.is_visible.return_value = True
-        camera.world_to_screen.return_value = (15, 25)
+        camera.x = 2
+        camera.y = 3
 
         warrior = Mock()
         warrior.grid_x = 5
@@ -1607,8 +1621,8 @@ class TestWorldRenderer:
         )
 
         # Assert
-        warrior.draw.assert_called_once_with(screen)
-        monster.draw.assert_called_once_with(screen)
+        warrior.draw.assert_called_once_with(screen, camera.x, camera.y)
+        monster.draw.assert_called_once_with(screen, camera.x, camera.y)
         fog_of_war.is_visible.assert_not_called()  # Fog check skipped
 
     @patch("pygame.display.flip")

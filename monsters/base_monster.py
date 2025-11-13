@@ -116,7 +116,12 @@ class BaseMonster(Entity):
                 # If blocked, try horizontal
                 self.move(dx, 0, world_map)
 
-    def draw(self, screen: pygame.Surface):
+    def draw(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
         """
         Draw the monster using template method pattern.
 
@@ -124,20 +129,29 @@ class BaseMonster(Entity):
         1. draw_body() - for main body rendering (override in subclasses)
         2. draw_details() - for additional details (override in subclasses)
         3. draw_health_bar() - for health display (inherited from Entity)
+
+        Args:
+            screen: The pygame screen surface
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
         """
         # Increment frame counter for animations
         self.frame_count += 1
 
+        # Calculate screen coordinates with camera offset
+        screen_x = self.get_screen_x(camera_offset_x)
+        screen_y = self.get_screen_y(camera_offset_y)
+
         # Calculate center position for rendering
-        center_x = int(self.x + self.size / 2)
-        center_y = int(self.y + self.size / 2)
+        center_x = int(screen_x + self.size / 2)
+        center_y = int(screen_y + self.size / 2)
 
         # Template method calls (subclasses override these)
         self.draw_body(screen, center_x, center_y)
         self.draw_details(screen, center_x, center_y)
 
         # Draw health bar on top of custom render
-        self.draw_health_bar(screen)
+        self.draw_health_bar(screen, camera_offset_x, camera_offset_y)
 
     def draw_body(self, screen: pygame.Surface, center_x: int, center_y: int):
         """
@@ -148,15 +162,24 @@ class BaseMonster(Entity):
 
         Args:
             screen: pygame surface to draw on
-            center_x: center x position
-            center_y: center y position
+            center_x: center x position (in screen/pixel coordinates)
+            center_y: center y position (in screen/pixel coordinates)
         """
+        # Calculate top-left from center for default drawing
+        top_left_x = center_x - self.size // 2
+        top_left_y = center_y - self.size // 2
+
         # Fallback to simple rectangle + eyes if not overridden
-        super().draw(screen)
+        pygame.draw.rect(
+            screen,
+            self.color,
+            pygame.Rect(top_left_x, top_left_y, self.size, self.size),
+        )
+
         eye_size = 6
-        left_eye_x = int(self.x + self.size * 0.3)
-        right_eye_x = int(self.x + self.size * 0.7)
-        eye_y = int(self.y + self.size * 0.3)
+        left_eye_x = int(top_left_x + self.size * 0.3)
+        right_eye_x = int(top_left_x + self.size * 0.7)
+        eye_y = int(top_left_y + self.size * 0.3)
         pygame.draw.circle(screen, config.YELLOW, (left_eye_x, eye_y), eye_size)
         pygame.draw.circle(screen, config.YELLOW, (right_eye_x, eye_y), eye_size)
         pygame.draw.circle(screen, config.BLACK, (left_eye_x, eye_y), eye_size // 2)
@@ -173,7 +196,7 @@ class BaseMonster(Entity):
 
         Args:
             screen: pygame surface to draw on
-            center_x: center x position
-            center_y: center y position
+            center_x: center x position (in screen/pixel coordinates)
+            center_y: center y position (in screen/pixel coordinates)
         """
         pass  # Subclasses can override to add details

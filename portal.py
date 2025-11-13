@@ -34,19 +34,50 @@ class Portal:
         """
         self.animation_time += dt
 
-    def draw(self, screen: pygame.Surface):
+    def get_screen_x(self, camera_offset_x: int = 0) -> int:
+        """
+        Get the screen pixel x coordinate with camera offset applied.
+
+        Args:
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel x coordinate
+        """
+        return (self.grid_x - camera_offset_x) * config.TILE_SIZE
+
+    def get_screen_y(self, camera_offset_y: int = 0) -> int:
+        """
+        Get the screen pixel y coordinate with camera offset applied.
+
+        Args:
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel y coordinate
+        """
+        return (self.grid_y - camera_offset_y) * config.TILE_SIZE
+
+    def draw(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
         """
         Draw the portal with a glowing swirling effect.
 
         Args:
             screen: Pygame surface to draw on
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
         """
-        # Update position based on grid coordinates
-        self.x = self.grid_x * config.TILE_SIZE
-        self.y = self.grid_y * config.TILE_SIZE
+        # Calculate screen coordinates with camera offset
+        screen_x = self.get_screen_x(camera_offset_x)
+        screen_y = self.get_screen_y(camera_offset_y)
 
-        center_x = self.x + self.size // 2
-        center_y = self.y + self.size // 2
+        center_x = screen_x + self.size // 2
+        center_y = screen_y + self.size // 2
 
         # Calculate pulsing effect
         pulse = abs(math.sin(self.animation_time * 2))
@@ -105,5 +136,5 @@ class Portal:
         font = pygame.font.Font(None, 20)
         label = "Return Portal" if self.is_return_portal else "Town Portal"
         text_surface = font.render(label, True, config.WHITE)
-        text_rect = text_surface.get_rect(center=(center_x, self.y + self.size + 10))
+        text_rect = text_surface.get_rect(center=(center_x, screen_y + self.size + 10))
         screen.blit(text_surface, text_rect)

@@ -45,16 +45,47 @@ class Temple:
         self.healing_active = True
         self.healing_effect_time = 1.0  # 1 second healing effect
 
-    def draw(self, screen: pygame.Surface):
+    def get_screen_x(self, camera_offset_x: int = 0) -> int:
+        """
+        Get the screen pixel x coordinate with camera offset applied.
+
+        Args:
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel x coordinate
+        """
+        return (self.grid_x - camera_offset_x) * config.TILE_SIZE
+
+    def get_screen_y(self, camera_offset_y: int = 0) -> int:
+        """
+        Get the screen pixel y coordinate with camera offset applied.
+
+        Args:
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel y coordinate
+        """
+        return (self.grid_y - camera_offset_y) * config.TILE_SIZE
+
+    def draw(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
         """
         Draw the temple with a classical architecture design.
 
         Args:
             screen: Pygame surface to draw on
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
         """
-        # Update position based on grid coordinates
-        self.x = self.grid_x * config.TILE_SIZE
-        self.y = self.grid_y * config.TILE_SIZE
+        # Calculate screen coordinates with camera offset
+        screen_x = self.get_screen_x(camera_offset_x)
+        screen_y = self.get_screen_y(camera_offset_y)
 
         # Temple color scheme - white marble with gold accents
         marble_color = (240, 240, 240)
@@ -65,20 +96,27 @@ class Temple:
         step_height = 3
         for i in range(3):
             step_width = self.size - (i * 4)
-            step_x = self.x + (i * 2)
-            step_y = self.y + self.size - (3 - i) * step_height - 15
+            step_x = screen_x + (i * 2)
+            step_y = screen_y + self.size - (3 - i) * step_height - 15
             pygame.draw.rect(
                 screen, shadow_color, (step_x, step_y, step_width, step_height)
             )
 
         # Main temple floor
-        floor_y = self.y + self.size - 15
-        pygame.draw.rect(screen, marble_color, (self.x + 6, floor_y, self.size - 12, 8))
+        floor_y = screen_y + self.size - 15
+        pygame.draw.rect(
+            screen, marble_color, (screen_x + 6, floor_y, self.size - 12, 8)
+        )
 
         # Draw 4 columns
         column_width = 6
         column_height = 20
-        column_positions = [self.x + 10, self.x + 18, self.x + 26, self.x + 34]
+        column_positions = [
+            screen_x + 10,
+            screen_x + 18,
+            screen_x + 26,
+            screen_x + 34,
+        ]
 
         for col_x in column_positions:
             # Column shadow
@@ -103,17 +141,17 @@ class Temple:
         # Roof (triangular pediment)
         roof_top_y = floor_y - column_height - 8
         roof_points = [
-            (self.x + self.size // 2, roof_top_y),  # Top point
-            (self.x + 8, floor_y - column_height),  # Bottom left
-            (self.x + self.size - 8, floor_y - column_height),  # Bottom right
+            (screen_x + self.size // 2, roof_top_y),  # Top point
+            (screen_x + 8, floor_y - column_height),  # Bottom left
+            (screen_x + self.size - 8, floor_y - column_height),  # Bottom right
         ]
         pygame.draw.polygon(screen, gold_color, roof_points)
         pygame.draw.polygon(screen, shadow_color, roof_points, 2)
 
         # Draw healing glow effect when active
         if self.healing_active:
-            center_x = self.x + self.size // 2
-            center_y = self.y + self.size // 2
+            center_x = screen_x + self.size // 2
+            center_y = screen_y + self.size // 2
 
             # Pulsing glow effect
             pulse = abs(math.sin(self.animation_time * 4))
@@ -131,7 +169,7 @@ class Temple:
 
         # Draw healing cross symbol in the center
         cross_color = (255, 100, 100) if self.healing_active else (200, 50, 50)
-        center_x = self.x + self.size // 2
+        center_x = screen_x + self.size // 2
         center_y = floor_y - 5
 
         # Vertical bar of cross
@@ -146,8 +184,10 @@ class Temple:
 
         # Add subtle shadow to text
         shadow_surface = font.render(label_text, True, (50, 50, 50))
-        text_rect = text_surface.get_rect(center=(center_x + 1, self.y + self.size + 9))
+        text_rect = text_surface.get_rect(
+            center=(center_x + 1, screen_y + self.size + 9)
+        )
         screen.blit(shadow_surface, text_rect)
 
-        text_rect = text_surface.get_rect(center=(center_x, self.y + self.size + 8))
+        text_rect = text_surface.get_rect(center=(center_x, screen_y + self.size + 8))
         screen.blit(text_surface, text_rect)
