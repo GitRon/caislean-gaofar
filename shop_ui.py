@@ -225,8 +225,8 @@ class ShopUI:
             if item_y > list_y + list_height:
                 break
 
-            # Store rect for click detection
-            self.item_rects.append((item_rect, shop_item))
+            # Store rect for click detection with actual item index
+            self.item_rects.append((item_rect, shop_item, i))
 
             # Check if hovered or selected
             is_hovered = item_rect.collidepoint(mouse_pos)
@@ -309,8 +309,8 @@ class ShopUI:
             if item_y > list_y + list_height:
                 break
 
-            # Store rect for click detection
-            self.item_rects.append((item_rect, item))
+            # Store rect for click detection with actual item index
+            self.item_rects.append((item_rect, item, i))
 
             # Check if hovered or selected
             is_hovered = item_rect.collidepoint(mouse_pos)
@@ -712,9 +712,9 @@ class ShopUI:
 
         # Handle item selection
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            for i, (rect, item_data) in enumerate(self.item_rects):
+            for rect, item_data, actual_index in self.item_rects:
                 if rect.collidepoint(event.pos):
-                    self.selected_item_index = i
+                    self.selected_item_index = actual_index
                     return True
 
         # Handle action button click
