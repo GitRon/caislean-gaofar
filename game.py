@@ -51,13 +51,23 @@ class Game:
         self.dungeon_manager = DungeonManager(map_file)
         self.dungeon_manager.load_world_map()
 
-        # Load dungeons
-        self.dungeon_manager.load_dungeon(
-            "dark_cave", os.path.join("maps", "dark_cave.json")
-        )
-        self.dungeon_manager.load_dungeon(
-            "ancient_castle", os.path.join("maps", "ancient_castle.json")
-        )
+        # Load dungeons - map unique IDs to actual dungeon files
+        dark_cave_path = os.path.join("maps", "dark_cave.json")
+        ancient_castle_path = os.path.join("maps", "ancient_castle.json")
+
+        # Cave-type dungeons
+        self.dungeon_manager.load_dungeon("dark_cave_1", dark_cave_path)
+        self.dungeon_manager.load_dungeon("mystic_grotto", dark_cave_path)
+        self.dungeon_manager.load_dungeon("dark_woods_lair", dark_cave_path)
+        self.dungeon_manager.load_dungeon("southern_caverns", dark_cave_path)
+
+        # Castle-type dungeons
+        self.dungeon_manager.load_dungeon("haunted_crypt", ancient_castle_path)
+        self.dungeon_manager.load_dungeon("shadow_keep", ancient_castle_path)
+        self.dungeon_manager.load_dungeon("ruined_fortress", ancient_castle_path)
+        self.dungeon_manager.load_dungeon("ancient_keep", ancient_castle_path)
+
+        # Town
         self.dungeon_manager.load_dungeon("town", os.path.join("maps", "town.json"))
 
         # Get current map (initially world map)

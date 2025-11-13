@@ -90,11 +90,11 @@ class TestDungeonManager:
         manager = DungeonManager(map_path)
         manager.load_world_map()
         dungeon_path = config.resource_path(os.path.join("maps", "dark_cave.json"))
-        manager.load_dungeon("forgotten_tomb", dungeon_path)
+        manager.load_dungeon("dark_cave_1", dungeon_path)
 
         # Check dungeon entrance location (from overworld.json)
-        dungeon_id = manager.get_dungeon_at_position(12, 12)
-        assert dungeon_id == "forgotten_tomb"
+        dungeon_id = manager.get_dungeon_at_position(4, 12)
+        assert dungeon_id == "dark_cave_1"
 
         # Check non-dungeon location
         dungeon_id = manager.get_dungeon_at_position(5, 5)
@@ -108,7 +108,7 @@ class TestDungeonManager:
         # Don't load the dungeon, just check the position
 
         # Check dungeon entrance location (entrance exists but dungeon not loaded)
-        dungeon_id = manager.get_dungeon_at_position(12, 12)
+        dungeon_id = manager.get_dungeon_at_position(4, 12)
         assert dungeon_id is None  # Should return None because dungeon not loaded
 
     def test_get_dungeon_at_position_when_in_dungeon(self):
@@ -219,23 +219,23 @@ class TestDungeonManager:
 
         # Load both dungeons
         manager.load_dungeon(
-            "forgotten_tomb",
+            "dark_cave_1",
             config.resource_path(os.path.join("maps", "dark_cave.json")),
         )
         manager.load_dungeon(
             "mystic_grotto",
-            config.resource_path(os.path.join("maps", "ancient_castle.json")),
+            config.resource_path(os.path.join("maps", "dark_cave.json")),
         )
 
         assert len(manager.dungeon_maps) == 2
-        assert "forgotten_tomb" in manager.dungeon_maps
+        assert "dark_cave_1" in manager.dungeon_maps
         assert "mystic_grotto" in manager.dungeon_maps
 
         # Check different entrance locations
-        forgotten_tomb_id = manager.get_dungeon_at_position(12, 12)
-        assert forgotten_tomb_id == "forgotten_tomb"
+        dark_cave_id = manager.get_dungeon_at_position(4, 12)
+        assert dark_cave_id == "dark_cave_1"
 
-        mystic_grotto_id = manager.get_dungeon_at_position(13, 13)
+        mystic_grotto_id = manager.get_dungeon_at_position(16, 13)
         assert mystic_grotto_id == "mystic_grotto"
 
     def test_dungeon_state_preservation(self):

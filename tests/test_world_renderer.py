@@ -1336,3 +1336,582 @@ class TestWorldRenderer:
         assert effect.x == 5 * config.TILE_SIZE + 25  # Restored
         assert effect.y == 10 * config.TILE_SIZE + 30  # Restored
         effect.draw.assert_called_once_with(screen)
+
+    @patch("pygame.display.flip")
+    def test_draw_playing_state_with_dungeons_on_world_map(self, mock_flip):
+        """Test drawing dungeon icons when on world map."""
+        # Arrange
+        screen = pygame.Surface((800, 600))
+        renderer = WorldRenderer(screen)
+
+        world_map = Mock()
+        world_map.draw = Mock()
+
+        camera = Mock()
+        camera.x = 0
+        camera.y = 0
+        camera.viewport_width = 800
+        camera.viewport_height = 600
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (10, 20)
+
+        entity_manager = Mock()
+        entity_manager.chests = []
+        entity_manager.ground_items = []
+        entity_manager.monsters = []
+        entity_manager.get_nearest_alive_monster.return_value = None
+
+        warrior = Mock()
+        warrior.grid_x = 5
+        warrior.grid_y = 10
+        warrior.health = 100
+        warrior.max_health = 100
+        warrior.gold = 50
+        warrior.draw = Mock()
+        warrior.inventory = Mock()
+        warrior.inventory.get_all_items.return_value = []
+        warrior.experience = Mock()
+        warrior.experience.get_xp_progress.return_value = 0.5
+        warrior.experience.current_level = 1
+        warrior.experience.get_available_skill_points.return_value = 0
+
+        dungeon_manager = Mock()
+        dungeon_manager.current_map_id = "world"
+
+        shop = Mock()
+        shop.grid_x = 1
+        shop.grid_y = 1
+
+        # Act
+        with patch.object(renderer, "_draw_dungeons_with_camera") as mock_draw_dungeons:
+            renderer.draw_playing_state(
+                world_map=world_map,
+                camera=camera,
+                entity_manager=entity_manager,
+                warrior=warrior,
+                dungeon_manager=dungeon_manager,
+                shop=shop,
+                active_portal=None,
+                return_portal=None,
+                message="",
+                fog_of_war=None,
+            )
+
+            # Assert
+            mock_draw_dungeons.assert_called_once_with(camera, dungeon_manager, warrior)
+
+    def test_draw_dungeons_with_camera_cave_entrance(self):
+        """Test drawing cave entrance dungeon icons."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "C", "."],  # Cave entrance at (1, 1)
+            [".", ".", "."],
+        ]
+        world_map.get_entity_spawns.return_value = [
+            {"id": "cave_dungeon", "name": "Dark Cave", "x": 1, "y": 1}
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"cave_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 10  # Far away
+        warrior.grid_y = 10
+
+        # Act
+        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert
+            mock_draw_cave.assert_called_once()
+
+    def test_draw_dungeons_with_camera_castle_entrance(self):
+        """Test drawing castle entrance dungeon icons."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "K", "."],  # Castle entrance at (1, 1)
+            [".", ".", "."],
+        ]
+        world_map.get_entity_spawns.return_value = [
+            {"id": "castle_dungeon", "name": "Ancient Castle", "x": 1, "y": 1}
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"castle_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 10  # Far away
+        warrior.grid_y = 10
+
+        # Act
+        with patch.object(renderer, "_draw_castle_entrance") as mock_draw_castle:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert
+            mock_draw_castle.assert_called_once()
+
+    def test_draw_dungeons_with_camera_generic_entrance(self):
+        """Test drawing generic dungeon entrance icons."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "D", "."],  # Generic dungeon at (1, 1)
+            [".", ".", "."],
+        ]
+        world_map.get_entity_spawns.return_value = [
+            {"id": "mystery_dungeon", "name": "Mystery Dungeon", "x": 1, "y": 1}
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"mystery_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 10  # Far away
+        warrior.grid_y = 10
+
+        # Act
+        with patch.object(renderer, "_draw_dungeon_entrance") as mock_draw_dungeon:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert
+            mock_draw_dungeon.assert_called_once()
+
+    def test_draw_dungeons_with_camera_not_visible(self):
+        """Test dungeons not drawn when not visible to camera."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = False  # Not visible
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "C", "."],
+            [".", ".", "."],
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"cave_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 10
+        warrior.grid_y = 10
+
+        # Act
+        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert
+            mock_draw_cave.assert_not_called()
+
+    @patch("pygame.draw.rect")
+    def test_draw_dungeons_with_camera_shows_name_when_on_entrance(
+        self, mock_draw_rect
+    ):
+        """Test dungeon name is displayed when warrior is on the entrance."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "C", "."],  # Cave entrance at (1, 1)
+            [".", ".", "."],
+        ]
+        world_map.get_entity_spawns.return_value = [
+            {"id": "cave_dungeon", "name": "Dark Cave", "x": 1, "y": 1}
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"cave_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 1  # On the dungeon entrance
+        warrior.grid_y = 1  # Distance = 0
+
+        # Act
+        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert
+            mock_draw_cave.assert_called_once()
+            # Verify text background was drawn
+            assert mock_draw_rect.call_count >= 1
+            # Verify text was drawn (blit called)
+            assert screen.blit.call_count >= 1
+
+    @patch("pygame.draw.ellipse")
+    @patch("pygame.draw.circle")
+    def test_draw_cave_entrance(self, mock_circle, mock_ellipse):
+        """Test drawing cave entrance with arch and rocky edges."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        # Act
+        renderer._draw_cave_entrance(100, 200, 50)
+
+        # Assert
+        assert mock_ellipse.call_count >= 2  # Main arch + inner cave
+        assert mock_circle.call_count >= 6  # Background circles (2) + rocky edges (4)
+
+    @patch("pygame.draw.rect")
+    @patch("pygame.draw.line")
+    @patch("pygame.draw.circle")
+    def test_draw_castle_entrance(self, mock_circle, mock_line, mock_rect):
+        """Test drawing castle entrance with battlements."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        # Act
+        renderer._draw_castle_entrance(100, 200, 50)
+
+        # Assert
+        assert mock_circle.call_count >= 2  # Background circles
+        assert mock_rect.call_count >= 4  # Gate structure + battlements
+        assert mock_line.call_count >= 3  # Stone block pattern
+
+    @patch("pygame.draw.circle")
+    def test_draw_dungeon_entrance(self, mock_circle):
+        """Test drawing generic dungeon entrance portal."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        # Act
+        renderer._draw_dungeon_entrance(100, 200, 50)
+
+        # Assert
+        assert (
+            mock_circle.call_count >= 5
+        )  # Background circles (2) + outer glow + inner portal + dark center
+
+    def test_draw_dungeons_with_camera_multiple_dungeons(self):
+        """Test drawing multiple dungeon entrances."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", "C", "K", "D", "."],
+            [".", ".", ".", ".", "."],
+        ]
+        world_map.get_entity_spawns.return_value = [
+            {"id": "cave_dungeon", "name": "Dark Cave", "x": 1, "y": 0},
+            {"id": "castle_dungeon", "name": "Castle", "x": 2, "y": 0},
+            {"id": "mystery_dungeon", "name": "Mystery", "x": 3, "y": 0},
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {
+            "cave_dungeon": (1, 0),
+            "castle_dungeon": (2, 0),
+            "mystery_dungeon": (3, 0),
+        }
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 10  # Far away from all dungeons
+        warrior.grid_y = 10
+
+        # Act
+        with (
+            patch.object(renderer, "_draw_cave_entrance") as mock_cave,
+            patch.object(renderer, "_draw_castle_entrance") as mock_castle,
+            patch.object(renderer, "_draw_dungeon_entrance") as mock_dungeon,
+        ):
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert - all three types should be drawn
+            mock_cave.assert_called_once()
+            mock_castle.assert_called_once()
+            mock_dungeon.assert_called_once()
+
+    def test_draw_dungeons_with_camera_warrior_far_from_dungeon(self):
+        """Test dungeon name is not displayed when warrior is far."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "C", "."],  # Cave entrance at (1, 1)
+            [".", ".", "."],
+        ]
+        world_map.get_entity_spawns.return_value = [
+            {"id": "cave_dungeon", "name": "Dark Cave", "x": 1, "y": 1}
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"cave_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 10  # Far away
+        warrior.grid_y = 10  # Distance = 18, which is > 1
+
+        # Act
+        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert
+            mock_draw_cave.assert_called_once()
+            # Verify text was NOT drawn (warrior too far)
+            screen.blit.assert_not_called()
+
+    def test_draw_dungeons_with_camera_no_matching_spawn_data(self):
+        """Test dungeon drawing when spawn data doesn't match dungeon ID."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "C", "."],  # Cave entrance at (1, 1)
+            [".", ".", "."],
+        ]
+        # Spawn data with different ID (not matching dungeon_entrances)
+        world_map.get_entity_spawns.return_value = [
+            {"id": "different_dungeon", "name": "Other Cave", "x": 5, "y": 5}
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"cave_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 1  # Next to dungeon
+        warrior.grid_y = 2  # Distance = 1
+
+        # Act
+        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert
+            mock_draw_cave.assert_called_once()
+            # Name should not be drawn since no matching spawn data
+            screen.blit.assert_not_called()
+
+    @patch("pygame.draw.rect")
+    def test_draw_dungeons_mixed_distances(self, mock_draw_rect):
+        """Test drawing dungeons with warrior on one and far from another."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            ["C", ".", ".", ".", "K"],
+            [".", ".", ".", ".", "."],
+        ]
+        world_map.get_entity_spawns.return_value = [
+            {"id": "cave_dungeon", "name": "Near Cave", "x": 0, "y": 0},
+            {"id": "castle_dungeon", "name": "Far Castle", "x": 4, "y": 0},
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {
+            "cave_dungeon": (0, 0),
+            "castle_dungeon": (4, 0),
+        }
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 0  # On cave entrance (distance = 0)
+        warrior.grid_y = 0
+
+        # Act
+        with (
+            patch.object(renderer, "_draw_cave_entrance") as mock_cave,
+            patch.object(renderer, "_draw_castle_entrance") as mock_castle,
+        ):
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert - both dungeons drawn
+            mock_cave.assert_called_once()
+            mock_castle.assert_called_once()
+            # Name shown only for cave (warrior is on it)
+            assert mock_draw_rect.call_count >= 1
+            # Text drawn for cave
+            assert screen.blit.call_count >= 1
+
+    def test_draw_dungeons_with_camera_unknown_terrain_type(self):
+        """Test dungeon with unknown terrain character doesn't crash."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "X", "."],  # Unknown terrain type at (1, 1)
+            [".", ".", "."],
+        ]
+        world_map.get_entity_spawns.return_value = [
+            {"id": "unknown_dungeon", "name": "Unknown", "x": 1, "y": 1}
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"unknown_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 10  # Far away
+        warrior.grid_y = 10
+
+        # Act
+        with (
+            patch.object(renderer, "_draw_cave_entrance") as mock_cave,
+            patch.object(renderer, "_draw_castle_entrance") as mock_castle,
+            patch.object(renderer, "_draw_dungeon_entrance") as mock_dungeon,
+        ):
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert - no drawing methods should be called for unknown type
+            mock_cave.assert_not_called()
+            mock_castle.assert_not_called()
+            mock_dungeon.assert_not_called()
+
+    @patch("pygame.draw.rect")
+    def test_draw_dungeons_name_display_with_multiple_spawns(self, mock_draw_rect):
+        """Test dungeon name display when spawn data has multiple entries."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "C", "."],  # Cave entrance at (1, 1)
+            [".", ".", "."],
+        ]
+        # Multiple spawns - the matching one is NOT first
+        world_map.get_entity_spawns.return_value = [
+            {"id": "other_dungeon", "name": "Other Cave", "x": 0, "y": 0},
+            {"id": "another_dungeon", "name": "Another Cave", "x": 2, "y": 2},
+            {"id": "cave_dungeon", "name": "Dark Cave", "x": 1, "y": 1},  # Match
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"cave_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 1  # On the dungeon entrance
+        warrior.grid_y = 1  # Distance = 0
+
+        # Act
+        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert - text should still be drawn (matching spawn found)
+            mock_draw_cave.assert_called_once()
+            assert mock_draw_rect.call_count >= 1  # Background for text
+            assert screen.blit.call_count >= 1  # Text rendered
+
+    @patch("pygame.draw.rect")
+    def test_draw_dungeons_name_display_no_matching_spawn(self, mock_draw_rect):
+        """Test dungeon name display when no matching spawn data exists."""
+        # Arrange
+        screen = Mock()
+        renderer = WorldRenderer(screen)
+
+        camera = Mock()
+        camera.is_visible.return_value = True
+        camera.world_to_screen.return_value = (5, 10)
+
+        world_map = Mock()
+        world_map.tiles = [
+            [".", ".", "."],
+            [".", "C", "."],  # Cave entrance at (1, 1)
+            [".", ".", "."],
+        ]
+        # Spawns exist but none match the dungeon_id
+        world_map.get_entity_spawns.return_value = [
+            {"id": "other_dungeon", "name": "Other Cave", "x": 0, "y": 0},
+            {"id": "another_dungeon", "name": "Another Cave", "x": 2, "y": 2},
+        ]
+
+        dungeon_manager = Mock()
+        dungeon_manager.dungeon_entrances = {"cave_dungeon": (1, 1)}
+        dungeon_manager.world_map = world_map
+
+        warrior = Mock()
+        warrior.grid_x = 1  # On the dungeon entrance
+        warrior.grid_y = 1  # Distance = 0
+
+        # Act
+        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+            renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
+            # Assert - cave drawn but no text (no matching spawn data)
+            mock_draw_cave.assert_called_once()
+            # No text background or text should be drawn since no match found
+            mock_draw_rect.assert_not_called()
+            screen.blit.assert_not_called()
