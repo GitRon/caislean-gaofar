@@ -22,12 +22,12 @@ class TestGame:
         game = Game()
 
         # Assert
-        assert game.state == config.STATE_PLAYING
+        assert game.state_manager.state == config.STATE_PLAYING
         assert game.warrior is not None
-        assert game.monsters is not None
-        assert len(game.monsters) > 0
-        assert game.combat_system is not None
-        assert game.inventory_ui is not None
+        assert game.entity_manager.monsters is not None
+        assert len(game.entity_manager.monsters) > 0
+        assert game.renderer.combat_system is not None
+        assert game.renderer.inventory_ui is not None
         assert game.world_map is not None
         assert game.camera is not None
 
@@ -42,7 +42,7 @@ class TestGame:
         game = Game()
 
         # Assert
-        assert game.state == config.STATE_PLAYING
+        assert game.state_manager.state == config.STATE_PLAYING
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
@@ -107,5 +107,8 @@ class TestGame:
         game._heal_at_temple()
 
         # Assert
-        assert game.message == "The temple's divine power restores your health!"
-        assert game.message_timer > 0
+        assert (
+            game.state_manager.message
+            == "The temple's divine power restores your health!"
+        )
+        assert game.state_manager.message_timer > 0
