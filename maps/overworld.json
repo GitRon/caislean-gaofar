@@ -119,13 +119,14 @@
       {"x": 3, "y": 12}
     ],
     "dungeons": [
-      {"x": 12, "y": 12, "name": "Forgotten Tomb", "id": "forgotten_tomb"},
-      {"x": 34, "y": 7, "name": "Haunted Crypt", "id": "haunted_crypt"},
-      {"x": 36, "y": 13, "name": "Shadow Keep", "id": "shadow_keep"},
-      {"x": 13, "y": 13, "name": "Mystic Grotto", "id": "mystic_grotto"},
-      {"x": 19, "y": 19, "name": "Ruined Fortress", "id": "ruined_fortress"},
-      {"x": 5, "y": 22, "name": "Dark Woods Lair", "id": "dark_woods_lair"},
-      {"x": 23, "y": 27, "name": "Southern Caverns", "id": "southern_caverns"}
+      {"x": 34, "y": 7, "name": "Haunted Crypt", "id": "haunted_crypt", "map": "ancient_castle"},
+      {"x": 4, "y": 12, "name": "Dark Cave", "id": "dark_cave_1", "map": "dark_cave"},
+      {"x": 16, "y": 13, "name": "Mystic Grotto", "id": "mystic_grotto", "map": "dark_cave"},
+      {"x": 35, "y": 13, "name": "Shadow Keep", "id": "shadow_keep", "map": "ancient_castle"},
+      {"x": 30, "y": 19, "name": "Ruined Fortress", "id": "ruined_fortress", "map": "ancient_castle"},
+      {"x": 23, "y": 21, "name": "Ancient Keep", "id": "ancient_keep", "map": "ancient_castle"},
+      {"x": 3, "y": 22, "name": "Dark Woods Lair", "id": "dark_woods_lair", "map": "dark_cave"},
+      {"x": 24, "y": 27, "name": "Southern Caverns", "id": "southern_caverns", "map": "dark_cave"}
     ]
   }
 }

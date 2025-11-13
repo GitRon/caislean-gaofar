@@ -51,13 +51,23 @@ class Game:
         self.dungeon_manager = DungeonManager(map_file)
         self.dungeon_manager.load_world_map()
 
-        # Load dungeons
-        self.dungeon_manager.load_dungeon(
-            "dark_cave", os.path.join("maps", "dark_cave.json")
-        )
-        self.dungeon_manager.load_dungeon(
-            "ancient_castle", os.path.join("maps", "ancient_castle.json")
-        )
+        # Load dungeons - map unique IDs to actual dungeon files
+        dark_cave_path = os.path.join("maps", "dark_cave.json")
+        ancient_castle_path = os.path.join("maps", "ancient_castle.json")
+
+        # Cave-type dungeons
+        self.dungeon_manager.load_dungeon("dark_cave_1", dark_cave_path)
+        self.dungeon_manager.load_dungeon("mystic_grotto", dark_cave_path)
+        self.dungeon_manager.load_dungeon("dark_woods_lair", dark_cave_path)
+        self.dungeon_manager.load_dungeon("southern_caverns", dark_cave_path)
+
+        # Castle-type dungeons
+        self.dungeon_manager.load_dungeon("haunted_crypt", ancient_castle_path)
+        self.dungeon_manager.load_dungeon("shadow_keep", ancient_castle_path)
+        self.dungeon_manager.load_dungeon("ruined_fortress", ancient_castle_path)
+        self.dungeon_manager.load_dungeon("ancient_keep", ancient_castle_path)
+
+        # Town
         self.dungeon_manager.load_dungeon("town", os.path.join("maps", "town.json"))
 
         # Get current map (initially world map)
@@ -369,6 +379,9 @@ class Game:
         if self.temple:
             self.temple.update(dt)
 
+        # Update attack effects
+        self.renderer.attack_effect_manager.update(dt)
+
         # Only update game logic when actively playing
         if self.state_manager.state != config.STATE_PLAYING:
             return
@@ -415,6 +428,7 @@ class Game:
             on_chest_opened=self._handle_chest_opened,
             on_item_picked=self._show_message,
             on_monster_death=self._handle_monster_death,
+            attack_effect_manager=self.renderer.attack_effect_manager,
         )
 
     def _check_dungeon_transition(self):
@@ -618,6 +632,7 @@ class Game:
                 entity_manager=self.entity_manager,
                 warrior=self.warrior,
                 fog_of_war=self.fog_of_war,
+                dungeon_manager=self.dungeon_manager,
             )
         elif self.state_manager.state == config.STATE_SHOP:
             self.renderer.draw_shop_state(shop=self.shop, warrior=self.warrior)

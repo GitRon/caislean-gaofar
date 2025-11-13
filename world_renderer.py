@@ -9,6 +9,7 @@ from shop import Shop
 from shop_ui import ShopUI
 from hud import HUD
 from camera import Camera
+from attack_effect import AttackEffectManager
 import config
 
 
@@ -27,6 +28,7 @@ class WorldRenderer:
         self.inventory_ui = InventoryUI()
         self.shop_ui = ShopUI()
         self.hud = HUD()
+        self.attack_effect_manager = AttackEffectManager()
 
     def draw_playing_state(
         self,
@@ -69,6 +71,7 @@ class WorldRenderer:
                 camera.viewport_width,
                 camera.viewport_height,
                 fog_of_war,
+                dungeon_manager.current_map_id,
             )
         else:
             world_map.draw(
@@ -80,7 +83,9 @@ class WorldRenderer:
             )
 
         # Draw world objects (chests and ground items) with camera offset
-        self._draw_world_objects_with_camera(camera, entity_manager)
+        self._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
 
         # Draw active portal if present (only when NOT in town)
         if active_portal and dungeon_manager.current_map_id != "town":
@@ -98,8 +103,17 @@ class WorldRenderer:
             if temple:
                 self._draw_temple_with_camera(camera, temple)
 
+        # Draw dungeon entrances if on world map
+        if dungeon_manager.current_map_id == "world":
+            self._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
+
         # Draw entities with camera offset
-        self._draw_entities_with_camera(camera, warrior, entity_manager)
+        self._draw_entities_with_camera(
+            camera, warrior, entity_manager, fog_of_war, dungeon_manager
+        )
+
+        # Draw attack effects with camera offset
+        self._draw_attack_effects_with_camera(camera)
 
         # Draw combat UI (find nearest monster)
         nearest_monster = entity_manager.get_nearest_alive_monster(warrior)
@@ -122,6 +136,7 @@ class WorldRenderer:
         entity_manager: EntityManager,
         warrior: Warrior,
         fog_of_war=None,
+        dungeon_manager=None,
     ):
         """
         Draw the inventory state.
@@ -132,11 +147,12 @@ class WorldRenderer:
             entity_manager: The entity manager
             warrior: The warrior entity
             fog_of_war: Fog of war system (optional)
+            dungeon_manager: The dungeon manager (optional)
         """
         self.screen.fill(config.BLACK)
 
         # Draw the game in the background
-        if fog_of_war:
+        if fog_of_war and dungeon_manager:
             world_map.draw(
                 self.screen,
                 camera.x,
@@ -144,6 +160,7 @@ class WorldRenderer:
                 camera.viewport_width,
                 camera.viewport_height,
                 fog_of_war,
+                dungeon_manager.current_map_id,
             )
         else:
             world_map.draw(
@@ -153,8 +170,12 @@ class WorldRenderer:
                 camera.viewport_width,
                 camera.viewport_height,
             )
-        self._draw_world_objects_with_camera(camera, entity_manager)
-        self._draw_entities_with_camera(camera, warrior, entity_manager)
+        self._draw_world_objects_with_camera(
+            camera, entity_manager, fog_of_war, dungeon_manager
+        )
+        self._draw_entities_with_camera(
+            camera, warrior, entity_manager, fog_of_war, dungeon_manager
+        )
         nearest_monster = entity_manager.get_nearest_alive_monster(warrior)
         if nearest_monster:
             self.combat_system.draw_combat_ui(self.screen, warrior, nearest_monster)
@@ -216,7 +237,11 @@ class WorldRenderer:
         pygame.display.flip()
 
     def _draw_world_objects_with_camera(
-        self, camera: Camera, entity_manager: EntityManager
+        self,
+        camera: Camera,
+        entity_manager: EntityManager,
+        fog_of_war=None,
+        dungeon_manager=None,
     ):
         """
         Draw chests and ground items with camera offset applied.
@@ -224,19 +249,45 @@ class WorldRenderer:
         Args:
             camera: The camera instance
             entity_manager: The entity manager
+            fog_of_war: Fog of war system (optional)
+            dungeon_manager: The dungeon manager (optional)
         """
+        # Check if fog of war is enabled for current map
+        fog_enabled = (
+            fog_of_war
+            and dungeon_manager
+            and fog_of_war.is_fog_enabled_for_map(dungeon_manager.current_map_id)
+        )
+
         # Draw chests
         for chest in entity_manager.chests:
             if camera.is_visible(chest.grid_x, chest.grid_y):
+                # Check fog of war visibility
+                if fog_enabled and not fog_of_war.is_visible(
+                    chest.grid_x, chest.grid_y
+                ):
+                    continue
+
                 chest.draw(self.screen, camera.x, camera.y)
 
         # Draw ground items
         for ground_item in entity_manager.ground_items:
             if camera.is_visible(ground_item.grid_x, ground_item.grid_y):
+                # Check fog of war visibility
+                if fog_enabled and not fog_of_war.is_visible(
+                    ground_item.grid_x, ground_item.grid_y
+                ):
+                    continue
+
                 ground_item.draw(self.screen, camera.x, camera.y)
 
     def _draw_entities_with_camera(
-        self, camera: Camera, warrior: Warrior, entity_manager: EntityManager
+        self,
+        camera: Camera,
+        warrior: Warrior,
+        entity_manager: EntityManager,
+        fog_of_war=None,
+        dungeon_manager=None,
     ):
         """
         Draw all entities with camera offset applied.
@@ -245,14 +296,29 @@ class WorldRenderer:
             camera: The camera instance
             warrior: The warrior entity
             entity_manager: The entity manager
+            fog_of_war: Fog of war system (optional)
+            dungeon_manager: The dungeon manager (optional)
         """
-        # Draw warrior
+        # Check if fog of war is enabled for current map
+        fog_enabled = (
+            fog_of_war
+            and dungeon_manager
+            and fog_of_war.is_fog_enabled_for_map(dungeon_manager.current_map_id)
+        )
+
+        # Draw warrior (always visible)
         if camera.is_visible(warrior.grid_x, warrior.grid_y):
             warrior.draw(self.screen, camera.x, camera.y)
 
         # Draw monsters
         for monster in entity_manager.monsters:
             if monster.is_alive and camera.is_visible(monster.grid_x, monster.grid_y):
+                # Check fog of war visibility
+                if fog_enabled and not fog_of_war.is_visible(
+                    monster.grid_x, monster.grid_y
+                ):
+                    continue
+
                 monster.draw(self.screen, camera.x, camera.y)
 
     def _draw_portal_with_camera(self, camera: Camera, portal):
@@ -363,6 +429,192 @@ class WorldRenderer:
             pygame.draw.rect(self.screen, config.BLACK, bg_rect)
             self.screen.blit(text, (text_x, text_y))
 
+    def _draw_dungeons_with_camera(
+        self, camera: Camera, dungeon_manager, warrior: Warrior
+    ):
+        """
+        Draw dungeon entrance icons on the world map.
+
+        Args:
+            camera: The camera instance
+            dungeon_manager: The dungeon manager
+            warrior: The warrior entity
+        """
+        # Get dungeon entrance locations
+        for dungeon_id, (
+            entrance_x,
+            entrance_y,
+        ) in dungeon_manager.dungeon_entrances.items():
+            if not camera.is_visible(entrance_x, entrance_y):
+                continue
+
+            # Convert to screen coordinates
+            screen_x, screen_y = camera.world_to_screen(entrance_x, entrance_y)
+            x = screen_x * config.TILE_SIZE
+            y = screen_y * config.TILE_SIZE
+            size = config.TILE_SIZE
+
+            # Determine dungeon type based on terrain character at this position
+            terrain_char = dungeon_manager.world_map.tiles[entrance_y][entrance_x]
+
+            # Draw different icons for different dungeon types
+            if terrain_char == "C":  # Cave entrance
+                self._draw_cave_entrance(x, y, size)
+            elif terrain_char == "K":  # Castle entrance
+                self._draw_castle_entrance(x, y, size)
+            elif terrain_char == "D":  # Generic dungeon entrance
+                self._draw_dungeon_entrance(x, y, size)
+
+            # Show dungeon name when player is on the entrance
+            distance = abs(warrior.grid_x - entrance_x) + abs(
+                warrior.grid_y - entrance_y
+            )
+            if distance == 0:
+                # Get dungeon name
+                for spawn in dungeon_manager.world_map.get_entity_spawns("dungeons"):
+                    if spawn.get("id") == dungeon_id:
+                        dungeon_name = spawn.get("name", "Dungeon")
+                        font = pygame.font.Font(None, 20)
+                        text = font.render(dungeon_name, True, config.WHITE)
+                        text_x = x + size // 2 - text.get_width() // 2
+                        text_y = y - 25
+                        # Draw background for text
+                        bg_rect = pygame.Rect(
+                            text_x - 3,
+                            text_y - 3,
+                            text.get_width() + 6,
+                            text.get_height() + 6,
+                        )
+                        pygame.draw.rect(self.screen, config.BLACK, bg_rect)
+                        self.screen.blit(text, (text_x, text_y))
+                        break
+
+    def _draw_cave_entrance(self, x: int, y: int, size: int):
+        """
+        Draw a cave entrance icon.
+
+        Args:
+            x: Screen x position
+            y: Screen y position
+            size: Tile size
+        """
+        # Background circle for visibility
+        pygame.draw.circle(
+            self.screen, (30, 30, 30), (x + size // 2, y + size // 2), size // 2 + 2
+        )
+        pygame.draw.circle(
+            self.screen, (200, 180, 140), (x + size // 2, y + size // 2), size // 2
+        )
+
+        # Cave entrance - dark arch with rocky edges
+        cave_color = (60, 40, 20)  # Very dark brown
+        rock_color = (120, 100, 70)  # Lighter brown for contrast
+
+        # Main cave opening (arch shape)
+        arch_rect = pygame.Rect(
+            x + size // 6, y + size // 3, size * 2 // 3, size * 2 // 3
+        )
+        pygame.draw.ellipse(self.screen, cave_color, arch_rect)
+
+        # Dark inner cave (very dark to show depth)
+        inner_rect = pygame.Rect(x + size // 4, y + size // 2, size // 2, size // 3)
+        pygame.draw.ellipse(self.screen, (20, 15, 10), inner_rect)
+
+        # Rocky edges (small circles) - make them stand out more
+        rock_positions = [
+            (x + size // 6, y + size // 2),
+            (x + size * 5 // 6, y + size // 2),
+            (x + size // 4, y + size // 3),
+            (x + size * 3 // 4, y + size // 3),
+        ]
+        for rx, ry in rock_positions:
+            pygame.draw.circle(self.screen, rock_color, (int(rx), int(ry)), size // 7)
+
+    def _draw_castle_entrance(self, x: int, y: int, size: int):
+        """
+        Draw a castle entrance icon.
+
+        Args:
+            x: Screen x position
+            y: Screen y position
+            size: Tile size
+        """
+        # Background circle for visibility
+        pygame.draw.circle(
+            self.screen, (30, 30, 30), (x + size // 2, y + size // 2), size // 2 + 2
+        )
+        pygame.draw.circle(
+            self.screen, (180, 180, 180), (x + size // 2, y + size // 2), size // 2
+        )
+
+        # Castle entrance - stone gateway with battlements
+        stone_color = (140, 130, 120)  # Lighter stone grey for visibility
+        dark_stone = (60, 55, 50)  # Very dark for contrast
+
+        # Main gate structure
+        gate_rect = pygame.Rect(
+            x + size // 6, y + size // 4, size * 2 // 3, size * 3 // 4
+        )
+        pygame.draw.rect(self.screen, stone_color, gate_rect)
+
+        # Dark gate opening
+        opening_rect = pygame.Rect(x + size // 3, y + size // 2, size // 3, size // 2)
+        pygame.draw.rect(self.screen, dark_stone, opening_rect)
+
+        # Battlements on top (crenellations)
+        battlement_width = size // 6
+        for i in range(3):
+            if i % 2 == 0:  # Every other one
+                bx = x + size // 6 + i * battlement_width
+                pygame.draw.rect(
+                    self.screen,
+                    stone_color,
+                    (bx, y + size // 8, battlement_width, size // 8),
+                )
+
+        # Stone blocks pattern
+        for i in range(3):
+            by = y + size // 3 + i * size // 6
+            pygame.draw.line(
+                self.screen, dark_stone, (x + size // 6, by), (x + size * 5 // 6, by), 2
+            )
+
+    def _draw_dungeon_entrance(self, x: int, y: int, size: int):
+        """
+        Draw a generic dungeon entrance icon.
+
+        Args:
+            x: Screen x position
+            y: Screen y position
+            size: Tile size
+        """
+        # Background circle for visibility
+        pygame.draw.circle(
+            self.screen, (30, 30, 30), (x + size // 2, y + size // 2), size // 2 + 2
+        )
+        pygame.draw.circle(
+            self.screen, (220, 220, 250), (x + size // 2, y + size // 2), size // 2
+        )
+
+        # Generic dungeon - purple/mysterious portal
+        dungeon_color = (180, 120, 240)  # Brighter purple
+        glow_color = (220, 180, 255)  # Very light purple
+
+        # Outer glow - larger
+        pygame.draw.circle(
+            self.screen, glow_color, (x + size // 2, y + size // 2), size // 3 + 2
+        )
+
+        # Inner portal
+        pygame.draw.circle(
+            self.screen, dungeon_color, (x + size // 2, y + size // 2), size // 4 + 1
+        )
+
+        # Dark center
+        pygame.draw.circle(
+            self.screen, (30, 10, 50), (x + size // 2, y + size // 2), size // 6
+        )
+
     def _draw_message(self, message: str):
         """
         Draw the current message at the bottom of the screen.
@@ -387,3 +639,38 @@ class WorldRenderer:
 
         # Draw text
         self.screen.blit(text_surface, text_rect)
+
+    def _draw_attack_effects_with_camera(self, camera: Camera):
+        """
+        Draw attack effects with camera offset applied.
+
+        Args:
+            camera: The camera instance
+        """
+        # Temporarily adjust camera offset for attack effects
+        # Since attack effects use pixel coordinates, we need to adjust them
+        for effect in self.attack_effect_manager.effects:
+            # Store original position
+            original_x = effect.x
+            original_y = effect.y
+
+            # Convert to screen coordinates (effects are in world pixel space)
+            # Calculate grid position first
+            grid_x = original_x // config.TILE_SIZE
+            grid_y = original_y // config.TILE_SIZE
+
+            # Only draw if in camera view
+            if camera.is_visible(grid_x, grid_y):
+                # Convert to screen space
+                screen_grid_x, screen_grid_y = camera.world_to_screen(grid_x, grid_y)
+                offset_x = original_x % config.TILE_SIZE
+                offset_y = original_y % config.TILE_SIZE
+                effect.x = screen_grid_x * config.TILE_SIZE + offset_x
+                effect.y = screen_grid_y * config.TILE_SIZE + offset_y
+
+                # Draw the effect
+                effect.draw(self.screen)
+
+                # Restore original position
+                effect.x = original_x
+                effect.y = original_y
