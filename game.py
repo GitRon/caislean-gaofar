@@ -622,6 +622,7 @@ class Game:
                 entity_manager=self.entity_manager,
                 warrior=self.warrior,
                 fog_of_war=self.fog_of_war,
+                dungeon_manager=self.dungeon_manager,
             )
         elif self.state_manager.state == config.STATE_SHOP:
             self.renderer.draw_shop_state(shop=self.shop, warrior=self.warrior)
