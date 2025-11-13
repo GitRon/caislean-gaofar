@@ -41,6 +41,30 @@ class Chest:
         """Get collision rectangle for the chest."""
         return pygame.Rect(self.x, self.y, TILE_SIZE, TILE_SIZE)
 
+    def get_screen_x(self, camera_offset_x: int = 0) -> int:
+        """
+        Get the screen pixel x coordinate with camera offset applied.
+
+        Args:
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel x coordinate
+        """
+        return (self.grid_x - camera_offset_x) * TILE_SIZE
+
+    def get_screen_y(self, camera_offset_y: int = 0) -> int:
+        """
+        Get the screen pixel y coordinate with camera offset applied.
+
+        Args:
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel y coordinate
+        """
+        return (self.grid_y - camera_offset_y) * TILE_SIZE
+
     def open(self) -> Item:
         """
         Open the chest and return the item inside.
@@ -51,18 +75,32 @@ class Chest:
         self.is_opened = True
         return self.item
 
-    def draw(self, screen: pygame.Surface):
+    def draw(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
         """
         Draw the chest on the screen.
         Chests appear as brown rectangles with a golden lock icon.
+
+        Args:
+            screen: The pygame screen surface
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
         """
         if self.is_opened:
             return  # Don't draw opened chests
 
+        # Calculate screen coordinates with camera offset
+        screen_x = self.get_screen_x(camera_offset_x)
+        screen_y = self.get_screen_y(camera_offset_y)
+
         # Draw chest body (brown rectangle)
         chest_rect = pygame.Rect(
-            self.x + TILE_SIZE // 4,
-            self.y + TILE_SIZE // 4,
+            screen_x + TILE_SIZE // 4,
+            screen_y + TILE_SIZE // 4,
             TILE_SIZE // 2,
             TILE_SIZE // 2,
         )
@@ -70,7 +108,7 @@ class Chest:
         pygame.draw.rect(screen, (80, 40, 10), chest_rect, 3)  # Dark brown border
 
         # Draw lock (golden circle in center)
-        lock_center = (self.x + TILE_SIZE // 2, self.y + TILE_SIZE // 2)
+        lock_center = (screen_x + TILE_SIZE // 2, screen_y + TILE_SIZE // 2)
         pygame.draw.circle(screen, GOLD, lock_center, 6)
         pygame.draw.circle(
             screen, (200, 150, 0), lock_center, 6, 2

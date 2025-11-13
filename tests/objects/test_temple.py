@@ -91,16 +91,22 @@ class TestTemple:
         assert temple.healing_active is False
         assert temple.healing_effect_time <= 0
 
-    def test_temple_draw_updates_position(self, screen):
-        """Test draw method updates position based on grid coordinates."""
-        temple = Temple(2, 3)
+    def test_temple_screen_coordinates_with_camera_offset(self, screen):
+        """Test temple calculates screen coordinates correctly with camera offset."""
+        temple = Temple(10, 15)
 
-        # Change grid position
-        temple.grid_x = 5
-        temple.draw(screen)
+        # Test without camera offset
+        assert temple.get_screen_x(0) == 10 * config.TILE_SIZE
+        assert temple.get_screen_y(0) == 15 * config.TILE_SIZE
 
-        # Position should be updated during draw
-        assert temple.x == 5 * config.TILE_SIZE
+        # Test with camera offset
+        assert temple.get_screen_x(3) == 7 * config.TILE_SIZE
+        assert temple.get_screen_y(5) == 10 * config.TILE_SIZE
+
+        # Verify draw doesn't mutate position
+        temple.draw(screen, 3, 5)
+        assert temple.x == 10 * config.TILE_SIZE  # Should remain unchanged
+        assert temple.y == 15 * config.TILE_SIZE  # Should remain unchanged
 
     def test_temple_draw_normal(self, screen):
         """Test drawing a temple without healing effect."""

@@ -1,11 +1,22 @@
 """Tests for CatSi monster class"""
 
-from caislean_gaofar.entities.monsters.cat_si import CatSi
-from caislean_gaofar.entities.monsters.base_monster import BaseMonster
+import pygame
+import pytest
+
+from monsters.cat_si import CatSi
+from monsters.base_monster import BaseMonster
 
 
 class TestCatSi:
     """Tests for CatSi monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_cat_si_initialization(self):
         """Test CatSi can be initialized"""
@@ -67,3 +78,21 @@ class TestCatSi:
         # Assert
         assert cat_si.is_alive is True
         assert cat_si.health == cat_si.max_health
+
+    def test_cat_si_draw_body(self):
+        """Test CatSi draw_body renders without error"""
+        # Arrange
+        cat_si = CatSi(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        cat_si.draw_body(screen, 400, 300)
+
+    def test_cat_si_draw_details(self):
+        """Test CatSi draw_details renders without error"""
+        # Arrange
+        cat_si = CatSi(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        cat_si.draw_details(screen, 400, 300)

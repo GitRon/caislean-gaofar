@@ -33,10 +33,16 @@ class TestTurnProcessor:
         monster1 = Mock(is_alive=True)
         monster1.on_turn_start = Mock()
         monster1.execute_turn = Mock()
+        monster1.grid_distance_to = Mock(return_value=10)
+        monster1.attack_range = 1
+        monster1.can_attack = Mock(return_value=False)
 
         monster2 = Mock(is_alive=True)
         monster2.on_turn_start = Mock()
         monster2.execute_turn = Mock()
+        monster2.grid_distance_to = Mock(return_value=10)
+        monster2.attack_range = 1
+        monster2.can_attack = Mock(return_value=False)
 
         entity_manager.monsters = [monster1, monster2]
 
@@ -222,6 +228,9 @@ class TestTurnProcessor:
         alive_monster = Mock(is_alive=True)
         alive_monster.on_turn_start = Mock()
         alive_monster.execute_turn = Mock()
+        alive_monster.grid_distance_to = Mock(return_value=10)
+        alive_monster.attack_range = 1
+        alive_monster.can_attack = Mock(return_value=False)
 
         dead_monster = Mock(is_alive=False)
         dead_monster.on_turn_start = Mock()
@@ -315,3 +324,293 @@ class TestTurnProcessor:
         warrior.queue_movement.assert_not_called()
         warrior.queue_attack.assert_not_called()
         assert processor.waiting_for_player_input is False
+
+    def test_process_turn_with_attack_effect_warrior_success(self):
+        """Test that attack effects are triggered when warrior attacks successfully."""
+        # Arrange
+        processor = TurnProcessor()
+
+        warrior = Mock()
+        warrior.on_turn_start = Mock()
+        warrior.execute_turn = Mock(
+            return_value={"success": True, "damage": 10, "crit": False}
+        )
+        warrior.size = 50
+
+        nearest_monster = Mock()
+        nearest_monster.x = 100
+        nearest_monster.y = 200
+        nearest_monster.size = 50
+
+        entity_manager = Mock()
+        entity_manager.get_nearest_alive_monster.return_value = nearest_monster
+        entity_manager.check_chest_collision.return_value = None
+        entity_manager.check_ground_item_pickup.return_value = (False, "")
+        entity_manager.check_monster_deaths.return_value = []
+        entity_manager.monsters = []
+
+        world_map = Mock()
+        dungeon_manager = Mock()
+        on_dungeon_transition = Mock()
+        on_chest_opened = Mock()
+        on_item_picked = Mock()
+        on_monster_death = Mock()
+
+        attack_effect_manager = Mock()
+
+        # Act
+        processor.process_turn(
+            warrior=warrior,
+            entity_manager=entity_manager,
+            world_map=world_map,
+            dungeon_manager=dungeon_manager,
+            on_dungeon_transition=on_dungeon_transition,
+            on_chest_opened=on_chest_opened,
+            on_item_picked=on_item_picked,
+            on_monster_death=on_monster_death,
+            attack_effect_manager=attack_effect_manager,
+        )
+
+        # Assert
+        attack_effect_manager.add_effect.assert_called_once_with(125.0, 225.0, False)
+
+    def test_process_turn_with_attack_effect_warrior_crit(self):
+        """Test that crit attack effects are triggered when warrior crits."""
+        # Arrange
+        processor = TurnProcessor()
+
+        warrior = Mock()
+        warrior.on_turn_start = Mock()
+        warrior.execute_turn = Mock(
+            return_value={"success": True, "damage": 20, "crit": True}
+        )
+        warrior.size = 50
+
+        nearest_monster = Mock()
+        nearest_monster.x = 100
+        nearest_monster.y = 200
+        nearest_monster.size = 50
+
+        entity_manager = Mock()
+        entity_manager.get_nearest_alive_monster.return_value = nearest_monster
+        entity_manager.check_chest_collision.return_value = None
+        entity_manager.check_ground_item_pickup.return_value = (False, "")
+        entity_manager.check_monster_deaths.return_value = []
+        entity_manager.monsters = []
+
+        world_map = Mock()
+        dungeon_manager = Mock()
+        on_dungeon_transition = Mock()
+        on_chest_opened = Mock()
+        on_item_picked = Mock()
+        on_monster_death = Mock()
+
+        attack_effect_manager = Mock()
+
+        # Act
+        processor.process_turn(
+            warrior=warrior,
+            entity_manager=entity_manager,
+            world_map=world_map,
+            dungeon_manager=dungeon_manager,
+            on_dungeon_transition=on_dungeon_transition,
+            on_chest_opened=on_chest_opened,
+            on_item_picked=on_item_picked,
+            on_monster_death=on_monster_death,
+            attack_effect_manager=attack_effect_manager,
+        )
+
+        # Assert - crit is True
+        attack_effect_manager.add_effect.assert_called_once_with(125.0, 225.0, True)
+
+    def test_process_turn_with_attack_effect_warrior_no_damage(self):
+        """Test that attack effects are not triggered when warrior deals no damage."""
+        # Arrange
+        processor = TurnProcessor()
+
+        warrior = Mock()
+        warrior.on_turn_start = Mock()
+        warrior.execute_turn = Mock(
+            return_value={"success": True, "damage": 0, "crit": False}
+        )
+
+        nearest_monster = Mock()
+
+        entity_manager = Mock()
+        entity_manager.get_nearest_alive_monster.return_value = nearest_monster
+        entity_manager.check_chest_collision.return_value = None
+        entity_manager.check_ground_item_pickup.return_value = (False, "")
+        entity_manager.check_monster_deaths.return_value = []
+        entity_manager.monsters = []
+
+        world_map = Mock()
+        dungeon_manager = Mock()
+        on_dungeon_transition = Mock()
+        on_chest_opened = Mock()
+        on_item_picked = Mock()
+        on_monster_death = Mock()
+
+        attack_effect_manager = Mock()
+
+        # Act
+        processor.process_turn(
+            warrior=warrior,
+            entity_manager=entity_manager,
+            world_map=world_map,
+            dungeon_manager=dungeon_manager,
+            on_dungeon_transition=on_dungeon_transition,
+            on_chest_opened=on_chest_opened,
+            on_item_picked=on_item_picked,
+            on_monster_death=on_monster_death,
+            attack_effect_manager=attack_effect_manager,
+        )
+
+        # Assert - no effect because damage is 0
+        attack_effect_manager.add_effect.assert_not_called()
+
+    def test_process_turn_with_attack_effect_monster_attacks(self):
+        """Test that attack effects are triggered when monsters attack."""
+        # Arrange
+        processor = TurnProcessor()
+
+        warrior = Mock()
+        warrior.on_turn_start = Mock()
+        warrior.execute_turn = Mock(return_value={"success": False})
+        warrior.is_alive = True
+        warrior.x = 300
+        warrior.y = 400
+        warrior.size = 50
+
+        entity_manager = Mock()
+        entity_manager.get_nearest_alive_monster.return_value = None
+        entity_manager.check_chest_collision.return_value = None
+        entity_manager.check_ground_item_pickup.return_value = (False, "")
+        entity_manager.check_monster_deaths.return_value = []
+
+        # Monster in attack range
+        monster = Mock(is_alive=True)
+        monster.on_turn_start = Mock()
+        monster.execute_turn = Mock()
+        monster.grid_distance_to = Mock(return_value=1)
+        monster.attack_range = 1
+        monster.can_attack = Mock(return_value=True)
+
+        entity_manager.monsters = [monster]
+
+        world_map = Mock()
+        dungeon_manager = Mock()
+        on_dungeon_transition = Mock()
+        on_chest_opened = Mock()
+        on_item_picked = Mock()
+        on_monster_death = Mock()
+
+        attack_effect_manager = Mock()
+
+        # Act
+        processor.process_turn(
+            warrior=warrior,
+            entity_manager=entity_manager,
+            world_map=world_map,
+            dungeon_manager=dungeon_manager,
+            on_dungeon_transition=on_dungeon_transition,
+            on_chest_opened=on_chest_opened,
+            on_item_picked=on_item_picked,
+            on_monster_death=on_monster_death,
+            attack_effect_manager=attack_effect_manager,
+        )
+
+        # Assert - effect should be at warrior position
+        attack_effect_manager.add_effect.assert_called_once_with(325.0, 425.0, False)
+
+    def test_process_turn_with_attack_effect_no_manager(self):
+        """Test that process_turn works without attack_effect_manager (backward compatibility)."""
+        # Arrange
+        processor = TurnProcessor()
+
+        warrior = Mock()
+        warrior.on_turn_start = Mock()
+        warrior.execute_turn = Mock(
+            return_value={"success": True, "damage": 10, "crit": False}
+        )
+
+        nearest_monster = Mock()
+
+        entity_manager = Mock()
+        entity_manager.get_nearest_alive_monster.return_value = nearest_monster
+        entity_manager.check_chest_collision.return_value = None
+        entity_manager.check_ground_item_pickup.return_value = (False, "")
+        entity_manager.check_monster_deaths.return_value = []
+        entity_manager.monsters = []
+
+        world_map = Mock()
+        dungeon_manager = Mock()
+        on_dungeon_transition = Mock()
+        on_chest_opened = Mock()
+        on_item_picked = Mock()
+        on_monster_death = Mock()
+
+        # Act - no attack_effect_manager passed (should not crash)
+        processor.process_turn(
+            warrior=warrior,
+            entity_manager=entity_manager,
+            world_map=world_map,
+            dungeon_manager=dungeon_manager,
+            on_dungeon_transition=on_dungeon_transition,
+            on_chest_opened=on_chest_opened,
+            on_item_picked=on_item_picked,
+            on_monster_death=on_monster_death,
+        )
+
+        # Assert - should complete without error
+        warrior.execute_turn.assert_called_once()
+
+    def test_process_turn_monster_out_of_range_no_effect(self):
+        """Test that no attack effects are triggered when monster is out of attack range."""
+        # Arrange
+        processor = TurnProcessor()
+
+        warrior = Mock()
+        warrior.on_turn_start = Mock()
+        warrior.execute_turn = Mock(return_value={"success": False})
+        warrior.is_alive = True
+
+        entity_manager = Mock()
+        entity_manager.get_nearest_alive_monster.return_value = None
+        entity_manager.check_chest_collision.return_value = None
+        entity_manager.check_ground_item_pickup.return_value = (False, "")
+        entity_manager.check_monster_deaths.return_value = []
+
+        # Monster out of attack range
+        monster = Mock(is_alive=True)
+        monster.on_turn_start = Mock()
+        monster.execute_turn = Mock()
+        monster.grid_distance_to = Mock(return_value=5)
+        monster.attack_range = 1
+        monster.can_attack = Mock(return_value=True)
+
+        entity_manager.monsters = [monster]
+
+        world_map = Mock()
+        dungeon_manager = Mock()
+        on_dungeon_transition = Mock()
+        on_chest_opened = Mock()
+        on_item_picked = Mock()
+        on_monster_death = Mock()
+
+        attack_effect_manager = Mock()
+
+        # Act
+        processor.process_turn(
+            warrior=warrior,
+            entity_manager=entity_manager,
+            world_map=world_map,
+            dungeon_manager=dungeon_manager,
+            on_dungeon_transition=on_dungeon_transition,
+            on_chest_opened=on_chest_opened,
+            on_item_picked=on_item_picked,
+            on_monster_death=on_monster_death,
+            attack_effect_manager=attack_effect_manager,
+        )
+
+        # Assert - no effect because monster out of range
+        attack_effect_manager.add_effect.assert_not_called()

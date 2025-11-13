@@ -1,11 +1,22 @@
 """Tests for Changeling monster class"""
 
-from caislean_gaofar.entities.monsters.changeling import Changeling
-from caislean_gaofar.entities.monsters.base_monster import BaseMonster
+import pygame
+import pytest
+
+from monsters.changeling import Changeling
+from monsters.base_monster import BaseMonster
 
 
 class TestChangeling:
     """Tests for Changeling monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_changeling_initialization(self):
         """Test Changeling can be initialized"""
@@ -67,3 +78,21 @@ class TestChangeling:
         # Assert
         assert changeling.is_alive is True
         assert changeling.health == changeling.max_health
+
+    def test_changeling_draw_body(self):
+        """Test Changeling draw_body renders without error"""
+        # Arrange
+        changeling = Changeling(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        changeling.draw_body(screen, 400, 300)
+
+    def test_changeling_draw_details(self):
+        """Test Changeling draw_details renders without error"""
+        # Arrange
+        changeling = Changeling(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        changeling.draw_details(screen, 400, 300)

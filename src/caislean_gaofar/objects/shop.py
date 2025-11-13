@@ -101,6 +101,15 @@ class Shop:
         )
         self.inventory.append(ShopItem(chainmail, quantity=2))
 
+        # Town Portals - for teleporting to town
+        town_portal = Item(
+            name="Town Portal",
+            item_type=ItemType.CONSUMABLE,
+            description="Opens a portal to town. Use with 'T' key.",
+            gold_value=40,
+        )
+        self.inventory.append(ShopItem(town_portal, quantity=5))
+
     def buy_item(
         self, shop_item: ShopItem, player_gold: int, player_inventory: Inventory
     ) -> Tuple[bool, str]:

@@ -1,11 +1,22 @@
 """Tests for FearGorta monster class"""
 
-from caislean_gaofar.entities.monsters.fear_gorta import FearGorta
-from caislean_gaofar.entities.monsters.base_monster import BaseMonster
+import pygame
+import pytest
+
+from monsters.fear_gorta import FearGorta
+from monsters.base_monster import BaseMonster
 
 
 class TestFearGorta:
     """Tests for FearGorta monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_fear_gorta_initialization(self):
         """Test FearGorta can be initialized"""
@@ -67,3 +78,21 @@ class TestFearGorta:
         # Assert
         assert fear_gorta.is_alive is True
         assert fear_gorta.health == fear_gorta.max_health
+
+    def test_fear_gorta_draw_body(self):
+        """Test FearGorta draw_body renders without error"""
+        # Arrange
+        fear_gorta = FearGorta(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        fear_gorta.draw_body(screen, 400, 300)
+
+    def test_fear_gorta_draw_details(self):
+        """Test FearGorta draw_details renders without error"""
+        # Arrange
+        fear_gorta = FearGorta(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        fear_gorta.draw_details(screen, 400, 300)

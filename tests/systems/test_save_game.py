@@ -225,9 +225,12 @@ def test_save_game_creates_file(temp_save_dir):
     game.dungeon_manager = MagicMock()
     game.dungeon_manager.current_map_id = "world"
     game.dungeon_manager.return_location = None
-    game.killed_monsters = [{"type": "banshee", "x": 3, "y": 4, "map_id": "world"}]
-    game.opened_chests = [{"x": 5, "y": 6, "map_id": "world"}]
-    game.ground_items = []
+    game.entity_manager = MagicMock()
+    game.entity_manager.killed_monsters = [
+        {"type": "banshee", "x": 3, "y": 4, "map_id": "world"}
+    ]
+    game.entity_manager.opened_chests = [{"x": 5, "y": 6, "map_id": "world"}]
+    game.entity_manager.ground_items = []
 
     # Save the game
     result = SaveGame.save_game(game, "test_save")
@@ -308,13 +311,14 @@ def test_save_game_with_ground_items(temp_save_dir):
     game.dungeon_manager = MagicMock()
     game.dungeon_manager.current_map_id = "world"
     game.dungeon_manager.return_location = None
-    game.killed_monsters = []
-    game.opened_chests = []
+    game.entity_manager = MagicMock()
+    game.entity_manager.killed_monsters = []
+    game.entity_manager.opened_chests = []
 
     # Add a ground item
     item = Item("Test Item", ItemType.MISC, gold_value=10)
     ground_item = GroundItem(item, 3, 4)
-    game.ground_items = [ground_item]
+    game.entity_manager.ground_items = [ground_item]
 
     # Save the game
     result = SaveGame.save_game(game, "test_ground_items")

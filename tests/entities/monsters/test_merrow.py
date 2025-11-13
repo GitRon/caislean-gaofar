@@ -1,11 +1,22 @@
 """Tests for Merrow monster class"""
 
-from caislean_gaofar.entities.monsters.merrow import Merrow
-from caislean_gaofar.entities.monsters.base_monster import BaseMonster
+import pygame
+import pytest
+
+from monsters.merrow import Merrow
+from monsters.base_monster import BaseMonster
 
 
 class TestMerrow:
     """Tests for Merrow monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_merrow_initialization(self):
         """Test Merrow can be initialized"""
@@ -67,3 +78,21 @@ class TestMerrow:
         # Assert
         assert merrow.is_alive is True
         assert merrow.health == merrow.max_health
+
+    def test_merrow_draw_body(self):
+        """Test Merrow draw_body renders without error"""
+        # Arrange
+        merrow = Merrow(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        merrow.draw_body(screen, 400, 300)
+
+    def test_merrow_draw_details(self):
+        """Test Merrow draw_details renders without error"""
+        # Arrange
+        merrow = Merrow(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        merrow.draw_details(screen, 400, 300)

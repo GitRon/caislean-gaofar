@@ -1,11 +1,22 @@
 """Tests for Selkie monster class"""
 
-from caislean_gaofar.entities.monsters.selkie import Selkie
-from caislean_gaofar.entities.monsters.base_monster import BaseMonster
+import pygame
+import pytest
+
+from monsters.selkie import Selkie
+from monsters.base_monster import BaseMonster
 
 
 class TestSelkie:
     """Tests for Selkie monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_selkie_initialization(self):
         """Test Selkie can be initialized"""
@@ -67,3 +78,21 @@ class TestSelkie:
         # Assert
         assert selkie.is_alive is True
         assert selkie.health == selkie.max_health
+
+    def test_selkie_draw_body(self):
+        """Test Selkie draw_body renders without error"""
+        # Arrange
+        selkie = Selkie(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        selkie.draw_body(screen, 400, 300)
+
+    def test_selkie_draw_details(self):
+        """Test Selkie draw_details renders without error"""
+        # Arrange
+        selkie = Selkie(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        selkie.draw_details(screen, 400, 300)

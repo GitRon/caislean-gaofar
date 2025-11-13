@@ -38,7 +38,6 @@ omit = [
     "src/caislean_gaofar/core/game.py",
     "src/caislean_gaofar/ui/inventory_ui.py",
     "src/caislean_gaofar/ui/shop_ui.py",
-    "src/caislean_gaofar/ui/monster_renderer.py",
     "src/caislean_gaofar/ui/main_menu.py",
 ]
 
@@ -61,11 +60,13 @@ exclude_lines = [
 # Disable Django-specific rules since this is a pygame project (python-only mode)
 enable_django_rules = false
 
-# Enable ruff noqa support for better integration
-noqa_ruff_support = true
-
 # Disable overly strict Python rules that would require extensive refactoring
 exclude = [
     "PBR001",  # Positional arguments discouraged (too strict for this project)
     "PBR002",  # Return type hints required (too strict for this project)
 ]
+
+[tool.ruff.lint]
+# Avoiding flagging (and removing) any codes starting with `PBR` from any
+# `# noqa` directives, despite Ruff's lack of support for `boa-restrictor`.
+external = ["PBR"]

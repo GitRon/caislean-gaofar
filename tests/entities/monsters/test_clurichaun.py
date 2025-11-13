@@ -1,11 +1,22 @@
 """Tests for Clurichaun monster class"""
 
-from caislean_gaofar.entities.monsters.clurichaun import Clurichaun
-from caislean_gaofar.entities.monsters.base_monster import BaseMonster
+import pygame
+import pytest
+
+from monsters.clurichaun import Clurichaun
+from monsters.base_monster import BaseMonster
 
 
 class TestClurichaun:
     """Tests for Clurichaun monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_clurichaun_initialization(self):
         """Test Clurichaun can be initialized"""
@@ -67,3 +78,21 @@ class TestClurichaun:
         # Assert
         assert clurichaun.is_alive is True
         assert clurichaun.health == clurichaun.max_health
+
+    def test_clurichaun_draw_body(self):
+        """Test Clurichaun draw_body renders without error"""
+        # Arrange
+        clurichaun = Clurichaun(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        clurichaun.draw_body(screen, 400, 300)
+
+    def test_clurichaun_draw_details(self):
+        """Test Clurichaun draw_details renders without error"""
+        # Arrange
+        clurichaun = Clurichaun(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        clurichaun.draw_details(screen, 400, 300)

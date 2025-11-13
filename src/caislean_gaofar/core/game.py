@@ -51,13 +51,23 @@ class Game:
         self.dungeon_manager = DungeonManager(map_file)
         self.dungeon_manager.load_world_map()
 
-        # Load dungeons
-        self.dungeon_manager.load_dungeon(
-            "dark_cave", os.path.join("data", "maps", "dark_cave.json")
-        )
-        self.dungeon_manager.load_dungeon(
-            "ancient_castle", os.path.join("data", "maps", "ancient_castle.json")
-        )
+        # Load dungeons - map unique IDs to actual dungeon files
+        dark_cave_path = os.path.join("data", "maps", "dark_cave.json")
+        ancient_castle_path = os.path.join("data", "maps", "ancient_castle.json")
+
+        # Cave-type dungeons
+        self.dungeon_manager.load_dungeon("dark_cave_1", dark_cave_path)
+        self.dungeon_manager.load_dungeon("mystic_grotto", dark_cave_path)
+        self.dungeon_manager.load_dungeon("dark_woods_lair", dark_cave_path)
+        self.dungeon_manager.load_dungeon("southern_caverns", dark_cave_path)
+
+        # Castle-type dungeons
+        self.dungeon_manager.load_dungeon("haunted_crypt", ancient_castle_path)
+        self.dungeon_manager.load_dungeon("shadow_keep", ancient_castle_path)
+        self.dungeon_manager.load_dungeon("ruined_fortress", ancient_castle_path)
+        self.dungeon_manager.load_dungeon("ancient_keep", ancient_castle_path)
+
+        # Town
         self.dungeon_manager.load_dungeon("town", os.path.join("data", "maps", "town.json"))
 
         # Get current map (initially world map)
@@ -89,166 +99,6 @@ class Game:
         # Spawn monsters and chests
         self.entity_manager.spawn_monsters(self.world_map, self.dungeon_manager)
         self.entity_manager.spawn_chests(self.world_map, self.dungeon_manager)
-
-    @property
-    def running(self):
-        """Get running state from event dispatcher."""
-        return self.event_dispatcher.running
-
-    @running.setter
-    def running(self, value):
-        """Set running state on event dispatcher."""
-        self.event_dispatcher.running = value
-
-    @property
-    def state(self):
-        """Get current game state from state manager."""
-        return self.state_manager.state
-
-    @state.setter
-    def state(self, value):
-        """Set game state on state manager."""
-        self.state_manager.state = value
-
-    @property
-    def waiting_for_player_input(self):
-        """Get waiting for input state from turn processor."""
-        return self.turn_processor.waiting_for_player_input
-
-    @waiting_for_player_input.setter
-    def waiting_for_player_input(self, value):
-        """Set waiting for input state on turn processor."""
-        self.turn_processor.waiting_for_player_input = value
-
-    @property
-    def monsters(self):
-        """Get monsters list from entity manager."""
-        return self.entity_manager.monsters
-
-    @monsters.setter
-    def monsters(self, value):
-        """Set monsters list on entity manager."""
-        self.entity_manager.monsters = value
-
-    @property
-    def chests(self):
-        """Get chests list from entity manager."""
-        return self.entity_manager.chests
-
-    @chests.setter
-    def chests(self, value):
-        """Set chests list on entity manager."""
-        self.entity_manager.chests = value
-
-    @property
-    def ground_items(self):
-        """Get ground items list from entity manager."""
-        return self.entity_manager.ground_items
-
-    @ground_items.setter
-    def ground_items(self, value):
-        """Set ground items list on entity manager."""
-        self.entity_manager.ground_items = value
-
-    @property
-    def killed_monsters(self):
-        """Get killed monsters list from entity manager."""
-        return self.entity_manager.killed_monsters
-
-    @killed_monsters.setter
-    def killed_monsters(self, value):
-        """Set killed monsters list on entity manager."""
-        self.entity_manager.killed_monsters = value
-
-    @property
-    def opened_chests(self):
-        """Get opened chests list from entity manager."""
-        return self.entity_manager.opened_chests
-
-    @opened_chests.setter
-    def opened_chests(self, value):
-        """Set opened chests list on entity manager."""
-        self.entity_manager.opened_chests = value
-
-    @property
-    def message(self):
-        """Get message from state manager."""
-        return self.state_manager.message
-
-    @message.setter
-    def message(self, value):
-        """Set message on state manager."""
-        self.state_manager.message = value
-
-    @property
-    def message_timer(self):
-        """Get message timer from state manager."""
-        return self.state_manager.message_timer
-
-    @message_timer.setter
-    def message_timer(self, value):
-        """Set message timer on state manager."""
-        self.state_manager.message_timer = value
-
-    @property
-    def active_portal(self):
-        """Get active portal from state manager."""
-        return self.state_manager.active_portal
-
-    @active_portal.setter
-    def active_portal(self, value):
-        """Set active portal on state manager."""
-        self.state_manager.active_portal = value
-
-    @property
-    def return_portal(self):
-        """Get return portal from state manager."""
-        return self.state_manager.return_portal
-
-    @return_portal.setter
-    def return_portal(self, value):
-        """Set return portal on state manager."""
-        self.state_manager.return_portal = value
-
-    @property
-    def portal_return_location(self):
-        """Get portal return location from state manager."""
-        return self.state_manager.portal_return_location
-
-    @portal_return_location.setter
-    def portal_return_location(self, value):
-        """Set portal return location on state manager."""
-        self.state_manager.portal_return_location = value
-
-    @property
-    def portal_cooldown(self):
-        """Get portal cooldown from state manager."""
-        return self.state_manager.portal_cooldown
-
-    @portal_cooldown.setter
-    def portal_cooldown(self, value):
-        """Set portal cooldown on state manager."""
-        self.state_manager.portal_cooldown = value
-
-    @property
-    def combat_system(self):
-        """Get combat system from renderer."""
-        return self.renderer.combat_system
-
-    @property
-    def inventory_ui(self):
-        """Get inventory UI from renderer."""
-        return self.renderer.inventory_ui
-
-    @property
-    def shop_ui(self):
-        """Get shop UI from renderer."""
-        return self.renderer.shop_ui
-
-    @property
-    def hud(self):
-        """Get HUD from renderer."""
-        return self.renderer.hud
 
     def drop_item(self, item: Item, grid_x: int, grid_y: int):
         """
@@ -369,6 +219,9 @@ class Game:
         if self.temple:
             self.temple.update(dt)
 
+        # Update attack effects
+        self.renderer.attack_effect_manager.update(dt)
+
         # Only update game logic when actively playing
         if self.state_manager.state != config.STATE_PLAYING:
             return
@@ -415,6 +268,7 @@ class Game:
             on_chest_opened=self._handle_chest_opened,
             on_item_picked=self._show_message,
             on_monster_death=self._handle_monster_death,
+            attack_effect_manager=self.renderer.attack_effect_manager,
         )
 
     def _check_dungeon_transition(self):
@@ -618,6 +472,7 @@ class Game:
                 entity_manager=self.entity_manager,
                 warrior=self.warrior,
                 fog_of_war=self.fog_of_war,
+                dungeon_manager=self.dungeon_manager,
             )
         elif self.state_manager.state == config.STATE_SHOP:
             self.renderer.draw_shop_state(shop=self.shop, warrior=self.warrior)
@@ -746,7 +601,7 @@ class Game:
 
     def run(self):
         """Main game loop."""
-        while self.running:
+        while self.event_dispatcher.running:
             dt = self.clock.tick(config.FPS) / 1000.0  # Delta time in seconds
 
             self.handle_events()

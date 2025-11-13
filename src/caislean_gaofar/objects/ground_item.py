@@ -40,13 +40,52 @@ class GroundItem:
         size = TILE_SIZE // 2
         return pygame.Rect(self.x - size // 2, self.y - size // 2, size, size)
 
-    def draw(self, screen: pygame.Surface):
+    def get_screen_x(self, camera_offset_x: int = 0) -> int:
+        """
+        Get the screen pixel x coordinate with camera offset applied.
+
+        Args:
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel x coordinate (center of tile)
+        """
+        return (self.grid_x - camera_offset_x) * TILE_SIZE + TILE_SIZE // 2
+
+    def get_screen_y(self, camera_offset_y: int = 0) -> int:
+        """
+        Get the screen pixel y coordinate with camera offset applied.
+
+        Args:
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel y coordinate (center of tile)
+        """
+        return (self.grid_y - camera_offset_y) * TILE_SIZE + TILE_SIZE // 2
+
+    def draw(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
         """
         Draw the ground item on the screen.
         Shows a small colored square with the first letter of the item name.
+
+        Args:
+            screen: The pygame screen surface
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
         """
+        # Calculate screen coordinates with camera offset
+        screen_x = self.get_screen_x(camera_offset_x)
+        screen_y = self.get_screen_y(camera_offset_y)
+
         # Draw background square
-        rect = self.get_rect()
+        size = TILE_SIZE // 2
+        rect = pygame.Rect(screen_x - size // 2, screen_y - size // 2, size, size)
         pygame.draw.rect(screen, COLOR_GROUND_ITEM, rect)
         pygame.draw.rect(screen, COLOR_WHITE, rect, 2)  # White border
 
@@ -54,5 +93,5 @@ class GroundItem:
         font = pygame.font.Font(None, 24)
         letter = self.item.name[0].upper() if self.item.name else "?"
         text_surface = font.render(letter, True, COLOR_WHITE)
-        text_rect = text_surface.get_rect(center=(self.x, self.y))
+        text_rect = text_surface.get_rect(center=(screen_x, screen_y))
         screen.blit(text_surface, text_rect)

@@ -141,6 +141,30 @@ class TestShop:
         # Assert
         assert health_potion_found is True
 
+    def test_shop_has_town_portals(self):  # noqa: PBR008
+        """Test shop sells town portals"""
+        # Arrange
+        shop = Shop(0, 0)
+
+        # Act
+        town_portal_found = False
+        town_portal_item = None
+        for shop_item in shop.inventory:
+            if (
+                shop_item.item.name == "Town Portal"
+                and shop_item.item.item_type == ItemType.CONSUMABLE
+            ):
+                town_portal_found = True
+                town_portal_item = shop_item
+                break
+
+        # Assert
+        assert town_portal_found is True
+        assert town_portal_item is not None
+        assert town_portal_item.infinite is False  # Limited quantity
+        assert town_portal_item.quantity > 0  # Has stock
+        assert town_portal_item.item.gold_value == 40  # Price is 40 gold
+
     def test_shop_get_available_items(self):  # noqa: PBR008
         """Test getting available items from shop"""
         # Arrange
@@ -461,3 +485,131 @@ class TestShop:
         assert success is False
         assert "Failed" in message
         assert gold_earned == 0
+
+    def test_buy_town_portal_success(self):  # noqa: PBR008
+        """Test successfully buying a town portal from shop"""
+        # Arrange
+        shop = Shop(0, 0)
+        inventory = Inventory()
+        player_gold = 100
+
+        # Find town portal in shop
+        town_portal_shop_item = None
+        for shop_item in shop.inventory:
+            if shop_item.item.name == "Town Portal":
+                town_portal_shop_item = shop_item
+                break
+
+        assert town_portal_shop_item is not None
+        initial_quantity = town_portal_shop_item.quantity
+
+        # Act
+        success, message = shop.buy_item(town_portal_shop_item, player_gold, inventory)
+
+        # Assert
+        assert success is True
+        assert "Purchased Town Portal" in message
+        assert town_portal_shop_item.quantity == initial_quantity - 1
+        # Verify town portal is in player inventory
+        found_in_inventory = False
+        for item in inventory.get_all_items():
+            if item.name == "Town Portal":
+                found_in_inventory = True
+                break
+        assert found_in_inventory is True
+
+    def test_buy_town_portal_insufficient_gold(self):  # noqa: PBR008
+        """Test buying town portal with insufficient gold"""
+        # Arrange
+        shop = Shop(0, 0)
+        inventory = Inventory()
+        player_gold = 20  # Not enough for 40 gold portal
+
+        # Find town portal in shop
+        town_portal_shop_item = None
+        for shop_item in shop.inventory:
+            if shop_item.item.name == "Town Portal":
+                town_portal_shop_item = shop_item
+                break
+
+        assert town_portal_shop_item is not None
+
+        # Act
+        success, message = shop.buy_item(town_portal_shop_item, player_gold, inventory)
+
+        # Assert
+        assert success is False
+        assert "Not enough gold" in message
+
+    def test_buy_town_portal_depletes_stock(self):  # noqa: PBR008
+        """Test buying all town portals depletes shop stock"""
+        # Arrange
+        shop = Shop(0, 0)
+        inventory = Inventory()
+        player_gold = 1000
+
+        # Find town portal in shop
+        town_portal_shop_item = None
+        for shop_item in shop.inventory:
+            if shop_item.item.name == "Town Portal":
+                town_portal_shop_item = shop_item
+                break
+
+        assert town_portal_shop_item is not None
+        initial_quantity = town_portal_shop_item.quantity
+
+        # Act - Buy all town portals
+        for _ in range(initial_quantity):
+            success, _ = shop.buy_item(town_portal_shop_item, player_gold, inventory)
+            assert success is True
+            player_gold -= town_portal_shop_item.item.gold_value
+
+        # Try to buy one more
+        success, message = shop.buy_item(town_portal_shop_item, player_gold, inventory)
+
+        # Assert
+        assert success is False
+        assert "out of stock" in message
+        assert town_portal_shop_item.quantity == 0
+        assert town_portal_shop_item.is_available() is False
+
+    def test_sell_town_portal_back_to_shop(self):  # noqa: PBR008
+        """Test selling a town portal back to the shop increases stock"""
+        # Arrange
+        shop = Shop(0, 0)
+        inventory = Inventory()
+        player_gold = 100
+
+        # Find town portal in shop
+        town_portal_shop_item = None
+        for shop_item in shop.inventory:
+            if shop_item.item.name == "Town Portal":
+                town_portal_shop_item = shop_item
+                break
+
+        assert town_portal_shop_item is not None
+        initial_quantity = town_portal_shop_item.quantity
+
+        # Buy a town portal first
+        success, _ = shop.buy_item(town_portal_shop_item, player_gold, inventory)
+        assert success is True
+
+        # Find the town portal in inventory
+        town_portal_in_inventory = None
+        for item in inventory.get_all_items():
+            if item.name == "Town Portal":
+                town_portal_in_inventory = item
+                break
+
+        assert town_portal_in_inventory is not None
+
+        # Act - Sell it back
+        success, message, gold_earned = shop.sell_item(
+            town_portal_in_inventory, inventory
+        )
+
+        # Assert
+        assert success is True
+        assert "Sold Town Portal" in message
+        assert gold_earned == 20  # Half of 40 gold purchase price
+        assert town_portal_shop_item.quantity == initial_quantity  # Back to original

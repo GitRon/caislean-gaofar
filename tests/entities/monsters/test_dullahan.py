@@ -1,11 +1,22 @@
 """Tests for Dullahan monster class"""
 
-from caislean_gaofar.entities.monsters.dullahan import Dullahan
-from caislean_gaofar.entities.monsters.base_monster import BaseMonster
+import pygame
+import pytest
+
+from monsters.dullahan import Dullahan
+from monsters.base_monster import BaseMonster
 
 
 class TestDullahan:
     """Tests for Dullahan monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_dullahan_initialization(self):
         """Test Dullahan can be initialized"""
@@ -67,3 +78,21 @@ class TestDullahan:
         # Assert
         assert dullahan.is_alive is True
         assert dullahan.health == dullahan.max_health
+
+    def test_dullahan_draw_body(self):
+        """Test Dullahan draw_body renders without error"""
+        # Arrange
+        dullahan = Dullahan(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        dullahan.draw_body(screen, 400, 300)
+
+    def test_dullahan_draw_details(self):
+        """Test Dullahan draw_details renders without error"""
+        # Arrange
+        dullahan = Dullahan(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        dullahan.draw_details(screen, 400, 300)
