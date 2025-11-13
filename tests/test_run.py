@@ -1,10 +1,7 @@
 """Tests for run.py script."""
 
-import subprocess
-import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import runpy
-import pytest
 
 
 class TestRunScript:
@@ -21,9 +18,7 @@ class TestRunScript:
         runpy.run_path("run.py", run_name="__main__")
 
         # Assert
-        mock_subprocess_call.assert_called_once_with(
-            ["uv", "run", "python", "main.py"]
-        )
+        mock_subprocess_call.assert_called_once_with(["uv", "run", "python", "main.py"])
         mock_exit.assert_called_once_with(0)
 
     @patch("subprocess.call")
@@ -37,9 +32,7 @@ class TestRunScript:
         runpy.run_path("run.py", run_name="__main__")
 
         # Assert
-        mock_subprocess_call.assert_called_once_with(
-            ["uv", "run", "python", "main.py"]
-        )
+        mock_subprocess_call.assert_called_once_with(["uv", "run", "python", "main.py"])
         mock_exit.assert_called_once_with(1)
 
     @patch("subprocess.call")
@@ -53,9 +46,7 @@ class TestRunScript:
         runpy.run_path("run.py", run_name="__main__")
 
         # Assert
-        mock_subprocess_call.assert_called_once_with(
-            ["uv", "run", "python", "main.py"]
-        )
+        mock_subprocess_call.assert_called_once_with(["uv", "run", "python", "main.py"])
         mock_exit.assert_called_once_with(42)
 
     @patch("subprocess.call")
@@ -69,9 +60,7 @@ class TestRunScript:
         runpy.run_path("run.py", run_name="__main__")
 
         # Assert
-        mock_subprocess_call.assert_called_once_with(
-            ["uv", "run", "python", "main.py"]
-        )
+        mock_subprocess_call.assert_called_once_with(["uv", "run", "python", "main.py"])
         mock_exit.assert_called_once_with(-9)
 
     def test_run_script_not_as_main(self):
