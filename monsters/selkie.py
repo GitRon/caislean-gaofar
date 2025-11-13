@@ -70,8 +70,12 @@ class Selkie(BaseMonster):
         eye_color = (20, 20, 20)
         left_eye = (int(center_x - head_radius * 0.4), int(center_y - height * 0.27))
         right_eye = (int(center_x + head_radius * 0.4), int(center_y - height * 0.27))
-        pygame.draw.ellipse(screen, eye_color, (left_eye[0] - 4, left_eye[1] - 6, 8, 12))
-        pygame.draw.ellipse(screen, eye_color, (right_eye[0] - 4, right_eye[1] - 6, 8, 12))
+        pygame.draw.ellipse(
+            screen, eye_color, (left_eye[0] - 4, left_eye[1] - 6, 8, 12)
+        )
+        pygame.draw.ellipse(
+            screen, eye_color, (right_eye[0] - 4, right_eye[1] - 6, 8, 12)
+        )
         # Gleam
         gleam_color = (200, 220, 255)
         pygame.draw.circle(screen, gleam_color, left_eye, 2)

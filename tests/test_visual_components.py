@@ -74,9 +74,7 @@ class TestVisualComponents:
         frame_count = 0
 
         # Act & Assert - should not raise exception
-        visual_components.draw_glow_effect(
-            screen, center, radius, color, frame_count
-        )
+        visual_components.draw_glow_effect(screen, center, radius, color, frame_count)
 
     def test_draw_glow_effect_custom_alpha(self):
         """Test draw_glow_effect with custom alpha parameters"""

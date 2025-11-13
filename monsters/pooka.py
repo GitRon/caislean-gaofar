@@ -68,7 +68,10 @@ class Pooka(BaseMonster):
         for i in range(3):
             mane_x = center_x - effective_width * 0.4 + i * effective_width * 0.05
             mane_y = (
-                center_y - effective_height * 0.3 - i * effective_height * 0.05 + mane_offset
+                center_y
+                - effective_height * 0.3
+                - i * effective_height * 0.05
+                + mane_offset
             )
             mane_width = int(effective_width * 0.08)
             mane_height = int(effective_height * 0.25)
@@ -132,8 +135,14 @@ class Pooka(BaseMonster):
         tail_sway = int(10 * math.sin(self.frame_count * 0.07))
         tail_points = [
             (center_x + effective_width * 0.35, center_y),
-            (center_x + effective_width * 0.5 + tail_sway, center_y - effective_height * 0.2),
-            (center_x + effective_width * 0.55 + tail_sway, center_y + effective_height * 0.1),
+            (
+                center_x + effective_width * 0.5 + tail_sway,
+                center_y - effective_height * 0.2,
+            ),
+            (
+                center_x + effective_width * 0.55 + tail_sway,
+                center_y + effective_height * 0.1,
+            ),
             (center_x + effective_width * 0.4, center_y + effective_height * 0.15),
         ]
         pygame.draw.polygon(screen, tail_color, tail_points)

@@ -44,7 +44,9 @@ class Dullahan(BaseMonster):
         # Rider's headless body (dark armor)
         armor_color = (40, 40, 50)
         # Torso
-        torso = pygame.Rect(center_x - width * 0.2, center_y - height * 0.3, width * 0.4, height * 0.45)
+        torso = pygame.Rect(
+            center_x - width * 0.2, center_y - height * 0.3, width * 0.4, height * 0.45
+        )
         pygame.draw.rect(screen, armor_color, torso)
 
         # Shoulders (broad, menacing)
@@ -52,7 +54,12 @@ class Dullahan(BaseMonster):
         pygame.draw.rect(
             screen,
             shoulder_color,
-            (center_x - width * 0.3, center_y - height * 0.3, width * 0.6, height * 0.1),
+            (
+                center_x - width * 0.3,
+                center_y - height * 0.3,
+                width * 0.6,
+                height * 0.1,
+            ),
         )
 
         # NO HEAD on shoulders (that's the point!)
@@ -61,7 +68,12 @@ class Dullahan(BaseMonster):
         pygame.draw.ellipse(
             screen,
             neck_color,
-            (center_x - width * 0.12, center_y - height * 0.35, width * 0.24, height * 0.1),
+            (
+                center_x - width * 0.12,
+                center_y - height * 0.35,
+                width * 0.24,
+                height * 0.1,
+            ),
         )
 
         # Left arm holding the severed head
@@ -70,11 +82,18 @@ class Dullahan(BaseMonster):
         pygame.draw.rect(
             screen,
             arm_color,
-            (center_x - width * 0.45, center_y - height * 0.25, width * 0.15, height * 0.3),
+            (
+                center_x - width * 0.45,
+                center_y - height * 0.25,
+                width * 0.15,
+                height * 0.3,
+            ),
         )
         # Forearm
         pygame.draw.rect(
-            screen, arm_color, (center_x - width * 0.5, center_y, width * 0.12, height * 0.25)
+            screen,
+            arm_color,
+            (center_x - width * 0.5, center_y, width * 0.12, height * 0.25),
         )
 
         # THE SEVERED HEAD being held up (glowing, supernatural)
@@ -95,7 +114,12 @@ class Dullahan(BaseMonster):
         pygame.draw.arc(
             screen,
             mouth_color,
-            (head_pos[0] - head_radius // 2, head_pos[1], head_radius, head_radius // 2),
+            (
+                head_pos[0] - head_radius // 2,
+                head_pos[1],
+                head_radius,
+                head_radius // 2,
+            ),
             0,
             math.pi,
             3,
@@ -105,7 +129,12 @@ class Dullahan(BaseMonster):
         pygame.draw.rect(
             screen,
             arm_color,
-            (center_x + width * 0.2, center_y - height * 0.2, width * 0.15, height * 0.35),
+            (
+                center_x + width * 0.2,
+                center_y - height * 0.2,
+                width * 0.15,
+                height * 0.35,
+            ),
         )
 
         # Whip/reins

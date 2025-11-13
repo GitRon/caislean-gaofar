@@ -1,7 +1,6 @@
 """Banshee monster - wailing spirit with ranged attacks."""
 
 import pygame
-import math
 from monsters.base_monster import BaseMonster
 import visual_components
 
@@ -38,7 +37,9 @@ class Banshee(BaseMonster):
         )
 
         # Create semi-transparent surface for ghostly effect
-        ghost_surface = visual_components.create_transparent_surface(int(width), int(height))
+        ghost_surface = visual_components.create_transparent_surface(
+            int(width), int(height)
+        )
 
         # Flowing robe/dress (pale white-blue)
         robe_color = (220, 230, 245, 180)  # Semi-transparent pale blue-white
@@ -57,7 +58,10 @@ class Banshee(BaseMonster):
         head_color = (235, 240, 250, 200)
         head_radius = int(width * 0.15)
         pygame.draw.circle(
-            ghost_surface, head_color, (int(width * 0.5), int(height * 0.15)), head_radius
+            ghost_surface,
+            head_color,
+            (int(width * 0.5), int(height * 0.15)),
+            head_radius,
         )
 
         # Long flowing hair
@@ -71,7 +75,9 @@ class Banshee(BaseMonster):
         # Wailing mouth (dark open mouth)
         mouth_color = (40, 40, 60, 220)
         mouth_center = (int(width * 0.5), int(height * 0.18))
-        pygame.draw.circle(ghost_surface, mouth_color, mouth_center, int(head_radius * 0.4))
+        pygame.draw.circle(
+            ghost_surface, mouth_color, mouth_center, int(head_radius * 0.4)
+        )
 
         # Dark hollow eyes
         eye_color = (30, 30, 50, 200)

@@ -56,12 +56,18 @@ class Clurichaun(BaseMonster):
         cap_tilt = int(3 * math.sin(self.frame_count * 0.08))
         # Brim
         cap_brim = pygame.Rect(
-            adjusted_x - width * 0.25 + cap_tilt, center_y - height * 0.38, width * 0.5, height * 0.08
+            adjusted_x - width * 0.25 + cap_tilt,
+            center_y - height * 0.38,
+            width * 0.5,
+            height * 0.08,
         )
         pygame.draw.rect(screen, cap_color, cap_brim)
         # Top (tilted)
         cap_top = pygame.Rect(
-            adjusted_x - width * 0.18 + cap_tilt, center_y - height * 0.58, width * 0.36, height * 0.2
+            adjusted_x - width * 0.18 + cap_tilt,
+            center_y - height * 0.58,
+            width * 0.36,
+            height * 0.2,
         )
         pygame.draw.rect(screen, cap_color, cap_top)
 
@@ -82,7 +88,9 @@ class Clurichaun(BaseMonster):
         right_eye = (int(adjusted_x + head_radius * 0.4), int(center_y - height * 0.28))
         # Draw as slits (half-closed)
         pygame.draw.ellipse(screen, eye_color, (left_eye[0] - 4, left_eye[1] - 2, 8, 4))
-        pygame.draw.ellipse(screen, eye_color, (right_eye[0] - 4, right_eye[1] - 2, 8, 4))
+        pygame.draw.ellipse(
+            screen, eye_color, (right_eye[0] - 4, right_eye[1] - 2, 8, 4)
+        )
 
         # Rosy cheeks (from drinking)
         cheek_color = (255, 120, 120)
@@ -102,10 +110,16 @@ class Clurichaun(BaseMonster):
         # Legs
         leg_color = (40, 40, 40)
         left_leg = pygame.Rect(
-            adjusted_x - width * 0.2, center_y + height * 0.35, width * 0.15, height * 0.25
+            adjusted_x - width * 0.2,
+            center_y + height * 0.35,
+            width * 0.15,
+            height * 0.25,
         )
         right_leg = pygame.Rect(
-            adjusted_x + width * 0.05, center_y + height * 0.35, width * 0.15, height * 0.25
+            adjusted_x + width * 0.05,
+            center_y + height * 0.35,
+            width * 0.15,
+            height * 0.25,
         )
         pygame.draw.rect(screen, leg_color, left_leg)
         pygame.draw.rect(screen, leg_color, right_leg)
@@ -134,7 +148,12 @@ class Clurichaun(BaseMonster):
         pygame.draw.rect(
             screen,
             cork_color,
-            (bottle_x + width * 0.03, bottle_y - height * 0.1, width * 0.06, height * 0.03),
+            (
+                bottle_x + width * 0.03,
+                bottle_y - height * 0.1,
+                width * 0.06,
+                height * 0.03,
+            ),
         )
 
         # Wine splash/drops (sloppy drinker)

@@ -43,7 +43,10 @@ class Merrow(BaseMonster):
 
         # Torso
         torso_rect = pygame.Rect(
-            center_x - width * 0.2, adjusted_y - height * 0.1, width * 0.4, height * 0.35
+            center_x - width * 0.2,
+            adjusted_y - height * 0.1,
+            width * 0.4,
+            height * 0.35,
         )
         pygame.draw.ellipse(screen, skin_color, torso_rect)
 
@@ -152,6 +155,10 @@ class Merrow(BaseMonster):
         # Bubbles (underwater)
         bubble_color = (200, 230, 255, 150)
         for i in range(3):
-            bubble_x = int(center_x + width * 0.2 + 10 * math.sin(self.frame_count * 0.05 + i))
-            bubble_y = int(adjusted_y - height * 0.2 - i * 15 - (self.frame_count * 0.5) % 30)
+            bubble_x = int(
+                center_x + width * 0.2 + 10 * math.sin(self.frame_count * 0.05 + i)
+            )
+            bubble_y = int(
+                adjusted_y - height * 0.2 - i * 15 - (self.frame_count * 0.5) % 30
+            )
             pygame.draw.circle(screen, bubble_color, (bubble_x, bubble_y), 4)

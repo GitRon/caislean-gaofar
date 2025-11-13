@@ -61,11 +61,17 @@ class Changeling(BaseMonster):
         eye_white = (240, 240, 255)
         eye_color = (20, 20, 60)  # Deep, unnatural blue
         # Left eye
-        left_eye_pos = (int(adjusted_x - head_radius * 0.4), int(adjusted_y - height * 0.22))
+        left_eye_pos = (
+            int(adjusted_x - head_radius * 0.4),
+            int(adjusted_y - height * 0.22),
+        )
         pygame.draw.circle(screen, eye_white, left_eye_pos, int(head_radius * 0.35))
         pygame.draw.circle(screen, eye_color, left_eye_pos, int(head_radius * 0.25))
         # Right eye
-        right_eye_pos = (int(adjusted_x + head_radius * 0.4), int(adjusted_y - height * 0.22))
+        right_eye_pos = (
+            int(adjusted_x + head_radius * 0.4),
+            int(adjusted_y - height * 0.22),
+        )
         pygame.draw.circle(screen, eye_white, right_eye_pos, int(head_radius * 0.35))
         pygame.draw.circle(screen, eye_color, right_eye_pos, int(head_radius * 0.25))
 
@@ -77,7 +83,10 @@ class Changeling(BaseMonster):
         # Too-wide smile (unsettling)
         smile_color = (100, 80, 80)
         smile_rect = pygame.Rect(
-            adjusted_x - head_radius * 0.5, adjusted_y - height * 0.1, head_radius, head_radius * 0.3
+            adjusted_x - head_radius * 0.5,
+            adjusted_y - height * 0.1,
+            head_radius,
+            head_radius * 0.3,
         )
         pygame.draw.arc(screen, smile_color, smile_rect, 0, math.pi, 2)
 

@@ -58,13 +58,19 @@ class Leprechaun(BaseMonster):
         pygame.draw.rect(screen, hat_color, hat_brim)
         # Hat top (tall)
         hat_top = pygame.Rect(
-            center_x - width * 0.18, center_y - height * 0.65, width * 0.36, height * 0.25
+            center_x - width * 0.18,
+            center_y - height * 0.65,
+            width * 0.36,
+            height * 0.25,
         )
         pygame.draw.rect(screen, hat_color, hat_top)
         # Gold buckle on hat
         buckle_color = (255, 215, 0)  # Gold
         buckle = pygame.Rect(
-            center_x - width * 0.08, center_y - height * 0.48, width * 0.16, height * 0.08
+            center_x - width * 0.08,
+            center_y - height * 0.48,
+            width * 0.16,
+            height * 0.08,
         )
         pygame.draw.rect(screen, buckle_color, buckle)
 
@@ -94,10 +100,16 @@ class Leprechaun(BaseMonster):
         # Legs (black pants/boots)
         leg_color = (40, 40, 40)
         left_leg = pygame.Rect(
-            center_x - width * 0.2, center_y + height * 0.35, width * 0.15, height * 0.25
+            center_x - width * 0.2,
+            center_y + height * 0.35,
+            width * 0.15,
+            height * 0.25,
         )
         right_leg = pygame.Rect(
-            center_x + width * 0.05, center_y + height * 0.35, width * 0.15, height * 0.25
+            center_x + width * 0.05,
+            center_y + height * 0.35,
+            width * 0.15,
+            height * 0.25,
         )
         pygame.draw.rect(screen, leg_color, left_leg)
         pygame.draw.rect(screen, leg_color, right_leg)

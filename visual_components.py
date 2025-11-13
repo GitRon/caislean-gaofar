@@ -8,7 +8,9 @@ import pygame
 import math
 
 
-def apply_floating_effect(y: float, frame_count: int, amplitude: float = 3.0, speed: float = 0.05) -> float:
+def apply_floating_effect(
+    y: float, frame_count: int, amplitude: float = 3.0, speed: float = 0.05
+) -> float:
     """
     Apply a gentle floating/bobbing animation effect.
 
@@ -63,7 +65,9 @@ def draw_glow_effect(
         speed: Animation speed multiplier
     """
     # Calculate pulsing alpha
-    alpha = int(min_alpha + (max_alpha - min_alpha) * abs(math.sin(frame_count * speed)))
+    alpha = int(
+        min_alpha + (max_alpha - min_alpha) * abs(math.sin(frame_count * speed))
+    )
 
     # Create transparent surface for the glow
     glow_surface = create_transparent_surface(radius * 3, radius * 3)
@@ -107,7 +111,9 @@ def draw_wispy_trail(
         max_alpha: Maximum alpha transparency
     """
     # Animated transparency
-    wisp_alpha = int(min_alpha + (max_alpha - min_alpha) * abs(math.sin(frame_count * 0.1)))
+    wisp_alpha = int(
+        min_alpha + (max_alpha - min_alpha) * abs(math.sin(frame_count * 0.1))
+    )
     wisp_color = (*color, wisp_alpha)
 
     # Animated vertical offset
@@ -191,7 +197,9 @@ def draw_aura_effect(
         size_multiplier: How much larger than the creature (default 1.3x)
     """
     # Animated alpha
-    aura_alpha = int(min_alpha + (max_alpha - min_alpha) * abs(math.sin(frame_count * 0.07)))
+    aura_alpha = int(
+        min_alpha + (max_alpha - min_alpha) * abs(math.sin(frame_count * 0.07))
+    )
 
     # Create transparent surface
     aura_width = int(width * size_multiplier)

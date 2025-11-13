@@ -42,7 +42,10 @@ class CatSi(BaseMonster):
 
         # Main body
         body_ellipse = pygame.Rect(
-            center_x - width * 0.35, center_y - height * 0.05, width * 0.7, height * 0.35
+            center_x - width * 0.35,
+            center_y - height * 0.05,
+            width * 0.7,
+            height * 0.35,
         )
         pygame.draw.ellipse(screen, body_color, body_ellipse)
 
@@ -101,12 +104,22 @@ class CatSi(BaseMonster):
         eye_color = (0, eye_glow_intensity, 0)  # Eerie green glow
         eye_glow_color = (0, 100, 0)
 
-        left_eye_pos = (head_pos[0] - head_radius * 0.4, head_pos[1] - head_radius * 0.2)
-        right_eye_pos = (head_pos[0] + head_radius * 0.4, head_pos[1] - head_radius * 0.2)
+        left_eye_pos = (
+            head_pos[0] - head_radius * 0.4,
+            head_pos[1] - head_radius * 0.2,
+        )
+        right_eye_pos = (
+            head_pos[0] + head_radius * 0.4,
+            head_pos[1] - head_radius * 0.2,
+        )
 
         # Glow around eyes
-        pygame.draw.circle(screen, eye_glow_color, left_eye_pos, int(head_radius * 0.25))
-        pygame.draw.circle(screen, eye_glow_color, right_eye_pos, int(head_radius * 0.25))
+        pygame.draw.circle(
+            screen, eye_glow_color, left_eye_pos, int(head_radius * 0.25)
+        )
+        pygame.draw.circle(
+            screen, eye_glow_color, right_eye_pos, int(head_radius * 0.25)
+        )
         # Bright eyes
         pygame.draw.circle(screen, eye_color, left_eye_pos, int(head_radius * 0.18))
         pygame.draw.circle(screen, eye_color, right_eye_pos, int(head_radius * 0.18))
