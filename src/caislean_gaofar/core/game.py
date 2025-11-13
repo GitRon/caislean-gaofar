@@ -146,7 +146,7 @@ class Game:
 
     def handle_events(self):
         """Handle pygame events."""
-        # Use event dispatcher for most event handling
+        # Use event dispatcher for all event handling
         self.event_dispatcher.handle_events(
             warrior=self.warrior,
             game_state_manager=self.state_manager,
@@ -155,6 +155,7 @@ class Game:
             inventory_ui=self.renderer.inventory_ui,
             shop=self.shop,
             shop_ui=self.renderer.shop_ui,
+            skill_ui=self.skill_ui,
             dungeon_manager=self.dungeon_manager,
             on_restart=self.restart,
             on_save=self.save_game,
@@ -165,15 +166,6 @@ class Game:
             on_shop_check=self._handle_shop_check,
             inventory_game_ref=self,
         )
-
-        # Handle skill UI input separately (skills screen)
-        for event in pygame.event.get():
-            if self.state_manager.state == config.STATE_SKILLS:
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Left click - learn skill
-                        self.skill_ui.handle_click(event.pos, self.warrior, False)
-                    elif event.button == 3:  # Right click - set active
-                        self.skill_ui.handle_click(event.pos, self.warrior, True)
 
     def restart(self):
         """Restart the game."""

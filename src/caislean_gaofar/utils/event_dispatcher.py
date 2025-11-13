@@ -9,6 +9,7 @@ from caislean_gaofar.entities.entity_manager import EntityManager
 from caislean_gaofar.ui.inventory_ui import InventoryUI
 from caislean_gaofar.objects.shop import Shop
 from caislean_gaofar.ui.shop_ui import ShopUI
+from caislean_gaofar.ui.skill_ui import SkillUI
 from caislean_gaofar.core import config
 
 
@@ -30,6 +31,7 @@ class EventDispatcher:
         inventory_ui: InventoryUI,
         shop: Shop,
         shop_ui: ShopUI,
+        skill_ui: SkillUI,
         dungeon_manager,
         on_restart: Callable,
         on_save: Callable,
@@ -51,6 +53,7 @@ class EventDispatcher:
             inventory_ui: The inventory UI
             shop: The shop instance
             shop_ui: The shop UI
+            skill_ui: The skill UI
             dungeon_manager: The dungeon manager
             on_restart: Callback for restarting the game
             on_save: Callback for saving the game
@@ -95,6 +98,14 @@ class EventDispatcher:
             # Handle shop input when shop is open
             if game_state_manager.state == config.STATE_SHOP:
                 shop_ui.handle_input(event, shop, warrior)
+
+            # Handle skill UI input when skills screen is open
+            if game_state_manager.state == config.STATE_SKILLS:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left click - learn skill
+                        skill_ui.handle_click(event.pos, warrior, False)
+                    elif event.button == 3:  # Right click - set active
+                        skill_ui.handle_click(event.pos, warrior, True)
 
     def _handle_keydown(
         self,
