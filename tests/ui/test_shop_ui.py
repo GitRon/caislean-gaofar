@@ -1,13 +1,12 @@
 """Tests for shop_ui.py - ShopUI class"""
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import pygame
 from caislean_gaofar.ui.shop_ui import ShopUI
 from caislean_gaofar.objects.shop import Shop, ShopItem
 from caislean_gaofar.objects.item import Item, ItemType
 from caislean_gaofar.entities.warrior import Warrior
-from caislean_gaofar.systems.inventory import Inventory
 from caislean_gaofar.core import config
 
 
@@ -74,9 +73,7 @@ class TestShopUIDrawing:
     """Tests for ShopUI drawing methods"""
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_basic(
-        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
-    ):
+    def test_draw_basic(self, mock_get_pos, shop_ui, mock_screen, shop, warrior):
         """Test basic drawing of shop UI"""
         shop_ui.draw(mock_screen, shop, warrior)
         # Test passes if no exceptions are raised
@@ -100,7 +97,9 @@ class TestShopUIDrawing:
     ):
         """Test message expires after duration"""
         shop_ui.message = "Test message"
-        shop_ui.message_start_time = 1000  # Message shown at 1000ms, tested at 5000ms (4000ms elapsed)
+        shop_ui.message_start_time = (
+            1000  # Message shown at 1000ms, tested at 5000ms (4000ms elapsed)
+        )
         shop_ui.draw(mock_screen, shop, warrior)
         assert shop_ui.message == ""
         assert shop_ui.message_start_time == 0
@@ -126,27 +125,21 @@ class TestShopUIDrawing:
         assert shop_ui.sell_tab_rect is not None
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_player_info(
-        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
-    ):
+    def test_draw_player_info(self, mock_get_pos, shop_ui, mock_screen, shop, warrior):
         """Test drawing player gold and inventory capacity"""
         warrior.add_gold(500)
         shop_ui.draw(mock_screen, shop, warrior)
         # Test passes if no exceptions are raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_buy_list(
-        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
-    ):
+    def test_draw_buy_list(self, mock_get_pos, shop_ui, mock_screen, shop, warrior):
         """Test drawing buy list"""
         shop_ui.active_tab = "buy"
         shop_ui.draw(mock_screen, shop, warrior)
         assert len(shop_ui.item_rects) > 0
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_sell_list(
-        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
-    ):
+    def test_draw_sell_list(self, mock_get_pos, shop_ui, mock_screen, shop, warrior):
         """Test drawing sell list"""
         shop_ui.active_tab = "sell"
         # Add some items to warrior inventory
@@ -257,7 +250,9 @@ class TestShopUITabSwitching:
         assert shop_ui.scroll_offset == 0
 
     @patch("pygame.mouse.get_pos", return_value=(400, 200))
-    def test_switch_to_sell_tab(self, mock_get_pos, shop_ui, mock_screen, shop, warrior):
+    def test_switch_to_sell_tab(
+        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
+    ):
         """Test switching to sell tab"""
         # First draw to initialize tab rects
         shop_ui.draw(mock_screen, shop, warrior)
@@ -265,7 +260,9 @@ class TestShopUITabSwitching:
         event = Mock()
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 1
-        event.pos = shop_ui.sell_tab_rect.center if shop_ui.sell_tab_rect else (400, 150)
+        event.pos = (
+            shop_ui.sell_tab_rect.center if shop_ui.sell_tab_rect else (400, 150)
+        )
 
         shop_ui.handle_input(event, shop, warrior)
         assert shop_ui.active_tab == "sell"
@@ -328,15 +325,15 @@ class TestShopUIBuying:
         event = Mock()
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 1
-        event.pos = shop_ui.buy_button_rect.center if shop_ui.buy_button_rect else (400, 500)
+        event.pos = (
+            shop_ui.buy_button_rect.center if shop_ui.buy_button_rect else (400, 500)
+        )
 
         result = shop_ui.handle_input(event, shop, warrior)
         # Should not open confirmation dialog
         assert shop_ui.confirmation_dialog is None
 
-    def test_buy_button_click_with_selection(
-        self, shop_ui, shop, warrior
-    ):
+    def test_buy_button_click_with_selection(self, shop_ui, shop, warrior):
         """Test clicking buy button with item selected"""
         shop_ui.active_tab = "buy"
         shop_ui.selected_item_index = 0
@@ -415,7 +412,9 @@ class TestShopUIBuying:
         if shop_ui.confirmation_dialog:
             shop_ui.confirmation_dialog["callback"]()
             # Should show error message
-            assert "gold" in shop_ui.message.lower() or "funds" in shop_ui.message.lower()
+            assert (
+                "gold" in shop_ui.message.lower() or "funds" in shop_ui.message.lower()
+            )
 
     def test_buy_inventory_full(self, shop_ui, shop, warrior):
         """Test buying when inventory is full"""
@@ -430,7 +429,10 @@ class TestShopUIBuying:
         if shop_ui.confirmation_dialog:
             shop_ui.confirmation_dialog["callback"]()
             # Should show error message
-            assert "full" in shop_ui.message.lower() or "inventory" in shop_ui.message.lower()
+            assert (
+                "full" in shop_ui.message.lower()
+                or "inventory" in shop_ui.message.lower()
+            )
 
 
 class TestShopUISelling:
@@ -447,7 +449,9 @@ class TestShopUISelling:
         event = Mock()
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 1
-        event.pos = shop_ui.sell_button_rect.center if shop_ui.sell_button_rect else (400, 500)
+        event.pos = (
+            shop_ui.sell_button_rect.center if shop_ui.sell_button_rect else (400, 500)
+        )
 
         shop_ui.handle_input(event, shop, warrior)
         # Should not open confirmation dialog
@@ -466,7 +470,9 @@ class TestShopUISelling:
         event = Mock()
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 1
-        event.pos = shop_ui.sell_button_rect.center if shop_ui.sell_button_rect else (400, 500)
+        event.pos = (
+            shop_ui.sell_button_rect.center if shop_ui.sell_button_rect else (400, 500)
+        )
 
         shop_ui.handle_input(event, shop, warrior)
         # Should open confirmation dialog
@@ -676,9 +682,7 @@ class TestShopUIEdgeCases:
         shop_ui.draw(mock_screen, shop, warrior)
         assert len(shop_ui.item_rects) == 0 or warrior.inventory.get_all_items() == []
 
-    def test_handle_input_returns_false_for_unknown_event(
-        self, shop_ui, shop, warrior
-    ):
+    def test_handle_input_returns_false_for_unknown_event(self, shop_ui, shop, warrior):
         """Test that unknown events return False"""
         event = Mock()
         event.type = pygame.KEYDOWN
@@ -686,18 +690,14 @@ class TestShopUIEdgeCases:
         assert result is False or result is True  # Either is acceptable
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_buy_with_invalid_index(
-        self, mock_get_pos, shop_ui, shop, warrior
-    ):
+    def test_buy_with_invalid_index(self, mock_get_pos, shop_ui, shop, warrior):
         """Test buying with invalid selected index"""
         shop_ui.selected_item_index = 999  # Invalid index
         shop_ui._handle_buy_click(shop, warrior)
         # Should not crash, should handle gracefully
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_sell_with_invalid_index(
-        self, mock_get_pos, shop_ui, shop, warrior
-    ):
+    def test_sell_with_invalid_index(self, mock_get_pos, shop_ui, shop, warrior):
         """Test selling with invalid selected index"""
         shop_ui.active_tab = "sell"
         shop_ui.selected_item_index = 999  # Invalid index
