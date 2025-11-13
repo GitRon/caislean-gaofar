@@ -1336,6 +1336,7 @@ class TestWorldRenderer:
         assert effect.x == 5 * config.TILE_SIZE + 25  # Restored
         assert effect.y == 10 * config.TILE_SIZE + 30  # Restored
         effect.draw.assert_called_once_with(screen)
+
     @patch("pygame.display.flip")
     def test_draw_playing_state_with_dungeons_on_world_map(self, mock_flip):
         """Test drawing dungeon icons when on world map."""
