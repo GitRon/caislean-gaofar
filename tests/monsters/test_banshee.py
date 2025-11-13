@@ -1,11 +1,22 @@
 """Tests for Banshee monster class"""
 
+import pygame
+import pytest
+
 from monsters.banshee import Banshee
 from monsters.base_monster import BaseMonster
 
 
 class TestBanshee:
     """Tests for Banshee monster"""
+
+    @pytest.fixture(autouse=True)
+    def setup_pygame(self):
+        """Initialize pygame before each test."""
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        yield
+        pygame.quit()
 
     def test_banshee_initialization(self):
         """Test Banshee can be initialized"""
@@ -79,3 +90,21 @@ class TestBanshee:
         assert banshee.CHASE_RANGE == 6
         assert banshee.ATTACK_RANGE == 2
         assert banshee.monster_type == "banshee"
+
+    def test_banshee_draw_body(self):
+        """Test Banshee draw_body renders without error"""
+        # Arrange
+        banshee = Banshee(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        banshee.draw_body(screen, 400, 300)
+
+    def test_banshee_draw_details(self):
+        """Test Banshee draw_details renders without error"""
+        # Arrange
+        banshee = Banshee(5, 5)
+        screen = pygame.display.get_surface()
+
+        # Act & Assert - should not raise exception
+        banshee.draw_details(screen, 400, 300)

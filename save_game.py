@@ -138,8 +138,8 @@ class SaveGame:
                 },
                 "current_map_id": game.dungeon_manager.current_map_id,
                 "return_location": game.dungeon_manager.return_location,
-                "killed_monsters": game.killed_monsters,
-                "opened_chests": game.opened_chests,
+                "killed_monsters": game.entity_manager.killed_monsters,
+                "opened_chests": game.entity_manager.opened_chests,
                 "ground_items": [
                     {
                         "item": SaveGame.serialize_item(gi.item),
@@ -147,7 +147,7 @@ class SaveGame:
                         "grid_y": gi.grid_y,
                         "map_id": game.dungeon_manager.current_map_id,
                     }
-                    for gi in game.ground_items
+                    for gi in game.entity_manager.ground_items
                 ],
             }
 

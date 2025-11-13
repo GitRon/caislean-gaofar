@@ -297,39 +297,37 @@ class TestBaseMonster:
         # Act & Assert
         assert isinstance(monster, Entity)
 
-    @patch("monsters.base_monster.MONSTER_RENDERERS", {})
     @patch("pygame.draw.circle")
     def test_draw_without_custom_renderer(self, mock_draw_circle):
         """Test drawing without custom renderer uses fallback"""
         # Arrange
         monster = MonsterSubclass(5, 5)
-        monster.monster_type = "nonexistent_type"
         screen = pygame.display.set_mode((800, 600))
 
         # Act
         monster.draw(screen)
 
-        # Assert
+        # Assert - fallback draw_body should draw eyes
         assert mock_draw_circle.called
         assert monster.frame_count == 1
 
-    @patch("monsters.base_monster.MONSTER_RENDERERS", {"test_monster": Mock()})
     def test_draw_with_custom_renderer(self):
-        """Test drawing with custom renderer"""
+        """Test drawing with custom draw_body override"""
         # Arrange
         monster = MonsterSubclass(5, 5)
         screen = pygame.display.set_mode((800, 600))
-        mock_renderer = Mock()
 
-        with patch.dict(
-            "monsters.base_monster.MONSTER_RENDERERS", {"test_monster": mock_renderer}
-        ):
-            # Act
-            monster.draw(screen)
+        # Mock the draw_body method
+        monster.draw_body = Mock()
+        monster.draw_details = Mock()
 
-            # Assert
-            assert mock_renderer.called
-            assert monster.frame_count == 1
+        # Act
+        monster.draw(screen)
+
+        # Assert - draw_body and draw_details should be called
+        assert monster.draw_body.called
+        assert monster.draw_details.called
+        assert monster.frame_count == 1
 
     def test_draw_increments_frame_count(self):
         """Test draw increments frame count"""
@@ -345,12 +343,10 @@ class TestBaseMonster:
         # Assert
         assert monster.frame_count == initial_count + 2
 
-    @patch("monsters.base_monster.MONSTER_RENDERERS", {})
     def test_draw_fallback_renders_eyes(self):
-        """Test fallback renderer draws eyes"""
+        """Test fallback draw_body renders eyes"""
         # Arrange
         monster = MonsterSubclass(5, 5)
-        monster.monster_type = "unknown"
         screen = pygame.display.set_mode((800, 600))
 
         # Act & Assert - should not raise exception
