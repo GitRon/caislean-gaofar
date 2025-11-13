@@ -1415,8 +1415,10 @@ class TestWorldRenderer:
             mock_draw_cave.assert_not_called()
 
     @patch("pygame.draw.rect")
-    def test_draw_dungeons_with_camera_shows_name_when_near(self, mock_draw_rect):
-        """Test dungeon name is displayed when warrior is near."""
+    def test_draw_dungeons_with_camera_shows_name_when_on_entrance(
+        self, mock_draw_rect
+    ):
+        """Test dungeon name is displayed when warrior is on the entrance."""
         # Arrange
         screen = Mock()
         renderer = WorldRenderer(screen)
@@ -1440,8 +1442,8 @@ class TestWorldRenderer:
         dungeon_manager.world_map = world_map
 
         warrior = Mock()
-        warrior.grid_x = 1  # Next to dungeon
-        warrior.grid_y = 2  # Distance = 1
+        warrior.grid_x = 1  # On the dungeon entrance
+        warrior.grid_y = 1  # Distance = 0
 
         # Act
         with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
@@ -1467,11 +1469,12 @@ class TestWorldRenderer:
 
         # Assert
         assert mock_ellipse.call_count >= 2  # Main arch + inner cave
-        assert mock_circle.call_count >= 4  # Rocky edges
+        assert mock_circle.call_count >= 6  # Background circles (2) + rocky edges (4)
 
     @patch("pygame.draw.rect")
     @patch("pygame.draw.line")
-    def test_draw_castle_entrance(self, mock_line, mock_rect):
+    @patch("pygame.draw.circle")
+    def test_draw_castle_entrance(self, mock_circle, mock_line, mock_rect):
         """Test drawing castle entrance with battlements."""
         # Arrange
         screen = Mock()
@@ -1481,6 +1484,7 @@ class TestWorldRenderer:
         renderer._draw_castle_entrance(100, 200, 50)
 
         # Assert
+        assert mock_circle.call_count >= 2  # Background circles
         assert mock_rect.call_count >= 4  # Gate structure + battlements
         assert mock_line.call_count >= 3  # Stone block pattern
 
@@ -1495,7 +1499,9 @@ class TestWorldRenderer:
         renderer._draw_dungeon_entrance(100, 200, 50)
 
         # Assert
-        assert mock_circle.call_count == 3  # Outer glow, inner portal, dark center
+        assert (
+            mock_circle.call_count >= 5
+        )  # Background circles (2) + outer glow + inner portal + dark center
 
     def test_draw_dungeons_with_camera_multiple_dungeons(self):
         """Test drawing multiple dungeon entrances."""
@@ -1620,7 +1626,7 @@ class TestWorldRenderer:
 
     @patch("pygame.draw.rect")
     def test_draw_dungeons_mixed_distances(self, mock_draw_rect):
-        """Test drawing dungeons with warrior near one and far from another."""
+        """Test drawing dungeons with warrior on one and far from another."""
         # Arrange
         screen = Mock()
         renderer = WorldRenderer(screen)
@@ -1647,8 +1653,8 @@ class TestWorldRenderer:
         dungeon_manager.world_map = world_map
 
         warrior = Mock()
-        warrior.grid_x = 0  # Next to cave (distance = 1)
-        warrior.grid_y = 1
+        warrior.grid_x = 0  # On cave entrance (distance = 0)
+        warrior.grid_y = 0
 
         # Act
         with (
@@ -1660,9 +1666,9 @@ class TestWorldRenderer:
             # Assert - both dungeons drawn
             mock_cave.assert_called_once()
             mock_castle.assert_called_once()
-            # Name shown only for near cave (text background drawn)
+            # Name shown only for cave (warrior is on it)
             assert mock_draw_rect.call_count >= 1
-            # Text drawn for near cave
+            # Text drawn for cave
             assert screen.blit.call_count >= 1
 
     def test_draw_dungeons_with_camera_unknown_terrain_type(self):
