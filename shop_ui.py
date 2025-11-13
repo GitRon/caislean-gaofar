@@ -222,7 +222,7 @@ class ShopUI:
                 continue
 
             # Check if item is within list bounds
-            if item_y > list_y + list_height:
+            if item_y >= list_y + list_height:
                 break
 
             # Store rect for click detection with actual item index
@@ -306,7 +306,7 @@ class ShopUI:
                 continue
 
             # Check if item is within list bounds
-            if item_y > list_y + list_height:
+            if item_y >= list_y + list_height:
                 break
 
             # Store rect for click detection with actual item index
