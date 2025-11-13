@@ -9,6 +9,7 @@ from shop import Shop
 from shop_ui import ShopUI
 from hud import HUD
 from camera import Camera
+from attack_effect import AttackEffectManager
 import config
 
 
@@ -27,6 +28,7 @@ class WorldRenderer:
         self.inventory_ui = InventoryUI()
         self.shop_ui = ShopUI()
         self.hud = HUD()
+        self.attack_effect_manager = AttackEffectManager()
 
     def draw_playing_state(
         self,
@@ -100,6 +102,9 @@ class WorldRenderer:
 
         # Draw entities with camera offset
         self._draw_entities_with_camera(camera, warrior, entity_manager)
+
+        # Draw attack effects with camera offset
+        self._draw_attack_effects_with_camera(camera)
 
         # Draw combat UI (find nearest monster)
         nearest_monster = entity_manager.get_nearest_alive_monster(warrior)
@@ -429,3 +434,38 @@ class WorldRenderer:
 
         # Draw text
         self.screen.blit(text_surface, text_rect)
+
+    def _draw_attack_effects_with_camera(self, camera: Camera):
+        """
+        Draw attack effects with camera offset applied.
+
+        Args:
+            camera: The camera instance
+        """
+        # Temporarily adjust camera offset for attack effects
+        # Since attack effects use pixel coordinates, we need to adjust them
+        for effect in self.attack_effect_manager.effects:
+            # Store original position
+            original_x = effect.x
+            original_y = effect.y
+
+            # Convert to screen coordinates (effects are in world pixel space)
+            # Calculate grid position first
+            grid_x = original_x // config.TILE_SIZE
+            grid_y = original_y // config.TILE_SIZE
+
+            # Only draw if in camera view
+            if camera.is_visible(grid_x, grid_y):
+                # Convert to screen space
+                screen_grid_x, screen_grid_y = camera.world_to_screen(grid_x, grid_y)
+                offset_x = original_x % config.TILE_SIZE
+                offset_y = original_y % config.TILE_SIZE
+                effect.x = screen_grid_x * config.TILE_SIZE + offset_x
+                effect.y = screen_grid_y * config.TILE_SIZE + offset_y
+
+                # Draw the effect
+                effect.draw(self.screen)
+
+                # Restore original position
+                effect.x = original_x
+                effect.y = original_y
