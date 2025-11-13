@@ -83,7 +83,7 @@ class Chest:
     ):
         """
         Draw the chest on the screen.
-        Chests appear as brown rectangles with a golden lock icon.
+        Chests appear as 3D treasure chests with lid, body, metal bands, and lock.
 
         Args:
             screen: The pygame screen surface
@@ -97,22 +97,160 @@ class Chest:
         screen_x = self.get_screen_x(camera_offset_x)
         screen_y = self.get_screen_y(camera_offset_y)
 
-        # Draw chest body (brown rectangle)
-        chest_rect = pygame.Rect(
-            screen_x + TILE_SIZE // 4,
-            screen_y + TILE_SIZE // 4,
-            TILE_SIZE // 2,
-            TILE_SIZE // 2,
-        )
-        pygame.draw.rect(screen, COLOR_CHEST, chest_rect)
-        pygame.draw.rect(screen, (80, 40, 10), chest_rect, 3)  # Dark brown border
+        # Color palette for 3D chest
+        dark_brown = (80, 40, 10)
+        medium_brown = (139, 69, 19)
+        light_brown = (180, 100, 40)
+        very_dark_brown = (50, 25, 5)
+        metal_dark = (60, 60, 70)
+        metal_light = (120, 120, 140)
+        lock_gold = (255, 215, 0)
+        lock_gold_dark = (200, 150, 0)
 
-        # Draw lock (golden circle in center)
-        lock_center = (screen_x + TILE_SIZE // 2, screen_y + TILE_SIZE // 2)
-        pygame.draw.circle(screen, GOLD, lock_center, 6)
-        pygame.draw.circle(
-            screen, (200, 150, 0), lock_center, 6, 2
-        )  # Darker gold border
+        # Chest dimensions
+        chest_width = TILE_SIZE * 3 // 4
+        chest_height = TILE_SIZE * 3 // 4
+        chest_x = screen_x + (TILE_SIZE - chest_width) // 2
+        chest_y = screen_y + (TILE_SIZE - chest_height) // 2
+        lid_height = chest_height // 3
+
+        # Draw chest body (main container)
+        body_rect = pygame.Rect(
+            chest_x,
+            chest_y + lid_height,
+            chest_width,
+            chest_height - lid_height,
+        )
+        pygame.draw.rect(screen, dark_brown, body_rect)
+
+        # Add 3D depth to body - left shadow
+        pygame.draw.rect(
+            screen,
+            very_dark_brown,
+            (chest_x, chest_y + lid_height, 3, chest_height - lid_height),
+        )
+
+        # Add 3D depth to body - right highlight
+        pygame.draw.rect(
+            screen,
+            medium_brown,
+            (
+                chest_x + chest_width - 3,
+                chest_y + lid_height,
+                3,
+                chest_height - lid_height,
+            ),
+        )
+
+        # Draw chest lid with curved top
+        lid_rect = pygame.Rect(chest_x, chest_y, chest_width, lid_height)
+        pygame.draw.rect(screen, medium_brown, lid_rect)
+
+        # Add curved/rounded top to lid
+        pygame.draw.ellipse(
+            screen,
+            light_brown,
+            (chest_x, chest_y, chest_width, lid_height * 2),
+            0,
+        )
+
+        # Re-draw lower part of lid to cover ellipse overflow
+        pygame.draw.rect(
+            screen,
+            medium_brown,
+            (chest_x, chest_y + lid_height // 2, chest_width, lid_height // 2),
+        )
+
+        # Add shadow under lid
+        pygame.draw.line(
+            screen,
+            very_dark_brown,
+            (chest_x, chest_y + lid_height),
+            (chest_x + chest_width, chest_y + lid_height),
+            2,
+        )
+
+        # Draw metal bands (horizontal reinforcement)
+        band_width = 4
+        # Top band on body
+        pygame.draw.rect(
+            screen,
+            metal_dark,
+            (chest_x, chest_y + lid_height + 2, chest_width, band_width),
+        )
+        pygame.draw.rect(
+            screen,
+            metal_light,
+            (chest_x, chest_y + lid_height + 2, chest_width, 2),
+        )
+
+        # Bottom band on body
+        pygame.draw.rect(
+            screen,
+            metal_dark,
+            (
+                chest_x,
+                chest_y + chest_height - band_width - 2,
+                chest_width,
+                band_width,
+            ),
+        )
+        pygame.draw.rect(
+            screen,
+            metal_light,
+            (chest_x, chest_y + chest_height - band_width - 2, chest_width, 2),
+        )
+
+        # Draw vertical metal band in center
+        center_x = chest_x + chest_width // 2
+        pygame.draw.rect(
+            screen,
+            metal_dark,
+            (center_x - 2, chest_y, 4, chest_height),
+        )
+        pygame.draw.rect(
+            screen,
+            metal_light,
+            (center_x - 2, chest_y, 2, chest_height),
+        )
+
+        # Draw lock (golden rectangle with keyhole)
+        lock_width = 12
+        lock_height = 14
+        lock_x = center_x - lock_width // 2
+        lock_y = chest_y + lid_height + chest_height // 3
+        lock_rect = pygame.Rect(lock_x, lock_y, lock_width, lock_height)
+
+        # Lock body
+        pygame.draw.rect(screen, lock_gold, lock_rect, 0, 3)
+        pygame.draw.rect(screen, lock_gold_dark, lock_rect, 2, 3)
+
+        # Keyhole (small black circle and vertical line)
+        keyhole_center = (center_x, lock_y + 5)
+        pygame.draw.circle(screen, (0, 0, 0), keyhole_center, 2)
+        pygame.draw.line(
+            screen,
+            (0, 0, 0),
+            (center_x, lock_y + 5),
+            (center_x, lock_y + lock_height - 3),
+            2,
+        )
+
+        # Add corner details (metal corners)
+        corner_size = 3
+        corners = [
+            (chest_x, chest_y + lid_height),  # Top left
+            (chest_x + chest_width - corner_size, chest_y + lid_height),  # Top right
+            (chest_x, chest_y + chest_height - corner_size),  # Bottom left
+            (
+                chest_x + chest_width - corner_size,
+                chest_y + chest_height - corner_size,
+            ),  # Bottom right
+        ]
+        for corner_x, corner_y in corners:
+            pygame.draw.rect(
+                screen, metal_light, (corner_x, corner_y, corner_size, corner_size)
+            )
 
     @staticmethod
     def _generate_random_item() -> Item:
