@@ -136,7 +136,5 @@ class Portal:
         font = pygame.font.Font(None, 20)
         label = "Return Portal" if self.is_return_portal else "Town Portal"
         text_surface = font.render(label, True, config.WHITE)
-        text_rect = text_surface.get_rect(
-            center=(center_x, screen_y + self.size + 10)
-        )
+        text_rect = text_surface.get_rect(center=(center_x, screen_y + self.size + 10))
         screen.blit(text_surface, text_rect)
