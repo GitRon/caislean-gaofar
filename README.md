@@ -6,14 +6,21 @@ PyGame inspired by Castle of the Winds
 ### Running the Game
 
 ```bash
-# Install dependencies
+# Install dependencies and the package
 uv sync
 
 # Run the game
-python main.py
+uv run python main.py
+```
+
+**Alternative**: You can also use the convenience script:
+```bash
+python run.py
 ```
 
 The project uses `uv` for dependency management (Python 3.13+). Dependencies are locked in `uv.lock` for reproducible builds.
+
+**Note**: The game is now structured as a Python package (`caislean_gaofar`) in the `src/` directory. You must use `uv run` or activate the virtual environment before running.
 
 ### Testing
 

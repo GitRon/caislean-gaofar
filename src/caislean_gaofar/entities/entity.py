@@ -1,0 +1,223 @@
+"""Base entity class for game objects."""
+
+import pygame
+from typing import Tuple
+from caislean_gaofar.core import config
+from caislean_gaofar.utils.grid import Grid
+
+
+class Entity:
+    """Base class for all game entities (warriors, monsters, etc.)."""
+
+    def __init__(
+        self,
+        grid_x: int,
+        grid_y: int,
+        size: int,
+        color: Tuple[int, int, int],
+        max_health: int,
+        speed: int,
+        attack_damage: int,
+        attack_cooldown: int,
+    ):
+        """
+        Initialize an entity.
+
+        Args:
+            grid_x: Initial grid x position
+            grid_y: Initial grid y position
+            size: Size of the entity (square)
+            color: RGB color tuple
+            max_health: Maximum health points
+            speed: Movement speed in tiles per turn
+            attack_damage: Damage dealt per attack
+            attack_cooldown: Turns between attacks
+        """
+        self.grid_x = grid_x
+        self.grid_y = grid_y
+        self.size = size
+        self.color = color
+        self.max_health = max_health
+        self.health = max_health
+        self.speed = speed
+        self.attack_damage = attack_damage
+        self.attack_cooldown = attack_cooldown
+        self.turns_since_last_attack = attack_cooldown  # Can attack immediately
+        self.is_alive = True
+
+    @property
+    def x(self) -> int:
+        """Get pixel x coordinate."""
+        return self.grid_x * config.TILE_SIZE
+
+    @property
+    def y(self) -> int:
+        """Get pixel y coordinate."""
+        return self.grid_y * config.TILE_SIZE
+
+    def get_rect(self) -> pygame.Rect:
+        """Get the entity's rectangle for collision detection."""
+        return pygame.Rect(self.x, self.y, self.size, self.size)
+
+    def get_center(self) -> Tuple[float, float]:
+        """Get the center position of the entity in pixels."""
+        return (self.x + self.size / 2, self.y + self.size / 2)
+
+    def get_screen_x(self, camera_offset_x: int = 0) -> int:
+        """
+        Get the screen pixel x coordinate with camera offset applied.
+
+        Args:
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel x coordinate
+        """
+        return (self.grid_x - camera_offset_x) * config.TILE_SIZE
+
+    def get_screen_y(self, camera_offset_y: int = 0) -> int:
+        """
+        Get the screen pixel y coordinate with camera offset applied.
+
+        Args:
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+
+        Returns:
+            Screen pixel y coordinate
+        """
+        return (self.grid_y - camera_offset_y) * config.TILE_SIZE
+
+    def grid_distance_to(self, other: "Entity") -> int:
+        """Calculate Manhattan distance to another entity in tiles."""
+        return Grid.manhattan_distance(
+            self.grid_x, self.grid_y, other.grid_x, other.grid_y
+        )
+
+    def can_attack(self) -> bool:
+        """Check if entity can attack based on turn cooldown."""
+        return self.turns_since_last_attack >= self.attack_cooldown
+
+    def attack(self, target: "Entity") -> bool:
+        """
+        Attempt to attack a target.
+
+        Returns:
+            True if attack was successful, False otherwise
+        """
+        if not self.can_attack():
+            return False
+
+        target.take_damage(self.attack_damage)
+        self.turns_since_last_attack = 0
+        return True
+
+    def take_damage(self, damage: int, defense: int = 0):
+        """
+        Take damage and update health.
+
+        Args:
+            damage: Raw damage amount
+            defense: Defense value to reduce damage (default 0)
+        """
+        # Apply defense reduction (minimum 1 damage to prevent immunity)
+        actual_damage = max(1, damage - defense)
+        self.health -= actual_damage
+        if self.health <= 0:
+            self.health = 0
+            self.is_alive = False
+
+    def move(self, dx: int, dy: int, world_map=None) -> bool:
+        """
+        Move the entity by delta grid tiles.
+
+        Args:
+            dx: Delta x in tiles
+            dy: Delta y in tiles
+            world_map: Optional WorldMap object for terrain-based movement validation
+
+        Returns:
+            True if move was successful, False if blocked
+        """
+        new_grid_x = self.grid_x + dx
+        new_grid_y = self.grid_y + dy
+
+        # Check if new position is valid
+        if world_map:
+            # Use world map for validation (checks bounds and terrain passability)
+            if world_map.is_passable(new_grid_x, new_grid_y):
+                self.grid_x = new_grid_x
+                self.grid_y = new_grid_y
+                return True
+        else:
+            # Fallback to grid validation for backward compatibility
+            if Grid.is_valid_position(new_grid_x, new_grid_y):
+                self.grid_x = new_grid_x
+                self.grid_y = new_grid_y
+                return True
+        return False
+
+    def draw(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
+        """
+        Draw the entity on the screen.
+
+        Args:
+            screen: The pygame screen surface
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+        """
+        # Calculate screen coordinates with camera offset
+        screen_x = self.get_screen_x(camera_offset_x)
+        screen_y = self.get_screen_y(camera_offset_y)
+
+        # Draw entity
+        pygame.draw.rect(
+            screen, self.color, pygame.Rect(screen_x, screen_y, self.size, self.size)
+        )
+
+        # Draw health bar
+        self.draw_health_bar(screen, camera_offset_x, camera_offset_y)
+
+    def draw_health_bar(
+        self,
+        screen: pygame.Surface,
+        camera_offset_x: int = 0,
+        camera_offset_y: int = 0,
+    ):
+        """
+        Draw health bar above the entity.
+
+        Args:
+            screen: The pygame screen surface
+            camera_offset_x: Camera offset in grid coordinates (default 0)
+            camera_offset_y: Camera offset in grid coordinates (default 0)
+        """
+        bar_width = self.size
+        bar_height = 5
+        bar_x = self.get_screen_x(camera_offset_x)
+        bar_y = self.get_screen_y(camera_offset_y) - 10
+
+        # Background (red)
+        pygame.draw.rect(screen, config.DARK_RED, (bar_x, bar_y, bar_width, bar_height))
+
+        # Health (green)
+        health_ratio = self.health / self.max_health
+        health_width = bar_width * health_ratio
+        pygame.draw.rect(
+            screen, config.DARK_GREEN, (bar_x, bar_y, health_width, bar_height)
+        )
+
+        # Border
+        pygame.draw.rect(screen, config.WHITE, (bar_x, bar_y, bar_width, bar_height), 1)
+
+    def on_turn_start(self):
+        """Called at the start of the entity's turn."""
+        self.turns_since_last_attack += 1
+
+    def update(self):
+        """Update entity state. Override in subclasses."""
+        pass

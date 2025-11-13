@@ -1,9 +1,9 @@
 """Entry point for the Caislean Gaofar game."""
 
 import pygame
-from game import Game
-from main_menu import MainMenu
-import config
+from caislean_gaofar.core.game import Game
+from caislean_gaofar.ui.main_menu import MainMenu
+from caislean_gaofar.core import config
 
 
 def main():

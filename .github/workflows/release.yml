@@ -44,7 +44,7 @@ jobs:
       # 6. Build Windows executable
       - name: Build executable
         run: |
-          uv run pyinstaller --onefile --windowed --add-data="maps;maps" --name="CaisleanGaofar" main.py
+          uv run pyinstaller --onefile --windowed --add-data="data/maps;data/maps" --name="CaisleanGaofar" main.py
 
       # 7. Create GitHub Release and Upload Asset
       - name: Create Release and Upload Asset

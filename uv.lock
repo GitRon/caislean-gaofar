@@ -3,9 +3,9 @@ revision = 3
 requires-python = ">=3.13"
 
 [[package]]
-name = "claude-pytest"
+name = "caislean-gaofar"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "pygame" },
     { name = "pytest" },
