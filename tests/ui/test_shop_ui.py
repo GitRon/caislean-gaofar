@@ -329,7 +329,7 @@ class TestShopUIBuying:
             shop_ui.buy_button_rect.center if shop_ui.buy_button_rect else (400, 500)
         )
 
-        result = shop_ui.handle_input(event, shop, warrior)
+        shop_ui.handle_input(event, shop, warrior)
         # Should not open confirmation dialog
         assert shop_ui.confirmation_dialog is None
 
@@ -349,7 +349,6 @@ class TestShopUIBuying:
     ):
         """Test clicking yes on buy confirmation"""
         shop_ui.active_tab = "buy"
-        available_items = shop.get_available_items()
         shop_ui.selected_item_index = 0
 
         # Open confirmation dialog
@@ -854,7 +853,7 @@ class TestShopUIEdgeCases:
         event.pos = (100, 100)  # Outside the dialog
 
         # This should not close the dialog or execute callback
-        result = shop_ui.handle_input(event, shop, warrior)
+        shop_ui.handle_input(event, shop, warrior)
         # The dialog might stay open or close depending on implementation
 
     def test_sell_failure_message_color(self, shop_ui, shop, warrior):
@@ -905,3 +904,269 @@ class TestShopUIEdgeCases:
         result = shop_ui.handle_input(event, shop, warrior)
         # Should have opened confirmation dialog
         assert shop_ui.confirmation_dialog is not None or result is True
+
+
+class TestShopUICoverageBranches:
+    """Tests for missing branch coverage"""
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_draw_item_info_with_no_shop_item(
+        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
+    ):
+        """Test drawing item info when shop_item is None (line 385 branch)"""
+        # This happens in sell tab where items don't have ShopItem wrappers
+        shop_ui.active_tab = "sell"
+        item = Item("Test Item", ItemType.WEAPON, attack_bonus=5, gold_value=100)
+        warrior.inventory.add_item(item)
+        shop_ui.selected_item_index = 0
+        shop_ui.draw(mock_screen, shop, warrior)
+        # Test passes if no exceptions - the branch where shop_item is None is taken
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 500))
+    def test_button_hover_when_enabled(
+        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
+    ):
+        """Test button hover color when enabled and hovered (lines 466-467)"""
+        shop_ui.active_tab = "buy"
+        shop_ui.selected_item_index = 0  # Enable the button
+
+        # Draw to create button rect and check hover state
+        shop_ui.draw(mock_screen, shop, warrior)
+
+        # Verify button was created
+        assert shop_ui.buy_button_rect is not None
+
+        # Mock mouse position to be over the button
+        button_center = shop_ui.buy_button_rect.center
+        with patch("pygame.mouse.get_pos", return_value=button_center):
+            shop_ui.draw(mock_screen, shop, warrior)
+        # Test passes if no exceptions - hover color branch is taken
+
+    def test_wrap_text_with_word_too_long_empty_current_line(self, shop_ui):
+        """Test _wrap_text where word is too long and current_line is empty (line 640)"""
+        # Create a very long word that exceeds max_width
+        long_word = "A" * 200
+        text = f"{long_word}"
+        lines = shop_ui._wrap_text(text, 100)  # Small width to force the branch
+        # The word should be added to new line even though it's too long
+        assert len(lines) >= 1
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_confirmation_dialog_non_left_click(
+        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
+    ):
+        """Test confirmation dialog with non-left-click button (line 685 branch)"""
+        shop_ui.active_tab = "buy"
+        shop_ui.selected_item_index = 0
+        shop_ui._handle_buy_click(shop, warrior)
+
+        # Draw to create button rects
+        shop_ui.draw(mock_screen, shop, warrior)
+
+        # Right-click (button 3) on yes button
+        event = Mock()
+        event.type = pygame.MOUSEBUTTONDOWN
+        event.button = 3  # Right click, not left click
+        yes_rect = shop_ui.confirmation_dialog.get("yes_rect")
+        event.pos = yes_rect.center if yes_rect else (300, 300)
+
+        # This should not execute the callback because it's not button 1
+        initial_gold = warrior.gold
+        shop_ui.handle_input(event, shop, warrior)
+
+        # Dialog should still be open (not closed by right-click)
+        assert shop_ui.confirmation_dialog is not None
+        # Gold should not change
+        assert warrior.gold == initial_gold
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_sell_button_click_outside_rect_original(
+        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
+    ):
+        """Test clicking when sell_button_rect exists but pos doesn't collide (lines 726-727)"""
+        shop_ui.active_tab = "sell"
+        item = Item("Test", ItemType.WEAPON, attack_bonus=5)
+        warrior.inventory.add_item(item)
+        shop_ui.selected_item_index = 0
+
+        # Draw to create sell button rect
+        shop_ui.draw(mock_screen, shop, warrior)
+
+        # Click outside the button rect
+        event = Mock()
+        event.type = pygame.MOUSEBUTTONDOWN
+        event.button = 1
+        event.pos = (100, 100)  # Far from button position
+
+        # This should not trigger the sell action
+        shop_ui.handle_input(event, shop, warrior)
+        # Dialog should not be opened
+        assert shop_ui.confirmation_dialog is None
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_sell_button_exists_click_near_but_not_on_button(
+        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
+    ):
+        """Test the specific branch where sell button rect exists but click misses it (lines 726->731, 727->731)"""
+        shop_ui.active_tab = "sell"
+        item = Item("Test", ItemType.WEAPON, attack_bonus=5)
+        warrior.inventory.add_item(item)
+        shop_ui.selected_item_index = 0
+
+        # Draw to create sell button rect
+        shop_ui.draw(mock_screen, shop, warrior)
+
+        # Verify sell button exists
+        assert shop_ui.sell_button_rect is not None
+
+        # Get button position and click just outside it (but not on items/tabs)
+        button_right = shop_ui.sell_button_rect.right
+        button_top = shop_ui.sell_button_rect.top
+
+        # Click just to the right of the button, in empty space
+        event = Mock()
+        event.type = pygame.MOUSEBUTTONDOWN
+        event.button = 1
+        event.pos = (button_right + 10, button_top)  # Just outside button
+
+        # This should not trigger the sell action
+        result = shop_ui.handle_input(event, shop, warrior)
+        # Dialog should not be opened (branch 726->731, 727->731)
+        assert shop_ui.confirmation_dialog is None
+        # Result should be False since no handler claimed the event
+        assert result is False
+
+    def test_sell_button_click_far_outside_all_elements(self, shop_ui, shop, warrior):
+        """Test clicking well outside all UI elements in sell tab (line 726->731)"""
+        shop_ui.active_tab = "sell"
+        item = Item("Test", ItemType.WEAPON, attack_bonus=5)
+        warrior.inventory.add_item(item)
+
+        # Manually set button rect to ensure it exists
+        shop_ui.sell_button_rect = pygame.Rect(400, 500, 200, 40)
+
+        # Clear other UI elements to ensure we reach button handling code
+        shop_ui.item_rects = []
+        shop_ui.buy_tab_rect = None
+        shop_ui.sell_tab_rect = None
+        shop_ui.confirmation_dialog = None
+
+        # Click far from all UI elements (at screen edge)
+        event = Mock()
+        event.type = pygame.MOUSEBUTTONDOWN
+        event.button = 1
+        event.pos = (10, 10)  # Top-left corner of screen, not on any UI element
+
+        # This should reach the sell button handling code but not trigger it
+        result = shop_ui.handle_input(event, shop, warrior)
+
+        # Should return False since click didn't hit any element
+        assert result is False
+        assert shop_ui.confirmation_dialog is None
+
+    def test_sell_tab_click_outside_button_explicit(self, shop_ui, shop, warrior):
+        """Explicit test for branch 726->731: sell tab active, button exists, click misses"""
+        # Set up the exact conditions
+        shop_ui.active_tab = "sell"
+        shop_ui.sell_button_rect = pygame.Rect(300, 400, 100, 50)
+        shop_ui.buy_button_rect = None
+        shop_ui.item_rects = []
+        shop_ui.buy_tab_rect = pygame.Rect(0, 0, 1, 1)  # Won't hit our click
+        shop_ui.sell_tab_rect = pygame.Rect(0, 0, 1, 1)  # Won't hit our click
+        shop_ui.confirmation_dialog = None
+
+        # Create event that will reach line 726 but not enter line 727
+        event = Mock()
+        event.type = pygame.MOUSEBUTTONDOWN
+        event.button = 1
+        event.pos = (500, 500)  # Outside sell_button_rect
+
+        # Handle the event
+        result = shop_ui.handle_input(event, shop, warrior)
+
+        # Should return False (line 731) without opening dialog
+        assert result is False
+        assert shop_ui.confirmation_dialog is None
+
+    def test_branch_726_to_731_elif_false(self, shop_ui, shop, warrior):
+        """Test branch 726->731: elif condition is False"""
+        # To make elif at 726 false, we need active_tab != "sell" OR sell_button_rect is None
+        # But we also need the if at 722 to be false
+        # Set active_tab to "buy" but buy_button_rect to None
+        # This makes line 722 false (because buy_button_rect is None)
+        # Then line 726 is also false (because active_tab != "sell")
+        shop_ui.active_tab = "buy"
+        shop_ui.buy_button_rect = None  # Makes line 722 false
+        shop_ui.sell_button_rect = None  # Makes line 726 false
+        shop_ui.item_rects = []
+        shop_ui.buy_tab_rect = None
+        shop_ui.sell_tab_rect = None
+        shop_ui.confirmation_dialog = None
+
+        event = Mock()
+        event.type = pygame.MOUSEBUTTONDOWN
+        event.button = 1
+        event.pos = (400, 400)
+
+        result = shop_ui.handle_input(event, shop, warrior)
+
+        # Should return False at line 731
+        assert result is False
+
+    def test_sell_failure_red_message_color(self, shop_ui, shop, warrior):
+        """Test that failed sell shows RED message color (line 802)"""
+        # Create an item
+        item = Item("Test", ItemType.MISC, gold_value=50)
+        warrior.inventory.add_item(item)
+
+        shop_ui.active_tab = "sell"
+        shop_ui.selected_item_index = 0
+
+        # Get the item from inventory
+        player_items = warrior.inventory.get_all_items()
+        test_item = player_items[0]
+
+        # Remove the item from inventory to cause sell failure
+        warrior.inventory.remove_item(test_item)
+
+        # Now try to execute sell - this should fail
+        shop_ui._execute_sell(shop, warrior, test_item)
+
+        # Message color should be RED for failure
+        assert shop_ui.message_color == config.RED
+        assert shop_ui.message != ""  # Should have an error message
+
+    def test_draw_item_info_direct_with_none_shop_item(self, shop_ui, mock_screen):
+        """Test _draw_item_info called directly with shop_item=None (line 385->exit)"""
+        # Create a test item and rect
+        item = Item("Test Item", ItemType.WEAPON, attack_bonus=5, gold_value=100)
+        item_rect = pygame.Rect(50, 50, 300, 60)
+        player_gold = 200
+
+        # Call _draw_item_info directly with shop_item=None
+        shop_ui._draw_item_info(
+            mock_screen, item_rect, item, player_gold, shop_item=None
+        )
+        # Test passes if no exceptions - the else branch is taken
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_buy_button_click_outside_rect(
+        self, mock_get_pos, shop_ui, mock_screen, shop, warrior
+    ):
+        """Test clicking when buy_button_rect exists but pos doesn't collide (line 723->731)"""
+        shop_ui.active_tab = "buy"
+        shop_ui.selected_item_index = 0
+
+        # Draw to create buy button rect
+        shop_ui.draw(mock_screen, shop, warrior)
+
+        # Click outside the button rect (far from the button)
+        event = Mock()
+        event.type = pygame.MOUSEBUTTONDOWN
+        event.button = 1
+        event.pos = (50, 50)  # Top-left corner, far from button
+
+        # This should not trigger the buy action
+        shop_ui.handle_input(event, shop, warrior)
+        # Dialog should not be opened
+        assert shop_ui.confirmation_dialog is None

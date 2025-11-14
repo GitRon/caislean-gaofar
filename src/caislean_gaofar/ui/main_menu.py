@@ -26,7 +26,7 @@ class MainMenu:
         """Load available save files."""
         self.save_files = SaveGame.list_save_files()
 
-    def run(self) -> Optional[tuple]:  # pragma: no cover
+    def run(self) -> Optional[tuple]:
         """
         Run the main menu loop.
 
@@ -47,11 +47,11 @@ class MainMenu:
 
     def handle_events(self):
         """Handle input events."""
-        for event in pygame.event.get():  # pragma: no branch
+        for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
                 self.result = None
-            elif event.type == pygame.KEYDOWN:  # pragma: no branch
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
                     self.result = None
@@ -62,7 +62,7 @@ class MainMenu:
                     self.selected_option = min(max_option, self.selected_option + 1)
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                     self.select_option()
-                elif event.key == pygame.K_DELETE and self.selected_option > 0:  # pragma: no branch
+                elif event.key == pygame.K_DELETE and self.selected_option > 0:
                     # Delete selected save file
                     self.delete_selected_save()
 
@@ -78,7 +78,7 @@ class MainMenu:
             if save_index < len(self.save_files):
                 save_file = self.save_files[save_index]
                 save_data = SaveGame.load_game(save_file["filename"])
-                if save_data:  # pragma: no branch
+                if save_data:
                     self.result = ("load", save_data)
                     self.running = False
 
@@ -86,7 +86,7 @@ class MainMenu:
         """Delete the currently selected save file."""
         if self.selected_option > 0:
             save_index = self.selected_option - 1
-            if save_index < len(self.save_files):  # pragma: no branch
+            if save_index < len(self.save_files):
                 save_file = self.save_files[save_index]
                 SaveGame.delete_save(save_file["filename"])
                 # Reload save files
@@ -95,7 +95,7 @@ class MainMenu:
                 if self.selected_option > len(self.save_files):
                     self.selected_option = len(self.save_files)
 
-    def draw(self):  # pragma: no cover
+    def draw(self):
         """Draw the main menu."""
         self.screen.fill(config.BLACK)
 

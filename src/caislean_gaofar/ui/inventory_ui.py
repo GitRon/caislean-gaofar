@@ -44,7 +44,7 @@ class InventoryUI:
         # Slot rects for mouse detection (updated each frame)
         self.slot_rects = {}  # {(slot_type, index): pygame.Rect}
 
-    def draw(self, screen: pygame.Surface, inventory: Inventory):  # pragma: no cover
+    def draw(self, screen: pygame.Surface, inventory: Inventory):
         """Draw the inventory overlay"""
         screen_width = screen.get_width()
         screen_height = screen.get_height()
@@ -105,7 +105,7 @@ class InventoryUI:
 
     def _draw_equipment_section(
         self, screen: pygame.Surface, inventory: Inventory, panel_x: int, start_y: int
-    ):  # pragma: no cover
+    ):
         """Draw weapon and armor equipment slots"""
         # Weapon slot
         weapon_x = panel_x + self.padding
@@ -145,7 +145,7 @@ class InventoryUI:
 
     def _draw_backpack_section(
         self, screen: pygame.Surface, inventory: Inventory, panel_x: int, start_y: int
-    ):  # pragma: no cover
+    ):
         """Draw backpack slots"""
         # Backpack label
         label = self.font.render("BACKPACK", True, self.text_color)
@@ -184,7 +184,7 @@ class InventoryUI:
         is_equipped: bool = False,
         is_selected: bool = False,
         is_hovered: bool = False,
-    ):  # pragma: no cover
+    ):
         """Draw a single inventory slot"""
         # Store rect for mouse detection
         rect = pygame.Rect(x, y, self.slot_size, self.slot_size)
@@ -221,7 +221,7 @@ class InventoryUI:
         if item and self.dragging_from != slot_id:
             self._draw_item_in_slot(screen, x, y, item)
 
-    def _draw_item_in_slot(self, screen: pygame.Surface, x: int, y: int, item):  # pragma: no cover
+    def _draw_item_in_slot(self, screen: pygame.Surface, x: int, y: int, item):
         """Draw item information in a slot"""
         # Draw item name (abbreviated if too long)
         name = item.name
@@ -248,7 +248,7 @@ class InventoryUI:
             stat_x = x + (self.slot_size - stat_text.get_width()) // 2
             screen.blit(stat_text, (stat_x, stats_y))
 
-    def _draw_instructions(self, screen: pygame.Surface, panel_x: int, panel_y: int):  # pragma: no cover
+    def _draw_instructions(self, screen: pygame.Surface, panel_x: int, panel_y: int):
         """Draw control instructions"""
         instructions = [
             "Left Click - Select/Move Item",
@@ -264,7 +264,7 @@ class InventoryUI:
 
     def handle_input(
         self, event: pygame.event.Event, inventory: Inventory, game=None
-    ) -> bool:  # pragma: no cover
+    ) -> bool:
         """
         Handle input events for inventory management.
 
@@ -337,7 +337,7 @@ class InventoryUI:
 
         return False
 
-    def _update_hovered_slot(self, mouse_pos: Tuple[int, int]):  # pragma: no cover
+    def _update_hovered_slot(self, mouse_pos: Tuple[int, int]):
         """Update which slot is currently being hovered over"""
         self.hovered_slot = None
         for slot_id, rect in self.slot_rects.items():
@@ -347,7 +347,7 @@ class InventoryUI:
 
     def _handle_left_click(
         self, mouse_pos: Tuple[int, int], inventory: Inventory
-    ) -> bool:  # pragma: no cover
+    ) -> bool:
         """Handle left mouse button click"""
         # Close context menu if clicking outside it
         if self.context_menu_slot:
@@ -388,7 +388,7 @@ class InventoryUI:
 
     def _handle_left_release(
         self, mouse_pos: Tuple[int, int], inventory: Inventory
-    ) -> bool:  # pragma: no cover
+    ) -> bool:
         """Handle left mouse button release (end of drag or click)"""
         if self.dragging_item:
             # Find which slot we're over
@@ -412,7 +412,7 @@ class InventoryUI:
 
     def _handle_right_click(
         self, mouse_pos: Tuple[int, int], inventory: Inventory
-    ) -> bool:  # pragma: no cover
+    ) -> bool:
         """Handle right mouse button click"""
         # Check if clicking on a slot with an item
         for slot_id, rect in self.slot_rects.items():
@@ -429,7 +429,7 @@ class InventoryUI:
 
     def _get_item_from_slot(
         self, inventory: Inventory, slot_type: str, slot_index: int
-    ):  # pragma: no cover
+    ):
         """Get the item from a specific slot"""
         if slot_type == "weapon":
             return inventory.weapon_slot
@@ -444,7 +444,7 @@ class InventoryUI:
         inventory: Inventory,
         from_slot: Tuple[str, int],
         to_slot: Tuple[str, int],
-    ):  # pragma: no cover
+    ):
         """Move or swap items between slots"""
         from_type, from_index = from_slot
         to_type, to_index = to_slot
@@ -470,7 +470,7 @@ class InventoryUI:
 
     def _place_item_in_slot(
         self, inventory: Inventory, item, slot_type: str, slot_index: int
-    ) -> bool:  # pragma: no cover
+    ) -> bool:
         """Place an item in a specific slot, returns True if successful"""
         if slot_type == "weapon":
             from caislean_gaofar.objects.item import ItemType
@@ -491,7 +491,7 @@ class InventoryUI:
 
     def _draw_tooltip(
         self, screen: pygame.Surface, inventory: Inventory, mouse_pos: Tuple[int, int]
-    ):  # pragma: no cover
+    ):
         """Draw tooltip showing item details"""
         if not self.hovered_slot:
             return
@@ -552,7 +552,7 @@ class InventoryUI:
                 text, (tooltip_x + padding, tooltip_y + padding + i * line_height)
             )
 
-    def _draw_context_menu(self, screen: pygame.Surface, inventory: Inventory):  # pragma: no cover
+    def _draw_context_menu(self, screen: pygame.Surface, inventory: Inventory):
         """Draw right-click context menu"""
         if not self.context_menu_slot or not self.context_menu_pos:
             return
@@ -623,7 +623,7 @@ class InventoryUI:
             text_y = option_y + (menu_item_height - text.get_height()) // 2
             screen.blit(text, (text_x, text_y))
 
-    def _execute_context_menu_action(self, action: str, inventory: Inventory):  # pragma: no cover
+    def _execute_context_menu_action(self, action: str, inventory: Inventory):
         """Execute the selected context menu action"""
         if not self.context_menu_slot:
             return
@@ -639,7 +639,7 @@ class InventoryUI:
             # Select the slot to show it's being inspected
             self.selected_slot = self.context_menu_slot
 
-    def _draw_dragged_item(self, screen: pygame.Surface, mouse_pos: Tuple[int, int]):  # pragma: no cover
+    def _draw_dragged_item(self, screen: pygame.Surface, mouse_pos: Tuple[int, int]):
         """Draw the item being dragged"""
         if not self.dragging_item:
             return
@@ -662,7 +662,7 @@ class InventoryUI:
         # Draw item info
         self._draw_item_in_slot(screen, x, y, self.dragging_item)
 
-    def _is_pos_in_context_menu(self, pos: Tuple[int, int]) -> bool:  # pragma: no cover
+    def _is_pos_in_context_menu(self, pos: Tuple[int, int]) -> bool:
         """Check if a position is inside the context menu"""
         if not self.context_menu_pos:
             return False

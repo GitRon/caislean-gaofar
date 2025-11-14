@@ -382,7 +382,7 @@ class ShopUI:
         screen.blit(price_text, (price_x, item_rect.y + padding))
 
         # Quantity (AC1)
-        if shop_item:  # pragma: no branch
+        if shop_item:
             if shop_item.infinite:
                 qty_text = self.small_font.render("∞", True, (150, 200, 255))
             else:
@@ -463,8 +463,8 @@ class ShopUI:
             button_color = (50, 50, 50)
             text_color = (100, 100, 100)
         elif is_hovered:
-            button_color = config.SHOP_BUTTON_HOVER_COLOR  # pragma: no cover
-            text_color = config.WHITE  # pragma: no cover
+            button_color = config.SHOP_BUTTON_HOVER_COLOR
+            text_color = config.WHITE
         else:
             button_color = config.SHOP_BUTTON_COLOR
             text_color = config.WHITE
@@ -637,7 +637,7 @@ class ShopUI:
             if self.font.size(test_line)[0] <= max_width:
                 current_line = test_line
             else:
-                if current_line:  # pragma: no branch
+                if current_line:
                     lines.append(current_line.strip())
                 current_line = word + " "
 
@@ -682,7 +682,7 @@ class ShopUI:
 
         # Handle confirmation dialog input first
         if self.confirmation_dialog and event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Left click  # pragma: no branch
+            if event.button == 1:  # Left click
                 yes_rect = self.confirmation_dialog.get("yes_rect")
                 no_rect = self.confirmation_dialog.get("no_rect")
 
@@ -720,11 +720,11 @@ class ShopUI:
         # Handle action button click
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.active_tab == "buy" and self.buy_button_rect:
-                if self.buy_button_rect.collidepoint(event.pos):  # pragma: no branch
+                if self.buy_button_rect.collidepoint(event.pos):
                     self._handle_buy_click(shop, warrior)
                     return True
-            elif self.active_tab == "sell" and self.sell_button_rect:  # pragma: no cover
-                if self.sell_button_rect.collidepoint(event.pos):  # pragma: no branch
+            elif self.active_tab == "sell" and self.sell_button_rect:
+                if self.sell_button_rect.collidepoint(event.pos):
                     self._handle_sell_click(shop, warrior)
                     return True
 
@@ -733,7 +733,7 @@ class ShopUI:
     def _handle_buy_click(self, shop: Shop, warrior: Warrior):
         """Handle buy button click (AC16 - requires confirmation)."""
         if self.selected_item_index is None:
-            return  # pragma: no cover
+            return
 
         # Get selected item
         available_items = shop.get_available_items()
@@ -799,7 +799,7 @@ class ShopUI:
             self.message_color = config.GREEN
             self.selected_item_index = None
         else:
-            self.message_color = config.RED  # pragma: no cover
+            self.message_color = config.RED
 
         self._show_message(message)
 
