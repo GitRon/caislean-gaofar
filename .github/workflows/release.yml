@@ -41,12 +41,18 @@ jobs:
         run: |
           uv pip install pyinstaller
 
-      # 6. Build Windows executable
+      # 6. Build Windows executable using .spec file
       - name: Build executable
         run: |
-          uv run pyinstaller --onefile --windowed --add-data="data/maps;data/maps" --name="CaisleanGaofar" main.py
+          uv run pyinstaller CaisleanGaofar.spec
 
-      # 7. Create GitHub Release and Upload Asset
+      # 7. Package the executable directory as ZIP
+      - name: Package executable
+        run: |
+          Compress-Archive -Path ./dist/CaisleanGaofar -DestinationPath ./dist/CaisleanGaofar-Windows.zip
+        shell: pwsh
+
+      # 8. Create GitHub Release and Upload Asset
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
@@ -57,14 +63,20 @@ jobs:
             Windows standalone executable for Caislean Gaofar - A PyGame action RPG inspired by "Castle of the Winds".
 
             ### Installation
-            1. Download `CaisleanGaofar.exe` from the assets below
-            2. Run the executable - no Python installation required!
+            1. Download `CaisleanGaofar-Windows.zip` from the assets below
+            2. Extract the ZIP file to a folder of your choice
+            3. Run `CaisleanGaofar.exe` from the extracted folder - no Python installation required!
 
             ### What's New
             See the [commit history](https://github.com/${{ github.repository }}/commits/${{ github.ref_name }}) for changes in this release.
 
             ---
-            **Note**: Windows Defender or other antivirus software may flag PyInstaller executables as suspicious. This is a false positive - the executable is safe to run.
-          files: ./dist/CaisleanGaofar.exe
+            **About Windows Defender**: This build has been optimized to reduce false positives from antivirus software by:
+            - Using directory-based distribution (--onedir) instead of self-extracting archives
+            - Disabling UPX compression which is often flagged as suspicious
+            - Including Windows executable metadata (version info, company, copyright)
+
+            If Windows Defender or other antivirus software still flags the executable, this is a false positive. The executable is safe to run. You can verify the source code is open and auditable in this repository.
+          files: ./dist/CaisleanGaofar-Windows.zip
           draft: false
           prerelease: false
