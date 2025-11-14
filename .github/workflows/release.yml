@@ -59,7 +59,6 @@ jobs:
             ### Installation
             1. Download `CaisleanGaofar.exe` from the assets below
             2. Run the executable - no Python installation required!
-            3. A console window will appear for debugging - this helps identify any startup issues
 
             ### What's New
             See the [commit history](https://github.com/${{ github.repository }}/commits/${{ github.ref_name }}) for changes in this release.
@@ -68,7 +67,6 @@ jobs:
             **About Windows Defender**: This build has been optimized to reduce false positives from antivirus software by:
             - Disabling UPX compression which is often flagged as suspicious
             - Including Windows executable metadata (version info, company, copyright)
-            - Enabling console output to help diagnose any issues
 
             If Windows Defender or other antivirus software still flags the executable, this is a false positive. The executable is safe to run. You can verify the source code is open and auditable in this repository.
           files: ./dist/CaisleanGaofar.exe

@@ -49,18 +49,7 @@ Explicitly disabled UPX compression in the `.spec` file.
 
 **Trade-off**: Slightly larger file size (negligible for modern systems)
 
-### 4. Enabled Console Output (`console=True`)
-
-Enabled console window to show error messages during debugging.
-
-**Benefits**:
-- Users can see startup errors and diagnostic information
-- Makes troubleshooting much easier
-- Helps identify if the executable is working correctly
-
-**Trade-off**: Console window appears alongside the game window (can be disabled later with `console=False`)
-
-### 5. Updated Release Process
+### 4. Updated Release Process
 
 Modified `.github/workflows/release.yml` to:
 - Build using the `.spec` file with `--onefile` mode
@@ -75,7 +64,6 @@ These changes should **reduce** but may not **completely eliminate** false posit
 - Missing metadata (added Windows version info)
 - UPX compression flags (explicitly disabled)
 - Opaque build process (using documented .spec file)
-- Silent failures (console output enabled for debugging)
 
 ⚠️ **Not addressed** (require external resources or different approaches):
 - Self-extraction behavior (still using --onefile mode for convenience)
