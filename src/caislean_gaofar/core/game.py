@@ -19,6 +19,8 @@ from caislean_gaofar.systems.turn_processor import TurnProcessor
 from caislean_gaofar.world.world_renderer import WorldRenderer
 from caislean_gaofar.core.game_state_manager import GameStateManager
 from caislean_gaofar.utils.event_dispatcher import EventDispatcher
+from caislean_gaofar.core.game_loop import GameLoop
+from caislean_gaofar.world.dungeon_transition_manager import DungeonTransitionManager
 
 
 class Game:
@@ -44,6 +46,8 @@ class Game:
         self.renderer = WorldRenderer(self.screen)
         self.state_manager = GameStateManager()
         self.event_dispatcher = EventDispatcher()
+        self.game_loop = GameLoop(self.clock)
+        self.dungeon_transition_manager = DungeonTransitionManager()
 
         # Initialize dungeon manager
         if map_file is None:
@@ -286,59 +290,32 @@ class Game:
 
     def _check_dungeon_transition(self):
         """Check if player is entering or exiting a dungeon."""
-        player_x = self.warrior.grid_x
-        player_y = self.warrior.grid_y
-
-        # Check if exiting dungeon
-        if self.dungeon_manager.check_for_exit(player_x, player_y):
-            return_pos = self.dungeon_manager.exit_dungeon()
-            if return_pos:
-                # Update map reference
-                self.world_map = self.dungeon_manager.get_current_map()
-
-                # Update camera for new map
-                self.camera = Camera(self.world_map.width, self.world_map.height)
-
-                # Move player to return location
-                self.warrior.grid_x, self.warrior.grid_y = return_pos
-
-                # Respawn monsters and chests for world map
-                self.entity_manager.spawn_monsters(self.world_map, self.dungeon_manager)
-                self.entity_manager.spawn_chests(self.world_map, self.dungeon_manager)
-                self.entity_manager.clear_ground_items()
-
-                self._show_message("You return to the world map.")
-                return
-
-        # Check if entering dungeon
-        dungeon_id = self.dungeon_manager.get_dungeon_at_position(player_x, player_y)
-        if dungeon_id:
-            # Enter the dungeon
-            spawn_x, spawn_y = self.dungeon_manager.enter_dungeon(
-                dungeon_id, player_x, player_y
+        new_camera, transition_occurred = (
+            self.dungeon_transition_manager.check_and_handle_transition(
+                warrior=self.warrior,
+                dungeon_manager=self.dungeon_manager,
+                entity_manager=self.entity_manager,
+                on_camera_update=self._create_camera,
+                on_message=self._show_message,
             )
+        )
 
-            # Update map reference
+        if transition_occurred and new_camera:
+            self.camera = new_camera
             self.world_map = self.dungeon_manager.get_current_map()
 
-            # Update camera for new map
-            self.camera = Camera(self.world_map.width, self.world_map.height)
+    def _create_camera(self, width: int, height: int) -> Camera:
+        """
+        Create a new camera with the given dimensions.
 
-            # Move player to dungeon spawn
-            self.warrior.grid_x = spawn_x
-            self.warrior.grid_y = spawn_y
+        Args:
+            width: Camera width
+            height: Camera height
 
-            # Spawn monsters and chests for dungeon
-            self.entity_manager.spawn_monsters(self.world_map, self.dungeon_manager)
-            self.entity_manager.spawn_chests(self.world_map, self.dungeon_manager)
-            self.entity_manager.clear_ground_items()
-
-            # Get dungeon name for message
-            for spawn in self.dungeon_manager.world_map.get_entity_spawns("dungeons"):
-                if spawn.get("id") == dungeon_id:
-                    dungeon_name = spawn.get("name", "dungeon")
-                    self._show_message(f"You enter the {dungeon_name}!")
-                    break
+        Returns:
+            New Camera instance
+        """
+        return Camera(width, height)
 
     def _handle_chest_opened(self, item: Item):
         """
@@ -614,11 +591,15 @@ class Game:
 
     def run(self):
         """Main game loop."""
-        while self.event_dispatcher.running:
-            dt = self.clock.tick(config.FPS) / 1000.0  # Delta time in seconds
-
+        # Synchronize running state between event_dispatcher and game_loop
+        def handle_events_wrapper():
             self.handle_events()
-            self.update(dt)
-            self.draw()
+            # If event_dispatcher stops, stop game_loop too
+            if not self.event_dispatcher.running:
+                self.game_loop.stop()
 
-        pygame.quit()
+        self.game_loop.run(
+            handle_events=handle_events_wrapper,
+            update=self.update,
+            draw=self.draw,
+        )
