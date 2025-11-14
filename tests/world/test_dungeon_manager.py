@@ -43,6 +43,17 @@ class TestDungeonManager:
         assert manager.dungeon_maps["dark_cave"].width > 0
         assert manager.dungeon_maps["dark_cave"].height > 0
 
+    def test_load_dungeon_with_relative_path(self):
+        """Test loading a dungeon map with relative path."""
+        manager = DungeonManager()
+        # Use relative path - resource_path should be applied internally
+        dungeon_path = os.path.join("data", "maps", "dark_cave.json")
+        manager.load_dungeon("dark_cave", dungeon_path)
+
+        assert "dark_cave" in manager.dungeon_maps
+        assert manager.dungeon_maps["dark_cave"].width > 0
+        assert manager.dungeon_maps["dark_cave"].height > 0
+
     def test_get_current_map_world(self):
         """Test getting current map when in world."""
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))

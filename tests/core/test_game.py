@@ -53,6 +53,23 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
+    def test_game_initialization_with_absolute_path_map(
+        self, mock_caption, mock_clock, mock_display
+    ):
+        """Test Game initialization with absolute path to custom map file"""
+        # Arrange - use absolute path (already resolved by resource_path)
+        custom_map = config.resource_path(os.path.join("data", "maps", "town.json"))
+
+        # Act
+        game = Game(map_file=custom_map)
+
+        # Assert
+        assert game.warrior is not None
+        assert game.world_map is not None
+
+    @patch("pygame.display.set_mode")
+    @patch("pygame.time.Clock")
+    @patch("pygame.display.set_caption")
     def test_game_initial_state_is_playing(
         self, mock_caption, mock_clock, mock_display
     ):
