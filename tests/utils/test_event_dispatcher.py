@@ -10,6 +10,7 @@ from caislean_gaofar.entities.entity_manager import EntityManager
 from caislean_gaofar.ui.inventory_ui import InventoryUI
 from caislean_gaofar.objects.shop import Shop
 from caislean_gaofar.ui.shop_ui import ShopUI
+from caislean_gaofar.ui.skill_ui import SkillUI
 from caislean_gaofar.core import config
 
 
@@ -742,6 +743,73 @@ class TestEventDispatcher:
         mocks["on_use_return_portal"].assert_not_called()
         mocks["turn_processor"].queue_player_action.assert_not_called()
 
+    @patch("pygame.event.get")
+    def test_skill_ui_handle_left_click(self, mock_get_events):
+        """Test that skill UI receives left click events."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        click_event = Mock()
+        click_event.type = pygame.MOUSEBUTTONDOWN
+        click_event.button = 1  # Left click
+        click_event.pos = (100, 200)
+        mock_get_events.return_value = [click_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SKILLS
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["skill_ui"].handle_click.assert_called_once_with(
+            (100, 200), mocks["warrior"], False
+        )
+
+    @patch("pygame.event.get")
+    def test_skill_ui_handle_right_click(self, mock_get_events):
+        """Test that skill UI receives right click events."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        click_event = Mock()
+        click_event.type = pygame.MOUSEBUTTONDOWN
+        click_event.button = 3  # Right click
+        click_event.pos = (150, 250)
+        mock_get_events.return_value = [click_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SKILLS
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert
+        mocks["skill_ui"].handle_click.assert_called_once_with(
+            (150, 250), mocks["warrior"], True
+        )
+
+    @patch("pygame.event.get")
+    def test_skill_ui_handle_middle_click(self, mock_get_events):
+        """Test that skill UI ignores middle mouse button clicks."""
+        # Arrange
+        dispatcher = EventDispatcher()
+
+        click_event = Mock()
+        click_event.type = pygame.MOUSEBUTTONDOWN
+        click_event.button = 2  # Middle click
+        click_event.pos = (150, 250)
+        mock_get_events.return_value = [click_event]
+
+        mocks = self._create_mock_parameters()
+        mocks["game_state_manager"].state = config.STATE_SKILLS
+
+        # Act
+        dispatcher.handle_events(**mocks)
+
+        # Assert - should not be called for middle click
+        mocks["skill_ui"].handle_click.assert_not_called()
+
     def _create_mock_parameters(self):
         """Create mock parameters for handle_events method."""
         warrior = Mock(spec=Warrior)
@@ -766,6 +834,7 @@ class TestEventDispatcher:
         inventory_ui = Mock(spec=InventoryUI)
         shop = Mock(spec=Shop)
         shop_ui = Mock(spec=ShopUI)
+        skill_ui = Mock(spec=SkillUI)
         dungeon_manager = Mock()
 
         return {
@@ -776,6 +845,7 @@ class TestEventDispatcher:
             "inventory_ui": inventory_ui,
             "shop": shop,
             "shop_ui": shop_ui,
+            "skill_ui": skill_ui,
             "dungeon_manager": dungeon_manager,
             "on_restart": Mock(),
             "on_save": Mock(),

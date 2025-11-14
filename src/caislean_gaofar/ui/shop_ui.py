@@ -221,8 +221,8 @@ class ShopUI:
             if item_y + item_height < list_y:
                 continue
 
-            # Check if item is within list bounds
-            if item_y > list_y + list_height:
+            # Check if item rect would extend beyond list bounds (and overlap with button)
+            if item_y + item_height > list_y + list_height:
                 break
 
             # Store rect for click detection with actual item index
@@ -305,8 +305,8 @@ class ShopUI:
             if item_y + item_height < list_y:
                 continue
 
-            # Check if item is within list bounds
-            if item_y > list_y + list_height:
+            # Check if item rect would extend beyond list bounds (and overlap with button)
+            if item_y + item_height > list_y + list_height:
                 break
 
             # Store rect for click detection with actual item index

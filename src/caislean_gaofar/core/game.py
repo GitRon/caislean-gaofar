@@ -146,7 +146,7 @@ class Game:
 
     def handle_events(self):  # pragma: no cover
         """Handle pygame events."""
-        # Use event dispatcher for most event handling
+        # Use event dispatcher for all event handling
         self.event_dispatcher.handle_events(
             warrior=self.warrior,
             game_state_manager=self.state_manager,
@@ -155,6 +155,7 @@ class Game:
             inventory_ui=self.renderer.inventory_ui,
             shop=self.shop,
             shop_ui=self.renderer.shop_ui,
+            skill_ui=self.skill_ui,
             dungeon_manager=self.dungeon_manager,
             on_restart=self.restart,
             on_save=self.save_game,
