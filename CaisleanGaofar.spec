@@ -33,14 +33,16 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
     [],
-    exclude_binaries=True,  # Use --onedir mode (more stable, less suspicious)
     name='CaisleanGaofar',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=False,  # Explicitly disable UPX compression (reduces AV false positives)
-    console=False,  # Windowed mode (no console window)
+    console=True,  # Enable console for debugging (shows error messages)
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
@@ -49,16 +51,4 @@ exe = EXE(
     # Windows version information (helps legitimize the executable)
     version='version_info.txt',
     icon=None,  # TODO: Add icon file to further legitimize
-)
-
-# COLLECT: Bundle everything into a directory
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    strip=False,
-    upx=False,  # Explicitly disable UPX for collected files too
-    upx_exclude=[],
-    name='CaisleanGaofar',
 )
