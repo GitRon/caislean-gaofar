@@ -47,13 +47,23 @@ class Game:
 
         # Initialize dungeon manager
         if map_file is None:
-            map_file = os.path.join("data", "maps", "overworld.json")
+            map_file = config.resource_path(
+                os.path.join("data", "maps", "overworld.json")
+            )
+        else:
+            # Apply resource_path to custom map if it's a relative path
+            if not os.path.isabs(map_file):
+                map_file = config.resource_path(map_file)
         self.dungeon_manager = DungeonManager(map_file)
         self.dungeon_manager.load_world_map()
 
         # Load dungeons - map unique IDs to actual dungeon files
-        dark_cave_path = os.path.join("data", "maps", "dark_cave.json")
-        ancient_castle_path = os.path.join("data", "maps", "ancient_castle.json")
+        dark_cave_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
+        ancient_castle_path = config.resource_path(
+            os.path.join("data", "maps", "ancient_castle.json")
+        )
 
         # Cave-type dungeons
         self.dungeon_manager.load_dungeon("dark_cave_1", dark_cave_path)
@@ -69,7 +79,7 @@ class Game:
 
         # Town
         self.dungeon_manager.load_dungeon(
-            "town", os.path.join("data", "maps", "town.json")
+            "town", config.resource_path(os.path.join("data", "maps", "town.json"))
         )
 
         # Get current map (initially world map)

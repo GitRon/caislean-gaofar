@@ -54,6 +54,10 @@ class DungeonManager:
             dungeon_id: Unique identifier for the dungeon
             dungeon_path: Path to the dungeon map file
         """
+        # Apply resource_path if the path is relative (for PyInstaller compatibility)
+        if not os.path.isabs(dungeon_path):
+            dungeon_path = config.resource_path(dungeon_path)
+
         dungeon_map = WorldMap()
         dungeon_map.load_from_file(dungeon_path)
         self.dungeon_maps[dungeon_id] = dungeon_map
