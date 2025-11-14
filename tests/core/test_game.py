@@ -1380,7 +1380,6 @@ class TestGame:
 
         # Track number of loop iterations
         iteration_count = [0]
-        original_handle_events = game.handle_events
 
         def mock_handle_events():
             iteration_count[0] += 1
