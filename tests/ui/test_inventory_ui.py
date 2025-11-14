@@ -146,7 +146,7 @@ class TestInventoryUIDrawing:
     def test_draw_all_backpack_slots(self, mock_get_pos, inventory_ui, mock_screen):
         """Test drawing all 13 backpack slots"""
         inventory = Inventory()
-        for i in range(13):
+        for i in range(13):  # noqa: PBR008
             inventory.backpack_slots[i] = Item(
                 f"Item {i}", ItemType.MISC, description="Test item"
             )

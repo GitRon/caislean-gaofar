@@ -418,7 +418,7 @@ class TestShopUIBuying:
     def test_buy_inventory_full(self, shop_ui, shop, warrior):
         """Test buying when inventory is full"""
         # Fill inventory
-        for i in range(15):
+        for i in range(15):  # noqa: PBR008
             warrior.inventory.add_item(Item(f"Item {i}", ItemType.MISC))
 
         shop_ui.selected_item_index = 0
@@ -640,7 +640,7 @@ class TestShopUIHelperMethods:
     ):
         """Test drawing scrollbar when content exceeds visible area"""
         # Create many items to force scrollbar
-        for i in range(20):
+        for i in range(20):  # noqa: PBR008
             item = Item(f"Item {i}", ItemType.MISC, gold_value=10)
             shop.inventory.append(ShopItem(item, quantity=1))
 
@@ -719,7 +719,7 @@ class TestShopUIEdgeCases:
     ):
         """Test scroll offset affects drawing in sell tab"""
         shop_ui.active_tab = "sell"
-        for i in range(10):
+        for i in range(10):  # noqa: PBR008
             warrior.inventory.add_item(Item(f"Item {i}", ItemType.MISC))
         shop_ui.scroll_offset = 100
         shop_ui.draw(mock_screen, shop, warrior)
@@ -731,7 +731,7 @@ class TestShopUIEdgeCases:
     ):
         """Test that items above visible area are skipped"""
         # Add many items and scroll down
-        for i in range(20):
+        for i in range(20):  # noqa: PBR008
             item = Item(f"Item {i}", ItemType.MISC, gold_value=10)
             shop.inventory.append(ShopItem(item, quantity=1))
 
@@ -746,7 +746,7 @@ class TestShopUIEdgeCases:
     ):
         """Test that drawing stops for items below visible area"""
         # Add many items
-        for i in range(30):
+        for i in range(30):  # noqa: PBR008
             item = Item(f"Item {i}", ItemType.MISC, gold_value=10)
             shop.inventory.append(ShopItem(item, quantity=1))
 
@@ -772,7 +772,7 @@ class TestShopUIEdgeCases:
     ):
         """Test scroll hint is shown when at top of scrollable list"""
         # Add many items to make list scrollable
-        for i in range(10):
+        for i in range(10):  # noqa: PBR008
             item = Item(f"Item {i}", ItemType.MISC, gold_value=10)
             shop.inventory.append(ShopItem(item, quantity=1))
 
@@ -803,7 +803,7 @@ class TestShopUIEdgeCases:
         """Test scrolling in sell tab"""
         shop_ui.active_tab = "sell"
         # Add items to warrior inventory
-        for i in range(10):
+        for i in range(10):  # noqa: PBR008
             warrior.inventory.add_item(Item(f"Item {i}", ItemType.MISC))
 
         event = Mock()
