@@ -861,7 +861,9 @@ class TestGame:
         # Assert - starting items should be in inventory
         # Count items in backpack and equipped slots
         total_items = sum(
-            1 for item in game.warrior.inventory.backpack_slots if item is not None  # noqa: PBR008
+            1
+            for item in game.warrior.inventory.backpack_slots
+            if item is not None  # noqa: PBR008
         )
         if game.warrior.inventory.weapon_slot:
             total_items += 1
