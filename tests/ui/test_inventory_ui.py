@@ -143,7 +143,7 @@ class TestInventoryUIDrawing:
         # Test passes if no exceptions are raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_all_backpack_slots(self, mock_get_pos, inventory_ui, mock_screen):
+    def test_draw_all_backpack_slots(self, mock_get_pos, inventory_ui, mock_screen):  # noqa: PBR008
         """Test drawing all 13 backpack slots"""
         inventory = Inventory()
         for i in range(13):  # noqa: PBR008

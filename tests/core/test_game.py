@@ -379,7 +379,7 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    def test_check_dungeon_transition_entering_dungeon(
+    def test_check_dungeon_transition_entering_dungeon(  # noqa: PBR008
         self, mock_caption, mock_clock, mock_display
     ):
         """Test entering a dungeon"""
@@ -402,9 +402,9 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    def test_check_dungeon_transition_exiting_dungeon(
+    def test_check_dungeon_transition_exiting_dungeon(  # noqa: PBR008
         self, mock_caption, mock_clock, mock_display
-    ):
+    ):  # noqa: PBR008
         """Test exiting a dungeon"""
         # Arrange
         game = Game()
@@ -524,7 +524,7 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    def test_handle_use_potion_no_potions(self, mock_caption, mock_clock, mock_display):
+    def test_handle_use_potion_no_potions(self, mock_caption, mock_clock, mock_display):  # noqa: PBR008
         """Test using a health potion when none available"""
         # Arrange
         game = Game()
@@ -560,9 +560,9 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    def test_handle_use_town_portal_success(
+    def test_handle_use_town_portal_success(  # noqa: PBR008
         self, mock_caption, mock_clock, mock_display
-    ):
+    ):  # noqa: PBR008
         """Test using town portal successfully"""
         # Arrange
         game = Game()
@@ -604,9 +604,9 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    def test_handle_use_return_portal_success(
+    def test_handle_use_return_portal_success(  # noqa: PBR008
         self, mock_caption, mock_clock, mock_display
-    ):
+    ):  # noqa: PBR008
         """Test using return portal successfully"""
         # Arrange
         game = Game()
@@ -853,7 +853,7 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    def test_add_starting_items(self, mock_caption, mock_clock, mock_display):
+    def test_add_starting_items(self, mock_caption, mock_clock, mock_display):  # noqa: PBR008
         """Test _add_starting_items adds items to inventory"""
         # Arrange
         game = Game()
@@ -1030,7 +1030,7 @@ class TestGame:
 
     @patch("pygame.display.set_mode")
     @patch("pygame.display.set_caption")
-    def test_update_return_portal_collision(self, mock_caption, mock_display):
+    def test_update_return_portal_collision(self, mock_caption, mock_display):  # noqa: PBR008
         """Test update handles return portal collision"""
         # Arrange
         # Create a mock clock that returns proper time
@@ -1258,9 +1258,9 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    def test_check_dungeon_transition_dungeon_entry_loop_no_match(
+    def test_check_dungeon_transition_dungeon_entry_loop_no_match(  # noqa: PBR008
         self, mock_caption, mock_clock, mock_display
-    ):
+    ):  # noqa: PBR008
         """Test dungeon entry loop when spawn list doesn't contain matching ID (branches 327-331)"""
         # Arrange
         game = Game()
@@ -1292,9 +1292,9 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    def test_check_dungeon_transition_dungeon_entry_loop_with_match(
+    def test_check_dungeon_transition_dungeon_entry_loop_with_match(  # noqa: PBR008
         self, mock_caption, mock_clock, mock_display
-    ):
+    ):  # noqa: PBR008
         """Test dungeon entry loop when spawn ID matches (break at line 331)"""
         # Arrange
         game = Game()

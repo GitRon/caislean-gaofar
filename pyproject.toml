@@ -59,7 +59,6 @@ enable_django_rules = false
 exclude = [
     "PBR001",  # Positional arguments discouraged (too strict for this project)
     "PBR002",  # Return type hints required (too strict for this project)
-    "PBR008",  # Loops in unit tests discouraged (acceptable for test data setup)
 ]
 
 [tool.ruff.lint]

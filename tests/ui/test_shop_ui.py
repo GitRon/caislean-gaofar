@@ -415,7 +415,7 @@ class TestShopUIBuying:
                 "gold" in shop_ui.message.lower() or "funds" in shop_ui.message.lower()
             )
 
-    def test_buy_inventory_full(self, shop_ui, shop, warrior):
+    def test_buy_inventory_full(self, shop_ui, shop, warrior):  # noqa: PBR008
         """Test buying when inventory is full"""
         # Fill inventory
         for i in range(15):  # noqa: PBR008
@@ -635,9 +635,9 @@ class TestShopUIHelperMethods:
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
     @patch("pygame.time.get_ticks", return_value=1000)
-    def test_draw_scrollbar_needed(
+    def test_draw_scrollbar_needed(  # noqa: PBR008
         self, mock_ticks, mock_get_pos, shop_ui, mock_screen, shop, warrior
-    ):
+    ):  # noqa: PBR008
         """Test drawing scrollbar when content exceeds visible area"""
         # Create many items to force scrollbar
         for i in range(20):  # noqa: PBR008
@@ -714,9 +714,9 @@ class TestShopUIEdgeCases:
         # Test passes if no exceptions are raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_scroll_offset_in_sell_tab(
+    def test_scroll_offset_in_sell_tab(  # noqa: PBR008
         self, mock_get_pos, shop_ui, mock_screen, shop, warrior
-    ):
+    ):  # noqa: PBR008
         """Test scroll offset affects drawing in sell tab"""
         shop_ui.active_tab = "sell"
         for i in range(10):  # noqa: PBR008
@@ -726,9 +726,9 @@ class TestShopUIEdgeCases:
         # Test passes if no exceptions are raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 400))
-    def test_draw_with_items_above_visible_area(
+    def test_draw_with_items_above_visible_area(  # noqa: PBR008
         self, mock_get_pos, shop_ui, mock_screen, shop, warrior
-    ):
+    ):  # noqa: PBR008
         """Test that items above visible area are skipped"""
         # Add many items and scroll down
         for i in range(20):  # noqa: PBR008
@@ -741,9 +741,9 @@ class TestShopUIEdgeCases:
         # Test passes if no exceptions are raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_with_items_below_visible_area(
+    def test_draw_with_items_below_visible_area(  # noqa: PBR008
         self, mock_get_pos, shop_ui, mock_screen, shop, warrior
-    ):
+    ):  # noqa: PBR008
         """Test that drawing stops for items below visible area"""
         # Add many items
         for i in range(30):  # noqa: PBR008
@@ -767,9 +767,9 @@ class TestShopUIEdgeCases:
         # Test passes if no exceptions are raised
 
     @patch("pygame.mouse.get_pos", return_value=(600, 600))
-    def test_draw_scrollbar_hint_at_top(
+    def test_draw_scrollbar_hint_at_top(  # noqa: PBR008
         self, mock_get_pos, shop_ui, mock_screen, shop, warrior
-    ):
+    ):  # noqa: PBR008
         """Test scroll hint is shown when at top of scrollable list"""
         # Add many items to make list scrollable
         for i in range(10):  # noqa: PBR008
@@ -799,7 +799,7 @@ class TestShopUIEdgeCases:
         shop_ui.draw(mock_screen, shop, warrior)
         # Test passes if no exceptions are raised
 
-    def test_scroll_in_sell_tab(self, shop_ui, shop, warrior):
+    def test_scroll_in_sell_tab(self, shop_ui, shop, warrior):  # noqa: PBR008
         """Test scrolling in sell tab"""
         shop_ui.active_tab = "sell"
         # Add items to warrior inventory
