@@ -38,21 +38,7 @@ Added comprehensive Windows version information including:
 - Right-click → Properties shows professional metadata
 - Reduces heuristic-based AV flags
 
-### 3. Directory-Based Distribution (`--onedir`)
-
-Switched from `--onefile` to `--onedir` mode:
-- **Before**: Single self-extracting EXE that unpacks to temp directory at runtime
-- **After**: Directory with main EXE and supporting DLL files
-
-**Benefits**:
-- Eliminates self-extraction behavior that mimics malware
-- Faster startup time (no extraction needed)
-- Easier for AV software to scan all components
-- More transparent file structure
-
-**Trade-off**: Users must extract a ZIP file instead of downloading a single EXE
-
-### 4. Disabled UPX Compression (`upx=False`)
+### 3. Disabled UPX Compression (`upx=False`)
 
 Explicitly disabled UPX compression in the `.spec` file.
 
@@ -63,24 +49,36 @@ Explicitly disabled UPX compression in the `.spec` file.
 
 **Trade-off**: Slightly larger file size (negligible for modern systems)
 
+### 4. Enabled Console Output (`console=True`)
+
+Enabled console window to show error messages during debugging.
+
+**Benefits**:
+- Users can see startup errors and diagnostic information
+- Makes troubleshooting much easier
+- Helps identify if the executable is working correctly
+
+**Trade-off**: Console window appears alongside the game window (can be disabled later with `console=False`)
+
 ### 5. Updated Release Process
 
 Modified `.github/workflows/release.yml` to:
-- Build using the `.spec` file
-- Package output directory as `CaisleanGaofar-Windows.zip`
+- Build using the `.spec` file with `--onefile` mode
+- Produce a single executable file
 - Include transparent release notes explaining AV mitigation steps
 
 ## Results
 
-These changes should **significantly reduce** but may not **completely eliminate** false positives because:
+These changes should **reduce** but may not **completely eliminate** false positives because:
 
 ✅ **Addressed**:
-- Self-extraction behavior
-- Missing metadata
-- UPX compression flags
-- Opaque build process
+- Missing metadata (added Windows version info)
+- UPX compression flags (explicitly disabled)
+- Opaque build process (using documented .spec file)
+- Silent failures (console output enabled for debugging)
 
-⚠️ **Not addressed** (require external resources):
+⚠️ **Not addressed** (require external resources or different approaches):
+- Self-extraction behavior (still using --onefile mode for convenience)
 - Code signing (requires certificate purchase ~$100-400/year)
 - Microsoft SmartScreen reputation building
 - Submission to Microsoft Defender for analysis
