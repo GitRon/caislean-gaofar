@@ -34,11 +34,6 @@ omit = [
     "main.py",
     ".venv/*",
     "venv/*",
-    # UI/Rendering code excluded from 100% requirement
-    "src/caislean_gaofar/core/game.py",
-    "src/caislean_gaofar/ui/inventory_ui.py",
-    "src/caislean_gaofar/ui/shop_ui.py",
-    "src/caislean_gaofar/ui/main_menu.py",
 ]
 
 [tool.coverage.report]

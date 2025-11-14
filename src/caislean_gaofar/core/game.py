@@ -167,6 +167,15 @@ class Game:
             inventory_game_ref=self,
         )
 
+        # Handle skill UI input separately (skills screen)
+        for event in pygame.event.get():
+            if self.state_manager.state == config.STATE_SKILLS:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left click - learn skill
+                        self.skill_ui.handle_click(event.pos, self.warrior, False)
+                    elif event.button == 3:  # Right click - set active
+                        self.skill_ui.handle_click(event.pos, self.warrior, True)
+
     def restart(self):
         """Restart the game."""
         # Close any active portals
