@@ -290,9 +290,7 @@ def test_run_with_new_game_selection(main_menu):
         "caislean_gaofar.ui.main_menu.SaveGame.list_save_files", return_value=[]
     ):
         # First call returns enter, second call returns empty to allow loop to exit
-        with patch(
-            "pygame.event.get", side_effect=[[enter_event], []]
-        ):
+        with patch("pygame.event.get", side_effect=[[enter_event], []]):
             result = main_menu.run()
 
             assert result == ("new", None)
@@ -326,7 +324,8 @@ def test_run_with_load_game_selection(main_menu):
         "caislean_gaofar.ui.main_menu.SaveGame.list_save_files", return_value=mock_saves
     ):
         with patch(
-            "caislean_gaofar.ui.main_menu.SaveGame.load_game", return_value=mock_save_data
+            "caislean_gaofar.ui.main_menu.SaveGame.load_game",
+            return_value=mock_save_data,
         ):
             with patch(
                 "pygame.event.get", side_effect=[[down_event], [enter_event], []]
@@ -342,9 +341,7 @@ def test_select_load_game_with_failed_load(main_menu):
     main_menu.save_files = [{"filename": "corrupt_save"}]
     main_menu.selected_option = 1
 
-    with patch(
-        "caislean_gaofar.ui.main_menu.SaveGame.load_game", return_value=None
-    ):
+    with patch("caislean_gaofar.ui.main_menu.SaveGame.load_game", return_value=None):
         main_menu.select_option()
 
         # Should not change result or stop running since load failed
@@ -357,9 +354,7 @@ def test_select_load_game_with_false_save_data(main_menu):
     main_menu.save_files = [{"filename": "bad_save"}]
     main_menu.selected_option = 1
 
-    with patch(
-        "caislean_gaofar.ui.main_menu.SaveGame.load_game", return_value=False
-    ):
+    with patch("caislean_gaofar.ui.main_menu.SaveGame.load_game", return_value=False):
         main_menu.select_option()
 
         # Should not change result or stop running since load failed
@@ -448,9 +443,7 @@ def test_draw_with_multiple_save_files(main_menu):
 
 def test_draw_with_malformed_timestamp(main_menu):
     """Test drawing with malformed timestamp in save file."""
-    main_menu.save_files = [
-        {"filename": "save1", "timestamp": "InvalidTimestamp"}
-    ]
+    main_menu.save_files = [{"filename": "save1", "timestamp": "InvalidTimestamp"}]
     main_menu.selected_option = 0
 
     try:
@@ -462,9 +455,7 @@ def test_draw_with_malformed_timestamp(main_menu):
 
 def test_draw_with_timestamp_without_time_part(main_menu):
     """Test drawing with timestamp that has no time component."""
-    main_menu.save_files = [
-        {"filename": "save1", "timestamp": "2024-01-01"}
-    ]
+    main_menu.save_files = [{"filename": "save1", "timestamp": "2024-01-01"}]
     main_menu.selected_option = 1
 
     try:

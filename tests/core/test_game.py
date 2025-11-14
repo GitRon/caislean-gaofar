@@ -524,9 +524,7 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    def test_handle_use_potion_no_potions(
-        self, mock_caption, mock_clock, mock_display
-    ):
+    def test_handle_use_potion_no_potions(self, mock_caption, mock_clock, mock_display):
         """Test using a health potion when none available"""
         # Arrange
         game = Game()
@@ -905,12 +903,8 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
-    @patch(
-        "caislean_gaofar.systems.save_game.SaveGame.save_game", return_value=False
-    )
-    def test_save_game_failure(
-        self, mock_save, mock_caption, mock_clock, mock_display
-    ):
+    @patch("caislean_gaofar.systems.save_game.SaveGame.save_game", return_value=False)
+    def test_save_game_failure(self, mock_save, mock_caption, mock_clock, mock_display):
         """Test save game failure"""
         # Arrange
         game = Game()
@@ -1249,13 +1243,9 @@ class TestGame:
         game = Game()
 
         # Mock check_for_exit to return True
-        with patch.object(
-            game.dungeon_manager, "check_for_exit", return_value=True
-        ):
+        with patch.object(game.dungeon_manager, "check_for_exit", return_value=True):
             # Mock exit_dungeon to return None
-            with patch.object(
-                game.dungeon_manager, "exit_dungeon", return_value=None
-            ):
+            with patch.object(game.dungeon_manager, "exit_dungeon", return_value=None):
                 # Act
                 game._check_dungeon_transition()
 
@@ -1382,16 +1372,16 @@ class TestGame:
         """Test run() method executes the game loop (lines 608-612)"""
         # Arrange
         game = Game()
-        
+
         # Mock clock tick
         mock_clock_instance = MagicMock()
         mock_clock.return_value = mock_clock_instance
         mock_clock_instance.tick.return_value = 16  # 60 FPS = 16ms per frame
-        
+
         # Track number of loop iterations
         iteration_count = [0]
         original_handle_events = game.handle_events
-        
+
         def mock_handle_events():
             iteration_count[0] += 1
             if iteration_count[0] >= 2:
@@ -1399,14 +1389,14 @@ class TestGame:
                 game.event_dispatcher.running = False
             # Call original (which is also mocked)
             pass
-        
-        with patch.object(game, 'handle_events', side_effect=mock_handle_events):
-            with patch.object(game, 'update'):
-                with patch.object(game, 'draw'):
-                    with patch('pygame.quit'):
+
+        with patch.object(game, "handle_events", side_effect=mock_handle_events):
+            with patch.object(game, "update"):
+                with patch.object(game, "draw"):
+                    with patch("pygame.quit"):
                         # Act
                         game.run()
-                        
+
                         # Assert - loop executed at least twice
                         assert iteration_count[0] == 2
 
@@ -1419,31 +1409,41 @@ class TestGame:
         """Test dungeon entry when no matching dungeon name is found (branch 327->exit)"""
         # Arrange
         game = Game()
-        
+
         # Mock dungeon_manager to simulate entering a dungeon
-        with patch.object(game.dungeon_manager, 'check_for_exit', return_value=False):
+        with patch.object(game.dungeon_manager, "check_for_exit", return_value=False):
             with patch.object(
-                game.dungeon_manager, 'get_dungeon_at_position', return_value='unknown_dungeon_id'
+                game.dungeon_manager,
+                "get_dungeon_at_position",
+                return_value="unknown_dungeon_id",
             ):
                 with patch.object(
-                    game.dungeon_manager, 'enter_dungeon', return_value=(5, 5)
+                    game.dungeon_manager, "enter_dungeon", return_value=(5, 5)
                 ):
                     # Mock entity spawning to avoid KeyError
-                    with patch.object(game.entity_manager, 'spawn_monsters'):
-                        with patch.object(game.entity_manager, 'spawn_chests'):
-                            with patch.object(game.entity_manager, 'clear_ground_items'):
+                    with patch.object(game.entity_manager, "spawn_monsters"):
+                        with patch.object(game.entity_manager, "spawn_chests"):
+                            with patch.object(
+                                game.entity_manager, "clear_ground_items"
+                            ):
                                 # Mock world_map.get_entity_spawns to return spawns that don't match
                                 with patch.object(
                                     game.dungeon_manager.world_map,
-                                    'get_entity_spawns',
+                                    "get_entity_spawns",
                                     return_value=[
-                                        {"id": "different_dungeon_1", "name": "Different Dungeon 1"},
-                                        {"id": "different_dungeon_2", "name": "Different Dungeon 2"},
-                                    ]
+                                        {
+                                            "id": "different_dungeon_1",
+                                            "name": "Different Dungeon 1",
+                                        },
+                                        {
+                                            "id": "different_dungeon_2",
+                                            "name": "Different Dungeon 2",
+                                        },
+                                    ],
                                 ):
                                     # Act
                                     game._check_dungeon_transition()
-                                    
+
                                     # Assert - should complete without error (loop exits without break)
                                     # The message won't be shown since no match was found
                                     assert game.warrior.grid_x == 5
@@ -1457,12 +1457,12 @@ class TestGame:
         # Arrange
         game = Game()
         game.state_manager.state = config.STATE_GAME_OVER
-        
+
         # Mock the renderer
-        with patch.object(game.renderer, 'draw_game_over_state') as mock_draw_game_over:
+        with patch.object(game.renderer, "draw_game_over_state") as mock_draw_game_over:
             # Act
             game.draw()
-            
+
             # Assert
             mock_draw_game_over.assert_called_once_with("GAME OVER!", config.RED)
 
@@ -1474,9 +1474,9 @@ class TestGame:
         # Arrange
         game = Game()
         game.state_manager.state = 999  # Unknown state
-        
+
         # Act
         game.draw()
-        
+
         # Assert - should complete without error (no elif matches, just exits)
         # This tests the exit path when no state matches

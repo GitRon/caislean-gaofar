@@ -788,7 +788,13 @@ class TestShopUIEdgeCases:
         """Test drawing item with both attack and defense bonuses in sell tab"""
         shop_ui.active_tab = "sell"
         # Add item with both bonuses
-        item = Item("Plate Armor", ItemType.ARMOR, attack_bonus=3, defense_bonus=5, gold_value=200)
+        item = Item(
+            "Plate Armor",
+            ItemType.ARMOR,
+            attack_bonus=3,
+            defense_bonus=5,
+            gold_value=200,
+        )
         warrior.inventory.add_item(item)
         shop_ui.draw(mock_screen, shop, warrior)
         # Test passes if no exceptions are raised

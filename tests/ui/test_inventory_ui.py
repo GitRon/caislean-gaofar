@@ -133,9 +133,7 @@ class TestInventoryUIDrawing:
         # Test passes if no exceptions are raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_item_with_both_bonuses(
-        self, mock_get_pos, inventory_ui, mock_screen
-    ):
+    def test_draw_item_with_both_bonuses(self, mock_get_pos, inventory_ui, mock_screen):
         """Test drawing item with both attack and defense bonuses"""
         inventory = Inventory()
         inventory.backpack_slots[0] = Item(
@@ -264,9 +262,7 @@ class TestInventoryUITooltip:
         # Tooltip should not be shown when dragging
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_no_tooltip_on_empty_slot(
-        self, mock_get_pos, inventory_ui, mock_screen
-    ):
+    def test_no_tooltip_on_empty_slot(self, mock_get_pos, inventory_ui, mock_screen):
         """Test no tooltip on empty slot"""
         inventory = Inventory()
         inventory_ui.draw(mock_screen, inventory)
@@ -307,7 +303,12 @@ class TestInventoryUIContextMenu:
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
     @patch("pygame.mouse.get_pressed", return_value=(False, False, False))
     def test_draw_context_menu_equipped_item(
-        self, mock_pressed, mock_get_pos, inventory_ui, mock_screen, inventory_with_items
+        self,
+        mock_pressed,
+        mock_get_pos,
+        inventory_ui,
+        mock_screen,
+        inventory_with_items,
     ):
         """Test drawing context menu for equipped item"""
         inventory_ui.context_menu_slot = ("weapon", 0)
@@ -318,7 +319,12 @@ class TestInventoryUIContextMenu:
     @patch("pygame.mouse.get_pos", return_value=(750, 550))
     @patch("pygame.mouse.get_pressed", return_value=(False, False, False))
     def test_draw_context_menu_near_edge(
-        self, mock_pressed, mock_get_pos, inventory_ui, mock_screen, inventory_with_items
+        self,
+        mock_pressed,
+        mock_get_pos,
+        inventory_ui,
+        mock_screen,
+        inventory_with_items,
     ):
         """Test context menu positioning near screen edge"""
         inventory_ui.context_menu_slot = ("weapon", 0)
@@ -1153,7 +1159,12 @@ class TestInventoryUIHelperMethods:
     @patch("pygame.mouse.get_pos", return_value=(750, 300))
     @patch("pygame.mouse.get_pressed", return_value=(False, False, False))
     def test_draw_context_menu_near_right_edge(
-        self, mock_pressed, mock_get_pos, inventory_ui, mock_screen, inventory_with_items
+        self,
+        mock_pressed,
+        mock_get_pos,
+        inventory_ui,
+        mock_screen,
+        inventory_with_items,
     ):
         """Test context menu positioning near right edge"""
         inventory_ui.context_menu_slot = ("weapon", 0)
@@ -1164,7 +1175,12 @@ class TestInventoryUIHelperMethods:
     @patch("pygame.mouse.get_pos", return_value=(400, 550))
     @patch("pygame.mouse.get_pressed", return_value=(False, False, False))
     def test_draw_context_menu_near_bottom_edge(
-        self, mock_pressed, mock_get_pos, inventory_ui, mock_screen, inventory_with_items
+        self,
+        mock_pressed,
+        mock_get_pos,
+        inventory_ui,
+        mock_screen,
+        inventory_with_items,
     ):
         """Test context menu positioning near bottom edge"""
         inventory_ui.context_menu_slot = ("weapon", 0)
@@ -1254,8 +1270,9 @@ class TestInventoryUIHelperMethods:
         inventory_ui.context_menu_pos = (400, 300)
 
         # Call _draw_context_menu directly
-        with patch("pygame.mouse.get_pos", return_value=(400, 300)), patch(
-            "pygame.mouse.get_pressed", return_value=(False, False, False)
+        with (
+            patch("pygame.mouse.get_pos", return_value=(400, 300)),
+            patch("pygame.mouse.get_pressed", return_value=(False, False, False)),
         ):
             inventory_ui._draw_context_menu(mock_screen, inventory)
 
@@ -1285,8 +1302,9 @@ class TestInventoryUIHelperMethods:
         inventory_ui.context_menu_pos = (400, 300)
 
         # Call _draw_context_menu directly - should clear context menu
-        with patch("pygame.mouse.get_pos", return_value=(400, 300)), patch(
-            "pygame.mouse.get_pressed", return_value=(False, False, False)
+        with (
+            patch("pygame.mouse.get_pos", return_value=(400, 300)),
+            patch("pygame.mouse.get_pressed", return_value=(False, False, False)),
         ):
             inventory_ui._draw_context_menu(mock_screen, inventory)
             assert inventory_ui.context_menu_slot is None
@@ -1504,7 +1522,7 @@ class TestInventoryUIHelperMethods:
                 return False
             return original_place(inv, item, slot_type, slot_index)
 
-        with patch.object(inventory_ui, '_place_item_in_slot', side_effect=mock_place):
+        with patch.object(inventory_ui, "_place_item_in_slot", side_effect=mock_place):
             # Try to move weapon2 to weapon slot - placement will fail
             inventory_ui._move_item(inventory, ("backpack", 0), ("weapon", 0))
 
@@ -1588,9 +1606,7 @@ class TestInventoryUIHelperMethods:
         """Test tooltip with item that has attack_bonus > 0 but no defense_bonus"""
         inventory = Inventory()
         # Create weapon with only attack bonus
-        inventory.weapon_slot = Item(
-            "Simple Sword", ItemType.WEAPON, attack_bonus=8
-        )
+        inventory.weapon_slot = Item("Simple Sword", ItemType.WEAPON, attack_bonus=8)
 
         inventory_ui.hovered_slot = ("weapon", 0)
         inventory_ui.draw(mock_screen, inventory)
@@ -1603,9 +1619,7 @@ class TestInventoryUIHelperMethods:
         """Test tooltip with item that has defense_bonus > 0 but no attack_bonus"""
         inventory = Inventory()
         # Create armor with only defense bonus
-        inventory.armor_slot = Item(
-            "Simple Shield", ItemType.ARMOR, defense_bonus=6
-        )
+        inventory.armor_slot = Item("Simple Shield", ItemType.ARMOR, defense_bonus=6)
 
         inventory_ui.hovered_slot = ("armor", 0)
         inventory_ui.draw(mock_screen, inventory)
@@ -1692,7 +1706,7 @@ class TestInventoryUIHelperMethods:
             # Subsequent calls (restoration) succeed
             return original_place(inv, item, slot_type, slot_index)
 
-        with patch.object(inventory_ui, '_place_item_in_slot', side_effect=mock_place):
+        with patch.object(inventory_ui, "_place_item_in_slot", side_effect=mock_place):
             # Try to move weapon to empty backpack slot - placement will fail
             inventory_ui._move_item(inventory, ("backpack", 0), ("backpack", 1))
 
@@ -1701,9 +1715,7 @@ class TestInventoryUIHelperMethods:
         assert inventory.backpack_slots[1] is None
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_tooltip_with_all_branches(
-        self, mock_get_pos, inventory_ui, mock_screen
-    ):
+    def test_tooltip_with_all_branches(self, mock_get_pos, inventory_ui, mock_screen):
         """Test tooltip branches 511->514, 514->516, 516->520 with specific combinations"""
         inventory = Inventory()
 
@@ -1713,7 +1725,7 @@ class TestInventoryUIHelperMethods:
             ItemType.WEAPON,
             attack_bonus=10,
             defense_bonus=5,
-            description="Has everything"
+            description="Has everything",
         )
         inventory_ui.hovered_slot = ("weapon", 0)
         inventory_ui.draw(mock_screen, inventory)
@@ -1724,25 +1736,20 @@ class TestInventoryUIHelperMethods:
             ItemType.ARMOR,
             attack_bonus=0,
             defense_bonus=5,
-            description="Only defense"
+            description="Only defense",
         )
         inventory_ui.hovered_slot = ("armor", 0)
         inventory_ui.draw(mock_screen, inventory)
 
         # Test 3: Item with attack but no defense (branch 514->515, then 516->exit)
         inventory.backpack_slots[0] = Item(
-            "Dagger",
-            ItemType.WEAPON,
-            attack_bonus=3,
-            defense_bonus=0
+            "Dagger", ItemType.WEAPON, attack_bonus=3, defense_bonus=0
         )
         inventory_ui.hovered_slot = ("backpack", 0)
         inventory_ui.draw(mock_screen, inventory)
 
     @patch("pygame.mouse.get_pos", return_value=(795, 300))
-    def test_tooltip_edge_case_right(
-        self, mock_get_pos, inventory_ui, mock_screen
-    ):
+    def test_tooltip_edge_case_right(self, mock_get_pos, inventory_ui, mock_screen):
         """Test tooltip repositioning right edge (line 534) with precise positioning"""
         inventory = Inventory()
         # Item with very long description to make tooltip wide
@@ -1751,7 +1758,7 @@ class TestInventoryUIHelperMethods:
             ItemType.WEAPON,
             attack_bonus=50,
             defense_bonus=30,
-            description="This is an extremely long description that will make the tooltip very wide and ensure it goes off the right edge of the screen when positioned normally"
+            description="This is an extremely long description that will make the tooltip very wide and ensure it goes off the right edge of the screen when positioned normally",
         )
 
         inventory_ui.hovered_slot = ("weapon", 0)
@@ -1759,9 +1766,7 @@ class TestInventoryUIHelperMethods:
         inventory_ui.draw(mock_screen, inventory)
 
     @patch("pygame.mouse.get_pos", return_value=(400, 595))
-    def test_tooltip_edge_case_bottom(
-        self, mock_get_pos, inventory_ui, mock_screen
-    ):
+    def test_tooltip_edge_case_bottom(self, mock_get_pos, inventory_ui, mock_screen):
         """Test tooltip repositioning bottom edge (line 536) with precise positioning"""
         inventory = Inventory()
         # Item with description and bonuses to make tooltip tall
@@ -1770,7 +1775,7 @@ class TestInventoryUIHelperMethods:
             ItemType.WEAPON,
             attack_bonus=25,
             defense_bonus=20,
-            description="Line 1 - Making this tooltip tall enough"
+            description="Line 1 - Making this tooltip tall enough",
         )
 
         inventory_ui.hovered_slot = ("weapon", 0)
@@ -1787,7 +1792,7 @@ class TestInventoryUIHelperMethods:
             "Test Sword",
             ItemType.WEAPON,
             attack_bonus=10,
-            description="Test description"
+            description="Test description",
         )
 
         # Set up the condition: hovered_slot is set, dragging_item is None
@@ -1816,10 +1821,7 @@ class TestInventoryUIHelperMethods:
         inventory = Inventory()
         # Item with NO description - should skip line 512 and go to 514
         inventory.weapon_slot = Item(
-            "Plain Sword",
-            ItemType.WEAPON,
-            attack_bonus=5,
-            defense_bonus=3
+            "Plain Sword", ItemType.WEAPON, attack_bonus=5, defense_bonus=3
         )
 
         inventory_ui.hovered_slot = ("weapon", 0)
@@ -1834,7 +1836,7 @@ class TestInventoryUIHelperMethods:
             ItemType.ARMOR,
             attack_bonus=0,
             defense_bonus=8,
-            description="Only defense"
+            description="Only defense",
         )
 
         inventory_ui.hovered_slot = ("armor", 0)
@@ -1849,7 +1851,7 @@ class TestInventoryUIHelperMethods:
             ItemType.WEAPON,
             attack_bonus=12,
             defense_bonus=0,
-            description="Only attack"
+            description="Only attack",
         )
 
         inventory_ui.hovered_slot = ("weapon", 0)
@@ -1864,7 +1866,7 @@ class TestInventoryUIHelperMethods:
             ItemType.MISC,
             attack_bonus=0,
             defense_bonus=0,
-            description=""  # Empty string
+            description="",  # Empty string
         )
 
         inventory_ui.hovered_slot = ("backpack", 0)
@@ -1884,7 +1886,7 @@ class TestInventoryUIHelperMethods:
             ("weapon", 0),
             is_equipped=False,
             is_selected=False,
-            is_hovered=True
+            is_hovered=True,
         )
         # Should use hover_color at lines 207-208
 
@@ -1898,7 +1900,7 @@ class TestInventoryUIHelperMethods:
             ItemType.WEAPON,
             attack_bonus=50,
             defense_bonus=40,
-            description=long_desc
+            description=long_desc,
         )
 
         inventory_ui.hovered_slot = ("weapon", 0)
@@ -1914,7 +1916,7 @@ class TestInventoryUIHelperMethods:
             ItemType.WEAPON,
             attack_bonus=50,
             defense_bonus=40,
-            description="Description line"
+            description="Description line",
         )
 
         inventory_ui.hovered_slot = ("weapon", 0)
@@ -1963,8 +1965,10 @@ class TestInventoryUIHelperMethods:
         inspect_pos = (400, 345)  # Middle of second option
 
         # Mock mouse hovering over Inspect option and clicking
-        with patch("pygame.mouse.get_pos", return_value=inspect_pos), \
-             patch("pygame.mouse.get_pressed", return_value=(True, False, False)):
+        with (
+            patch("pygame.mouse.get_pos", return_value=inspect_pos),
+            patch("pygame.mouse.get_pressed", return_value=(True, False, False)),
+        ):
             inventory_ui.draw(mock_screen, inventory)
 
         # Verify Inspect was executed (context menu should be closed and slot selected)
@@ -1976,10 +1980,7 @@ class TestInventoryUIHelperMethods:
         # Arrange
         inventory = Inventory()
         inventory.weapon_slot = Item(
-            "Test Sword",
-            ItemType.WEAPON,
-            attack_bonus=10,
-            description="A test sword"
+            "Test Sword", ItemType.WEAPON, attack_bonus=10, description="A test sword"
         )
 
         # Ensure we're not dragging
@@ -1991,7 +1992,9 @@ class TestInventoryUIHelperMethods:
 
         # Mock _draw_tooltip to track if it's called
         with patch.object(inventory_ui, "_draw_tooltip") as mock_tooltip:
-            with patch.object(inventory_ui, "_update_hovered_slot", side_effect=mock_update_hovered):
+            with patch.object(
+                inventory_ui, "_update_hovered_slot", side_effect=mock_update_hovered
+            ):
                 with patch("pygame.mouse.get_pos", return_value=(400, 300)):
                     # Act - this should trigger line 96: self._draw_tooltip(screen, inventory, mouse_pos)
                     inventory_ui.draw(mock_screen, inventory)
