@@ -1037,7 +1037,9 @@ class TestGame:
         """Test main game loop runs"""
         # Arrange
         game = Game()
-        game.event_dispatcher.running = False  # Stop immediately
+        # Stop both event_dispatcher and game_loop immediately
+        game.event_dispatcher.running = False
+        game.game_loop.stop()
 
         # Act
         game.run()
