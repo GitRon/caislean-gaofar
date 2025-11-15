@@ -96,9 +96,7 @@ class HUDRenderer:
         for corner in corners:
             pygame.draw.circle(surface, self.ornate_gold, corner, corner_radius)
 
-    def _draw_health_panel(
-        self, screen: pygame.Surface, warrior, state: HUDState
-    ):
+    def _draw_health_panel(self, screen: pygame.Surface, warrior, state: HUDState):
         """
         Draw the health panel with visual and numerical display.
 
@@ -175,9 +173,7 @@ class HUDRenderer:
         screen.blit(shadow_text, shadow_rect)
         screen.blit(health_text, text_rect)
 
-    def _draw_potion_panel(
-        self, screen: pygame.Surface, warrior, state: HUDState
-    ):
+    def _draw_potion_panel(self, screen: pygame.Surface, warrior, state: HUDState):
         """
         Draw the health potion panel with count and visual feedback.
 
@@ -205,7 +201,9 @@ class HUDRenderer:
         # Apply glow effect if potion was just used
         if state.is_potion_glowing():
             # Pulsing glow effect
-            glow_alpha = int(128 * (state.potion_glow_timer / state.potion_glow_duration))
+            glow_alpha = int(
+                128 * (state.potion_glow_timer / state.potion_glow_duration)
+            )
             glow_surface = pygame.Surface((icon_size + 10, icon_size + 10))
             glow_surface.set_alpha(glow_alpha)
             pygame.draw.circle(
@@ -642,9 +640,7 @@ class HUDRenderer:
         hint_text = font_hint.render("Press C", True, config.GRAY)
         screen.blit(hint_text, (panel_x + 60, panel_y + 33))
 
-    def _draw_critical_health_warning(
-        self, screen: pygame.Surface, state: HUDState
-    ):
+    def _draw_critical_health_warning(self, screen: pygame.Surface, state: HUDState):
         """
         Draw a visual warning when health is critically low.
 

@@ -109,7 +109,9 @@ class InventoryUI:
         return self.input_handler._move_item(inventory, from_slot, to_slot)
 
     def _place_item_in_slot(self, inventory, item, slot_type, slot_index):
-        return self.input_handler._place_item_in_slot(inventory, item, slot_type, slot_index)
+        return self.input_handler._place_item_in_slot(
+            inventory, item, slot_type, slot_index
+        )
 
     def _execute_context_menu_action(self, action, inventory):
         return self.input_handler._execute_context_menu_action(action, inventory)
@@ -137,9 +139,31 @@ class InventoryUI:
             mouse_pos = pygame.mouse.get_pos()
         return self.renderer._draw_dragged_item(screen, self.state, mouse_pos)
 
-    def _draw_slot(self, screen, x, y, label, item, slot_id, is_equipped=False, is_selected=False, is_hovered=False):
+    def _draw_slot(
+        self,
+        screen,
+        x,
+        y,
+        label,
+        item,
+        slot_id,
+        is_equipped=False,
+        is_selected=False,
+        is_hovered=False,
+    ):
         # Use self.state as the state parameter
-        return self.renderer._draw_slot(screen, x, y, label, item, slot_id, self.state, is_equipped, is_selected, is_hovered)
+        return self.renderer._draw_slot(
+            screen,
+            x,
+            y,
+            label,
+            item,
+            slot_id,
+            self.state,
+            is_equipped,
+            is_selected,
+            is_hovered,
+        )
 
     def draw(self, screen: pygame.Surface, inventory: Inventory):
         """

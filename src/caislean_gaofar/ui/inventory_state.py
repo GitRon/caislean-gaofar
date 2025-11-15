@@ -1,7 +1,6 @@
 """State management for inventory UI."""
 
 from typing import Optional, Tuple
-import pygame
 
 
 class InventoryState:

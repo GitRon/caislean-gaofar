@@ -1,7 +1,7 @@
 """Input handling for inventory UI."""
 
 import pygame
-from typing import Tuple, Optional
+from typing import Tuple
 from caislean_gaofar.systems.inventory import Inventory
 from caislean_gaofar.ui.inventory_state import InventoryState
 from caislean_gaofar.ui.inventory_renderer import InventoryRenderer
@@ -165,10 +165,7 @@ class InventoryInputHandler:
 
         # Equip item from backpack
         if event.key == pygame.K_e:
-            if (
-                self.state.selected_slot
-                and self.state.selected_slot[0] == "backpack"
-            ):
+            if self.state.selected_slot and self.state.selected_slot[0] == "backpack":
                 inventory.equip_from_backpack(self.state.selected_slot[1])
                 return True
 

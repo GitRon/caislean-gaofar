@@ -1,6 +1,6 @@
 """State management for shop UI."""
 
-from typing import Optional, Tuple
+from typing import Optional
 import pygame
 from caislean_gaofar.core import config
 
@@ -26,7 +26,9 @@ class ShopState:
         self.sell_tab_rect: Optional[pygame.Rect] = None
 
         # Confirmation dialog state
-        self.confirmation_dialog: Optional[dict] = None  # {"message": str, "callback": function}
+        self.confirmation_dialog: Optional[dict] = (
+            None  # {"message": str, "callback": function}
+        )
 
         # Message state
         self.message = ""
@@ -53,7 +55,9 @@ class ShopState:
         """Clear item rectangles for a new frame."""
         self.item_rects = []
 
-    def update_scroll(self, delta: int, num_items: int, list_height: int, item_height: int):
+    def update_scroll(
+        self, delta: int, num_items: int, list_height: int, item_height: int
+    ):
         """
         Update scroll offset.
 

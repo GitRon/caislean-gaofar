@@ -237,7 +237,13 @@ class ShopRenderer:
 
         # Draw scrollbar if needed
         self._draw_scrollbar(
-            screen, panel_x, list_y, list_height, len(available_items), item_height, state
+            screen,
+            panel_x,
+            list_y,
+            list_height,
+            len(available_items),
+            item_height,
+            state,
         )
 
     def _draw_sell_list(

@@ -151,7 +151,9 @@ class ShopUI:
         return self.renderer._wrap_text(text, max_width)
 
     def _draw_item_info(self, screen, item_rect, item, player_gold, shop_item=None):
-        return self.renderer._draw_item_info(screen, item_rect, item, player_gold, shop_item)
+        return self.renderer._draw_item_info(
+            screen, item_rect, item, player_gold, shop_item
+        )
 
     # Delegate methods to state for backward compatibility
     def _show_message(self, message, color=None):
