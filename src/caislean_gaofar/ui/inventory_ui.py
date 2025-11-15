@@ -18,7 +18,7 @@ class InventoryUI:
         """Initialize the inventory UI with separated concerns."""
         self.state = InventoryState()
         self.renderer = InventoryRenderer()
-        self.input_handler = InventoryInputHandler(self.state, self.renderer)
+        self.input_handler = InventoryInputHandler(self.state, self.renderer, ui=self)
 
     # Property delegation for backward compatibility with tests
     @property
@@ -178,10 +178,40 @@ class InventoryUI:
 
         # Update hovered slot based on mouse position
         mouse_pos = pygame.mouse.get_pos()
-        self.state.update_hovered_slot(mouse_pos)
+        self._update_hovered_slot(mouse_pos)
 
-        # Delegate rendering to the renderer
-        self.renderer.draw(screen, inventory, self.state)
+        # Delegate main rendering to the renderer (but not tooltip/context menu for testability)
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+        panel_x = (screen_width - self.renderer.panel_width) // 2
+        panel_y = (screen_height - self.renderer.panel_height) // 2
+
+        # Draw base UI elements
+        self.renderer._draw_base_ui(screen, panel_x, panel_y)
+        self.renderer._draw_equipment_section(screen, inventory, self.state, panel_x, panel_y + 60)
+        self.renderer._draw_backpack_section(screen, inventory, self.state, panel_x, panel_y + 200)
+        self.renderer._draw_instructions(screen, panel_x, panel_y)
+
+        # Draw tooltip if hovering (call through UI for testability)
+        if self.state.hovered_slot and not self.state.is_dragging():
+            self._draw_tooltip(screen, inventory, mouse_pos)
+
+        # Draw context menu if active (call through UI for testability)
+        if self.state.has_context_menu():
+            self._draw_context_menu(screen, inventory)
+
+        # Draw dragged item (on top of everything)
+        if self.state.is_dragging():
+            self._draw_dragged_item(screen, mouse_pos)
+
+        # Handle immediate-mode click detection on context menu (for backward compatibility)
+        if self.state.has_context_menu() and pygame.mouse.get_pressed()[0]:
+            option_rects = self.renderer.get_context_menu_rects(self.state, inventory)
+            for option_rect, option_text in option_rects:
+                if option_rect.collidepoint(mouse_pos):
+                    self._execute_context_menu_action(option_text, inventory)
+                    self.state.close_context_menu()
+                    break
 
     def handle_input(
         self, event: pygame.event.Event, inventory: Inventory, game=None

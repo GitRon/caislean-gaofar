@@ -48,23 +48,8 @@ class InventoryRenderer:
         panel_x = (screen_width - self.panel_width) // 2
         panel_y = (screen_height - self.panel_height) // 2
 
-        # Draw semi-transparent background
-        overlay = pygame.Surface((self.panel_width, self.panel_height), pygame.SRCALPHA)
-        overlay.fill(self.bg_color)
-        screen.blit(overlay, (panel_x, panel_y))
-
-        # Draw border
-        pygame.draw.rect(
-            screen,
-            self.slot_border_color,
-            (panel_x, panel_y, self.panel_width, self.panel_height),
-            2,
-        )
-
-        # Draw title
-        title_text = self.title_font.render("INVENTORY", True, self.text_color)
-        title_x = panel_x + (self.panel_width - title_text.get_width()) // 2
-        screen.blit(title_text, (title_x, panel_y + 10))
+        # Draw base UI
+        self._draw_base_ui(screen, panel_x, panel_y)
 
         # Starting position for slots
         current_y = panel_y + 60
@@ -91,6 +76,26 @@ class InventoryRenderer:
         # Draw dragged item (on top of everything)
         if state.is_dragging():
             self._draw_dragged_item(screen, state, mouse_pos)
+
+    def _draw_base_ui(self, screen: pygame.Surface, panel_x: int, panel_y: int):
+        """Draw the base UI elements (background, border, title)."""
+        # Draw semi-transparent background
+        overlay = pygame.Surface((self.panel_width, self.panel_height), pygame.SRCALPHA)
+        overlay.fill(self.bg_color)
+        screen.blit(overlay, (panel_x, panel_y))
+
+        # Draw border
+        pygame.draw.rect(
+            screen,
+            self.slot_border_color,
+            (panel_x, panel_y, self.panel_width, self.panel_height),
+            2,
+        )
+
+        # Draw title
+        title_text = self.title_font.render("INVENTORY", True, self.text_color)
+        title_x = panel_x + (self.panel_width - title_text.get_width()) // 2
+        screen.blit(title_text, (title_x, panel_y + 10))
 
     def _draw_equipment_section(
         self,

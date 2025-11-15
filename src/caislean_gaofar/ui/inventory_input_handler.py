@@ -10,16 +10,18 @@ from caislean_gaofar.ui.inventory_renderer import InventoryRenderer
 class InventoryInputHandler:
     """Handles input events for the inventory UI."""
 
-    def __init__(self, state: InventoryState, renderer: InventoryRenderer):
+    def __init__(self, state: InventoryState, renderer: InventoryRenderer, ui=None):
         """
         Initialize the input handler.
 
         Args:
             state: The inventory state manager
             renderer: The inventory renderer
+            ui: Optional reference to parent UI (for testability)
         """
         self.state = state
         self.renderer = renderer
+        self.ui = ui
 
     def handle_input(
         self, event: pygame.event.Event, inventory: Inventory, game=None
@@ -210,17 +212,20 @@ class InventoryInputHandler:
         if from_item is None:
             return  # Nothing to move
 
+        # Use UI's _place_item_in_slot if available (for testability), otherwise use our own
+        place_func = self.ui._place_item_in_slot if self.ui else self._place_item_in_slot
+
         # Try to place from_item in to_slot
-        success = self._place_item_in_slot(inventory, from_item, to_type, to_index)
+        success = place_func(inventory, from_item, to_type, to_index)
 
         # If successful and there was an item in to_slot, move it to from_slot
         if success and to_item:
-            self._place_item_in_slot(inventory, to_item, from_type, from_index)
+            place_func(inventory, to_item, from_type, from_index)
         elif not success:
             # Couldn't place item, put it back
-            self._place_item_in_slot(inventory, from_item, from_type, from_index)
+            place_func(inventory, from_item, from_type, from_index)
             if to_item:
-                self._place_item_in_slot(inventory, to_item, to_type, to_index)
+                place_func(inventory, to_item, to_type, to_index)
 
     def _place_item_in_slot(
         self, inventory: Inventory, item, slot_type: str, slot_index: int
