@@ -12,7 +12,7 @@ from caislean_gaofar.ui.shop_ui import ShopUI
 from caislean_gaofar.ui.skill_ui import SkillUI
 
 
-@dataclass
+@dataclass(kw_only=True)
 class EventContext:
     """
     Context object that encapsulates all dependencies needed for event handling.
