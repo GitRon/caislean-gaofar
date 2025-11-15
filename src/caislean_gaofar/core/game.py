@@ -591,6 +591,7 @@ class Game:
 
     def run(self):
         """Main game loop."""
+
         # Synchronize running state between event_dispatcher and game_loop
         def handle_events_wrapper():
             self.handle_events()

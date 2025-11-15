@@ -65,13 +65,11 @@ class TestDungeonTransitionManager:
         )
 
         # Get the first dungeon spawn and load it
-        dungeon_spawn = None
         for spawn in dungeon_manager.world_map.get_entity_spawns("dungeons"):
             dungeon_id = spawn["id"]
             dungeon_manager.load_dungeon(dungeon_id, dark_cave_path)
             warrior.grid_x = spawn["x"]
             warrior.grid_y = spawn["y"]
-            dungeon_spawn = spawn
             break
 
         on_camera_update = MagicMock(return_value=Camera(100, 100))
