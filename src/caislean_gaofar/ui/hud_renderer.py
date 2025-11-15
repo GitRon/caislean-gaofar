@@ -1,0 +1,699 @@
+"""Rendering logic for HUD (Heads-Up Display)."""
+
+import pygame
+import math
+from caislean_gaofar.core import config
+from caislean_gaofar.ui.hud_state import HUDState
+
+
+class HUDRenderer:
+    """Handles rendering of the HUD."""
+
+    def __init__(self):
+        """Initialize the HUD renderer with visual settings."""
+        # HUD positioning (right side of screen)
+        self.x = config.GAME_AREA_WIDTH
+        self.y = 0
+        self.width = config.HUD_WIDTH
+        self.height = config.HUD_HEIGHT
+
+        # Colors for medieval-fantasy theme
+        self.wood_color = (101, 67, 33)  # Dark brown wood
+        self.wood_border = (65, 43, 21)  # Darker wood border
+        self.ornate_gold = (218, 165, 32)  # Ornate golden color
+        self.health_green = (76, 187, 23)  # Vibrant health green
+        self.health_red = (220, 50, 50)  # Health red
+        self.health_critical = (139, 0, 0)  # Critical health dark red
+        self.text_color = (255, 248, 220)  # Cornsilk for readable text
+
+    def draw(self, screen: pygame.Surface, warrior, state: HUDState):
+        """
+        Draw the HUD on screen.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity to display stats for
+            state: The current HUD state
+        """
+        # Draw HUD background
+        hud_rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        pygame.draw.rect(screen, self.wood_border, hud_rect)
+
+        # Draw health bar panel
+        self._draw_health_panel(screen, warrior, state)
+
+        # Draw potion count panel
+        self._draw_potion_panel(screen, warrior, state)
+
+        # Draw town portal panel
+        self._draw_portal_panel(screen, warrior)
+
+        # Draw currency panel
+        self._draw_currency_panel(screen, warrior)
+
+        # Draw attack panel
+        self._draw_attack_panel(screen, warrior)
+
+        # Draw defense panel
+        self._draw_defense_panel(screen, warrior)
+
+        # Draw XP panel (below defense)
+        self._draw_xp_panel(screen, warrior)
+
+        # Draw inventory panel
+        self._draw_inventory_panel(screen)
+
+        # Draw skills panel
+        self._draw_skills_panel(screen, warrior)
+
+        # Draw critical health warning if needed
+        if state.is_critical_health(warrior):
+            self._draw_critical_health_warning(screen, state)
+
+    def _draw_ornate_border(self, surface: pygame.Surface, rect: pygame.Rect):
+        """
+        Draw an ornate medieval-style border around a rectangle.
+
+        Args:
+            surface: Surface to draw on
+            rect: Rectangle to draw border around
+        """
+        # Draw outer border (darker)
+        pygame.draw.rect(surface, self.wood_border, rect, 3)
+
+        # Draw inner ornate line (golden)
+        inner_rect = rect.inflate(-6, -6)
+        pygame.draw.rect(surface, self.ornate_gold, inner_rect, 1)
+
+        # Draw corner decorations (small circles)
+        corner_radius = 3
+        corners = [
+            (rect.left + 5, rect.top + 5),
+            (rect.right - 5, rect.top + 5),
+            (rect.left + 5, rect.bottom - 5),
+            (rect.right - 5, rect.bottom - 5),
+        ]
+        for corner in corners:
+            pygame.draw.circle(surface, self.ornate_gold, corner, corner_radius)
+
+    def _draw_health_panel(
+        self, screen: pygame.Surface, warrior, state: HUDState
+    ):
+        """
+        Draw the health panel with visual and numerical display.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+            state: The current HUD state
+        """
+        # Panel dimensions and position (relative to HUD)
+        panel_width = self.width - 20  # Fit within HUD width with margins
+        panel_height = 80
+        panel_x = self.x + 10
+        panel_y = self.y + 10
+
+        # Create panel background (wooden frame)
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw title
+        font_title = pygame.font.Font(None, 24)
+        title_text = font_title.render("Health", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 10, panel_y + 8))
+
+        # Health bar dimensions
+        bar_width = panel_width - 40  # Fit within panel with margins
+        bar_height = 24
+        bar_x = panel_x + 10
+        bar_y = panel_y + 38
+
+        # Calculate health percentage
+        health_percentage = warrior.health / warrior.max_health
+        displayed_percentage = state.displayed_health / warrior.max_health
+
+        # Draw health bar background (darker)
+        bar_bg_rect = pygame.Rect(bar_x, bar_y, bar_width, bar_height)
+        pygame.draw.rect(screen, self.wood_border, bar_bg_rect)
+
+        # Draw health bar fill with color gradient based on health
+        if displayed_percentage > 0:
+            fill_width = int(bar_width * displayed_percentage)
+            bar_fill_rect = pygame.Rect(bar_x, bar_y, fill_width, bar_height)
+
+            # Color changes from green -> yellow -> red as health decreases
+            if health_percentage > 0.5:
+                bar_color = self.health_green
+            elif health_percentage > 0.25:
+                bar_color = (220, 220, 50)  # Yellow
+            else:
+                bar_color = self.health_red
+
+            pygame.draw.rect(screen, bar_color, bar_fill_rect)
+
+        # Draw health bar border
+        pygame.draw.rect(screen, self.ornate_gold, bar_bg_rect, 2)
+
+        # Draw numerical health display
+        font_health = pygame.font.Font(None, 28)
+        health_text = font_health.render(
+            f"{int(warrior.health)}/{warrior.max_health} HP", True, self.text_color
+        )
+        # Center text on health bar
+        text_rect = health_text.get_rect(
+            center=(bar_x + bar_width // 2, bar_y + bar_height // 2)
+        )
+
+        # Add text shadow for better readability
+        shadow_text = font_health.render(
+            f"{int(warrior.health)}/{warrior.max_health} HP", True, (0, 0, 0)
+        )
+        shadow_rect = text_rect.copy()
+        shadow_rect.x += 2
+        shadow_rect.y += 2
+        screen.blit(shadow_text, shadow_rect)
+        screen.blit(health_text, text_rect)
+
+    def _draw_potion_panel(
+        self, screen: pygame.Surface, warrior, state: HUDState
+    ):
+        """
+        Draw the health potion panel with count and visual feedback.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+            state: The current HUD state
+        """
+        # Panel dimensions and position (below health, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 70
+        panel_x = self.x + 10
+        panel_y = self.y + 100
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw potion icon (stylized bottle)
+        icon_size = 40
+        icon_x = panel_x + 15
+        icon_y = panel_y + 15
+
+        # Apply glow effect if potion was just used
+        if state.is_potion_glowing():
+            # Pulsing glow effect
+            glow_alpha = int(128 * (state.potion_glow_timer / state.potion_glow_duration))
+            glow_surface = pygame.Surface((icon_size + 10, icon_size + 10))
+            glow_surface.set_alpha(glow_alpha)
+            pygame.draw.circle(
+                glow_surface,
+                (100, 255, 100),
+                (icon_size // 2 + 5, icon_size // 2 + 5),
+                icon_size // 2 + 5,
+            )
+            screen.blit(glow_surface, (icon_x - 5, icon_y - 5))
+
+        # Draw potion bottle
+        bottle_rect = pygame.Rect(icon_x + 10, icon_y + 8, 20, 24)
+        pygame.draw.rect(screen, (200, 50, 50), bottle_rect)  # Red potion
+        # Bottle neck
+        neck_rect = pygame.Rect(icon_x + 14, icon_y + 4, 12, 8)
+        pygame.draw.rect(screen, (200, 50, 50), neck_rect)
+        # Cork
+        cork_rect = pygame.Rect(icon_x + 16, icon_y, 8, 6)
+        pygame.draw.rect(screen, (139, 69, 19), cork_rect)
+        # Highlight on bottle
+        highlight = pygame.Rect(icon_x + 12, icon_y + 10, 4, 10)
+        pygame.draw.rect(screen, (255, 100, 100), highlight)
+
+        # Draw potion count
+        font_title = pygame.font.Font(None, 20)
+        title_text = font_title.render("Potions", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 10))
+
+        # Draw count (large and prominent)
+        font_count = pygame.font.Font(None, 36)
+        potion_count = warrior.count_health_potions()
+        count_text = font_count.render(f"x {potion_count}", True, self.text_color)
+        screen.blit(count_text, (panel_x + 60, panel_y + 30))
+
+        # Draw usage hint
+        font_hint = pygame.font.Font(None, 16)
+        hint_text = font_hint.render("Press P", True, config.GRAY)
+        screen.blit(hint_text, (panel_x + 130, panel_y + 40))
+
+    def _draw_portal_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the town portal panel with count.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below potions, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 70
+        panel_x = self.x + 10
+        panel_y = self.y + 180
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw portal icon (swirling magic circle)
+        icon_size = 40
+        icon_x = panel_x + 15
+        icon_y = panel_y + 15
+
+        # Draw magical portal effect
+        center_x = icon_x + icon_size // 2
+        center_y = icon_y + icon_size // 2
+
+        # Outer circle (magical energy)
+        pygame.draw.circle(screen, (138, 43, 226), (center_x, center_y), 18, 3)
+        # Middle circle
+        pygame.draw.circle(screen, (186, 85, 211), (center_x, center_y), 12, 2)
+        # Inner core
+        pygame.draw.circle(screen, (255, 255, 255), (center_x, center_y), 6)
+
+        # Draw portal count
+        font_title = pygame.font.Font(None, 20)
+        title_text = font_title.render("Portals", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 10))
+
+        # Draw count (large and prominent)
+        font_count = pygame.font.Font(None, 36)
+        portal_count = warrior.count_town_portals()
+        count_text = font_count.render(f"x {portal_count}", True, self.text_color)
+        screen.blit(count_text, (panel_x + 60, panel_y + 30))
+
+        # Draw usage hint
+        font_hint = pygame.font.Font(None, 16)
+        hint_text = font_hint.render("Press T", True, config.GRAY)
+        screen.blit(hint_text, (panel_x + 130, panel_y + 40))
+
+    def _draw_currency_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the currency/gold panel.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below portals, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 60
+        panel_x = self.x + 10
+        panel_y = self.y + 260
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw gold coin icon
+        coin_center_x = panel_x + 30
+        coin_center_y = panel_y + 30
+        coin_radius = 15
+
+        # Outer gold circle
+        pygame.draw.circle(
+            screen, self.ornate_gold, (coin_center_x, coin_center_y), coin_radius
+        )
+        # Inner darker circle for depth
+        pygame.draw.circle(
+            screen, (184, 134, 11), (coin_center_x, coin_center_y), coin_radius - 3
+        )
+        # Center decoration
+        pygame.draw.circle(
+            screen, self.ornate_gold, (coin_center_x, coin_center_y), coin_radius - 6
+        )
+
+        # Draw gold amount
+        font_title = pygame.font.Font(None, 24)
+        title_text = font_title.render("Gold", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 8))
+
+        font_gold = pygame.font.Font(None, 36)
+        gold_amount = warrior.count_gold()
+        gold_text = font_gold.render(f"{gold_amount}", True, self.text_color)
+        screen.blit(gold_text, (panel_x + 60, panel_y + 26))
+
+    def _draw_attack_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the attack stat panel with sword icon.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below gold, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 60
+        panel_x = self.x + 10
+        panel_y = self.y + 330
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw sword icon
+        icon_x = panel_x + 20
+        icon_y = panel_y + 15
+
+        # Sword blade (vertical line)
+        pygame.draw.line(
+            screen,
+            (192, 192, 192),  # Silver
+            (icon_x, icon_y),
+            (icon_x, icon_y + 25),
+            3,
+        )
+        # Sword crossguard (horizontal line)
+        pygame.draw.line(
+            screen, (139, 69, 19), (icon_x - 8, icon_y + 8), (icon_x + 8, icon_y + 8), 3
+        )
+        # Sword pommel (small circle)
+        pygame.draw.circle(screen, (139, 69, 19), (icon_x, icon_y + 28), 4)
+
+        # Draw attack value
+        font_title = pygame.font.Font(None, 24)
+        title_text = font_title.render("Attack", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 8))
+
+        font_stat = pygame.font.Font(None, 36)
+        attack_value = warrior.get_effective_attack_damage()
+        stat_text = font_stat.render(f"{attack_value}", True, self.text_color)
+        screen.blit(stat_text, (panel_x + 60, panel_y + 26))
+
+    def _draw_defense_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the defense stat panel with armor icon.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below attack, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 60
+        panel_x = self.x + 10
+        panel_y = self.y + 400
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw armor icon (stylized shield)
+        icon_center_x = panel_x + 20
+        icon_center_y = panel_y + 23
+
+        # Shield body (rounded rectangle shape using polygon)
+        shield_points = [
+            (icon_center_x, icon_center_y - 15),  # Top
+            (icon_center_x + 12, icon_center_y - 10),  # Top right
+            (icon_center_x + 12, icon_center_y + 10),  # Bottom right
+            (icon_center_x, icon_center_y + 18),  # Bottom point
+            (icon_center_x - 12, icon_center_y + 10),  # Bottom left
+            (icon_center_x - 12, icon_center_y - 10),  # Top left
+        ]
+        pygame.draw.polygon(screen, (128, 128, 128), shield_points)  # Gray shield
+        pygame.draw.polygon(screen, (64, 64, 64), shield_points, 2)  # Dark border
+
+        # Draw defense value
+        font_title = pygame.font.Font(None, 24)
+        title_text = font_title.render("Defense", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 8))
+
+        font_stat = pygame.font.Font(None, 36)
+        defense_value = warrior.inventory.get_total_defense_bonus()
+        stat_text = font_stat.render(f"{defense_value}", True, self.text_color)
+        screen.blit(stat_text, (panel_x + 60, panel_y + 26))
+
+    def _draw_xp_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the experience/level panel with progress bar.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below defense, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 60
+        panel_x = self.x + 10
+        panel_y = self.y + 390
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw title with level
+        font_title = pygame.font.Font(None, 22)
+        level_text = font_title.render(
+            f"Level {warrior.experience.current_level}", True, self.ornate_gold
+        )
+        screen.blit(level_text, (panel_x + 10, panel_y + 6))
+
+        # XP bar dimensions
+        bar_width = panel_width - 20
+        bar_height = 18
+        bar_x = panel_x + 10
+        bar_y = panel_y + 30
+
+        # Calculate XP progress
+        xp_progress = warrior.experience.get_xp_progress()
+
+        # Draw XP bar background
+        bar_bg_rect = pygame.Rect(bar_x, bar_y, bar_width, bar_height)
+        pygame.draw.rect(screen, self.wood_border, bar_bg_rect)
+
+        # Draw XP bar fill
+        if xp_progress > 0:
+            fill_width = int(bar_width * xp_progress)
+            bar_fill_rect = pygame.Rect(bar_x, bar_y, fill_width, bar_height)
+            # Gold/yellow color for XP bar
+            pygame.draw.rect(screen, self.ornate_gold, bar_fill_rect)
+
+        # Draw XP bar border
+        pygame.draw.rect(screen, self.ornate_gold, bar_bg_rect, 2)
+
+        # Draw XP text
+        font_xp = pygame.font.Font(None, 18)
+        if warrior.experience.is_max_level():
+            xp_text = font_xp.render("MAX LEVEL", True, self.text_color)
+        else:
+            current_xp = warrior.experience.current_xp
+            next_level_xp = warrior.experience.get_xp_for_next_level()
+            xp_text = font_xp.render(
+                f"{current_xp}/{next_level_xp} XP", True, self.text_color
+            )
+
+        # Center text on XP bar
+        text_rect = xp_text.get_rect(
+            center=(bar_x + bar_width // 2, bar_y + bar_height // 2)
+        )
+        # Add shadow
+        shadow_text = font_xp.render(
+            "MAX LEVEL"
+            if warrior.experience.is_max_level()
+            else f"{warrior.experience.current_xp}/{warrior.experience.get_xp_for_next_level()} XP",
+            True,
+            (0, 0, 0),
+        )
+        shadow_rect = text_rect.copy()
+        shadow_rect.x += 1
+        shadow_rect.y += 1
+        screen.blit(shadow_text, shadow_rect)
+        screen.blit(xp_text, text_rect)
+
+    def _draw_inventory_panel(self, screen: pygame.Surface):
+        """
+        Draw the inventory panel with icon and hotkey hint.
+
+        Args:
+            screen: Pygame surface to draw on
+        """
+        # Panel dimensions and position (below XP, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 60
+        panel_x = self.x + 10
+        panel_y = self.y + 470
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw backpack/bag icon
+        icon_x = panel_x + 15
+        icon_y = panel_y + 15
+
+        # Backpack body (rounded rectangle)
+        bag_rect = pygame.Rect(icon_x + 5, icon_y + 8, 30, 25)
+        pygame.draw.rect(screen, (101, 67, 33), bag_rect)  # Brown bag
+        pygame.draw.rect(screen, (65, 43, 21), bag_rect, 2)  # Dark border
+
+        # Backpack flap (top part)
+        flap_rect = pygame.Rect(icon_x + 5, icon_y + 3, 30, 10)
+        pygame.draw.rect(screen, (139, 90, 43), flap_rect)  # Lighter brown
+        pygame.draw.rect(screen, (65, 43, 21), flap_rect, 2)  # Dark border
+
+        # Backpack straps
+        pygame.draw.line(
+            screen, (65, 43, 21), (icon_x + 12, icon_y), (icon_x + 12, icon_y + 8), 3
+        )
+        pygame.draw.line(
+            screen, (65, 43, 21), (icon_x + 28, icon_y), (icon_x + 28, icon_y + 8), 3
+        )
+
+        # Buckle/clasp
+        pygame.draw.circle(screen, self.ornate_gold, (icon_x + 20, icon_y + 15), 3)
+
+        # Draw title
+        font_title = pygame.font.Font(None, 20)
+        title_text = font_title.render("Inventory", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 15))
+
+        # Draw usage hint
+        font_hint = pygame.font.Font(None, 16)
+        hint_text = font_hint.render("Press I", True, config.GRAY)
+        screen.blit(hint_text, (panel_x + 60, panel_y + 38))
+
+    def _draw_skills_panel(self, screen: pygame.Surface, warrior):
+        """
+        Draw the skills panel with icon and hotkey hint.
+
+        Args:
+            screen: Pygame surface to draw on
+            warrior: The warrior entity
+        """
+        # Panel dimensions and position (below inventory, relative to HUD)
+        panel_width = self.width - 20
+        panel_height = 60
+        panel_x = self.x + 10
+        panel_y = self.y + 530
+
+        # Create panel background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(screen, self.wood_color, panel_rect)
+        self._draw_ornate_border(screen, panel_rect)
+
+        # Draw skill book icon
+        icon_x = panel_x + 15
+        icon_y = panel_y + 10
+
+        # Book cover (rectangle)
+        book_rect = pygame.Rect(icon_x + 5, icon_y + 3, 25, 35)
+        pygame.draw.rect(screen, (139, 69, 19), book_rect)  # Brown book
+        pygame.draw.rect(screen, (101, 50, 0), book_rect, 2)  # Darker border
+
+        # Book pages (lighter rectangle inside)
+        pages_rect = pygame.Rect(icon_x + 8, icon_y + 6, 19, 29)
+        pygame.draw.rect(screen, (255, 248, 220), pages_rect)  # Cream pages
+
+        # Book spine decoration (vertical lines)
+        spine_x = icon_x + 7
+        for i in range(3):
+            pygame.draw.line(
+                screen,
+                self.ornate_gold,
+                (spine_x, icon_y + 10 + i * 8),
+                (spine_x, icon_y + 15 + i * 8),
+                2,
+            )
+
+        # Draw skill points indicator if available
+        skill_points = warrior.experience.get_available_skill_points()
+        if skill_points > 0:
+            # Draw notification badge
+            badge_x = icon_x + 30
+            badge_y = icon_y + 5
+            pygame.draw.circle(screen, config.RED, (badge_x, badge_y), 8)
+            pygame.draw.circle(screen, config.WHITE, (badge_x, badge_y), 8, 1)
+
+            # Draw skill point count
+            font_badge = pygame.font.Font(None, 16)
+            badge_text = font_badge.render(str(skill_points), True, config.WHITE)
+            badge_rect = badge_text.get_rect(center=(badge_x, badge_y))
+            screen.blit(badge_text, badge_rect)
+
+        # Draw title
+        font_title = pygame.font.Font(None, 20)
+        title_text = font_title.render("Skills", True, self.ornate_gold)
+        screen.blit(title_text, (panel_x + 60, panel_y + 10))
+
+        # Draw level info
+        font_level = pygame.font.Font(None, 16)
+        level_text = font_level.render(
+            f"Lvl {warrior.experience.current_level}", True, self.text_color
+        )
+        screen.blit(level_text, (panel_x + 110, panel_y + 12))
+
+        # Draw usage hint
+        font_hint = pygame.font.Font(None, 16)
+        hint_text = font_hint.render("Press C", True, config.GRAY)
+        screen.blit(hint_text, (panel_x + 60, panel_y + 33))
+
+    def _draw_critical_health_warning(
+        self, screen: pygame.Surface, state: HUDState
+    ):
+        """
+        Draw a visual warning when health is critically low.
+
+        Args:
+            screen: Pygame surface to draw on
+            state: The current HUD state
+        """
+        # Pulsing red vignette effect (only on game area, not HUD)
+        alpha = int(80 * (0.5 + 0.5 * math.sin(state.critical_health_timer / 200)))
+
+        # Create semi-transparent red overlay at game area edges
+        overlay = pygame.Surface((config.GAME_AREA_WIDTH, config.GAME_AREA_HEIGHT))
+        overlay.set_alpha(alpha)
+        overlay.fill((139, 0, 0))
+
+        # Draw vignette (darker at edges)
+        # Top
+        pygame.draw.rect(overlay, (139, 0, 0), (0, 0, config.GAME_AREA_WIDTH, 50))
+        # Bottom
+        pygame.draw.rect(
+            overlay,
+            (139, 0, 0),
+            (0, config.GAME_AREA_HEIGHT - 50, config.GAME_AREA_WIDTH, 50),
+        )
+        # Left
+        pygame.draw.rect(overlay, (139, 0, 0), (0, 0, 50, config.GAME_AREA_HEIGHT))
+        # Right
+        pygame.draw.rect(
+            overlay,
+            (139, 0, 0),
+            (config.GAME_AREA_WIDTH - 50, 0, 50, config.GAME_AREA_HEIGHT),
+        )
+
+        screen.blit(overlay, (0, 0))
+
+        # Draw warning text (pulsing) - centered in game area
+        if int(state.critical_health_timer / 500) % 2 == 0:
+            font_warning = pygame.font.Font(None, 32)
+            warning_text = font_warning.render(
+                "LOW HEALTH!", True, self.health_critical
+            )
+            warning_rect = warning_text.get_rect(
+                center=(config.GAME_AREA_WIDTH // 2, config.GAME_AREA_HEIGHT - 30)
+            )
+
+            # Add shadow
+            shadow_text = font_warning.render("LOW HEALTH!", True, (0, 0, 0))
+            shadow_rect = warning_rect.copy()
+            shadow_rect.x += 2
+            shadow_rect.y += 2
+            screen.blit(shadow_text, shadow_rect)
+            screen.blit(warning_text, warning_rect)
