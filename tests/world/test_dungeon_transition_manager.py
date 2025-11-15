@@ -47,7 +47,7 @@ class TestDungeonTransitionManager:
         on_camera_update.assert_not_called()
         on_message.assert_not_called()
 
-    def test_check_and_handle_transition_entering_dungeon(self):
+    def test_check_and_handle_transition_entering_dungeon(self):  # noqa: PBR008
         """Test entering a dungeon"""
         # Arrange
         manager = DungeonTransitionManager()
@@ -65,12 +65,12 @@ class TestDungeonTransitionManager:
         )
 
         # Get the first dungeon spawn and load it
-        for spawn in dungeon_manager.world_map.get_entity_spawns("dungeons"):
-            dungeon_id = spawn["id"]
-            dungeon_manager.load_dungeon(dungeon_id, dark_cave_path)
-            warrior.grid_x = spawn["x"]
-            warrior.grid_y = spawn["y"]
-            break
+        dungeon_spawns = dungeon_manager.world_map.get_entity_spawns("dungeons")
+        first_spawn = dungeon_spawns[0]
+        dungeon_id = first_spawn["id"]
+        dungeon_manager.load_dungeon(dungeon_id, dark_cave_path)
+        warrior.grid_x = first_spawn["x"]
+        warrior.grid_y = first_spawn["y"]
 
         on_camera_update = MagicMock(return_value=Camera(100, 100))
         on_message = MagicMock()
@@ -91,7 +91,7 @@ class TestDungeonTransitionManager:
         on_message.assert_called_once()
         assert "enter" in on_message.call_args[0][0].lower()
 
-    def test_check_and_handle_transition_exiting_dungeon(self):
+    def test_check_and_handle_transition_exiting_dungeon(self):  # noqa: PBR008
         """Test exiting a dungeon"""
         # Arrange
         manager = DungeonTransitionManager()
@@ -109,15 +109,15 @@ class TestDungeonTransitionManager:
         )
 
         # Enter dungeon first - use actual spawn ID
-        for spawn in dungeon_manager.world_map.get_entity_spawns("dungeons"):
-            dungeon_id = spawn["id"]
-            dungeon_manager.load_dungeon(dungeon_id, dark_cave_path)
-            spawn_x, spawn_y = dungeon_manager.enter_dungeon(
-                dungeon_id, spawn["x"], spawn["y"]
-            )
-            warrior.grid_x = spawn_x
-            warrior.grid_y = spawn_y
-            break
+        dungeon_spawns = dungeon_manager.world_map.get_entity_spawns("dungeons")
+        first_spawn = dungeon_spawns[0]
+        dungeon_id = first_spawn["id"]
+        dungeon_manager.load_dungeon(dungeon_id, dark_cave_path)
+        spawn_x, spawn_y = dungeon_manager.enter_dungeon(
+            dungeon_id, first_spawn["x"], first_spawn["y"]
+        )
+        warrior.grid_x = spawn_x
+        warrior.grid_y = spawn_y
 
         # Position warrior on exit (1,1 in dark_cave.json)
         warrior.grid_x = 1
