@@ -134,16 +134,24 @@ class EventDispatcher:
                 if current_time - self.last_key_time >= self.key_delay:
                     action_queued = False
                     if event.key in [pygame.K_w, pygame.K_UP]:
-                        ctx.turn_processor.queue_player_action("move", ctx.warrior, 0, -1)
+                        ctx.turn_processor.queue_player_action(
+                            "move", ctx.warrior, 0, -1
+                        )
                         action_queued = True
                     elif event.key in [pygame.K_s, pygame.K_DOWN]:
-                        ctx.turn_processor.queue_player_action("move", ctx.warrior, 0, 1)
+                        ctx.turn_processor.queue_player_action(
+                            "move", ctx.warrior, 0, 1
+                        )
                         action_queued = True
                     elif event.key in [pygame.K_a, pygame.K_LEFT]:
-                        ctx.turn_processor.queue_player_action("move", ctx.warrior, -1, 0)
+                        ctx.turn_processor.queue_player_action(
+                            "move", ctx.warrior, -1, 0
+                        )
                         action_queued = True
                     elif event.key in [pygame.K_d, pygame.K_RIGHT]:
-                        ctx.turn_processor.queue_player_action("move", ctx.warrior, 1, 0)
+                        ctx.turn_processor.queue_player_action(
+                            "move", ctx.warrior, 1, 0
+                        )
                         action_queued = True
                     elif event.key == pygame.K_SPACE:
                         ctx.turn_processor.queue_player_action("attack", ctx.warrior)
@@ -153,7 +161,10 @@ class EventDispatcher:
                         self.last_key_time = current_time
 
         # Shop state - return portal usage
-        elif event.key == pygame.K_t and ctx.game_state_manager.state == config.STATE_SHOP:
+        elif (
+            event.key == pygame.K_t
+            and ctx.game_state_manager.state == config.STATE_SHOP
+        ):
             if ctx.game_state_manager.return_portal:
                 ctx.on_use_return_portal()
 

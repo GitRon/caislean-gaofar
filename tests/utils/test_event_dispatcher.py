@@ -200,9 +200,7 @@ class TestEventDispatcher:
         dispatcher.handle_events(ctx)
 
         # Assert
-        ctx.game_state_manager.show_message.assert_called_once_with(
-            "No shop nearby!"
-        )
+        ctx.game_state_manager.show_message.assert_called_once_with("No shop nearby!")
 
     @patch("pygame.event.get")
     def test_handle_pickup_key(self, mock_get_events):
@@ -786,9 +784,7 @@ class TestEventDispatcher:
         dispatcher.handle_events(ctx)
 
         # Assert
-        ctx.skill_ui.handle_click.assert_called_once_with(
-            (150, 250), ctx.warrior, True
-        )
+        ctx.skill_ui.handle_click.assert_called_once_with((150, 250), ctx.warrior, True)
 
     @patch("pygame.event.get")
     def test_skill_ui_handle_middle_click(self, mock_get_events):
