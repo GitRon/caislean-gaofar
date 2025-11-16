@@ -3,6 +3,7 @@
 from unittest.mock import Mock, patch
 import pygame
 from caislean_gaofar.utils.event_dispatcher import EventDispatcher
+from caislean_gaofar.utils.event_context import EventContext
 from caislean_gaofar.entities.warrior import Warrior
 from caislean_gaofar.core.game_state_manager import GameStateManager
 from caislean_gaofar.systems.turn_processor import TurnProcessor
@@ -46,10 +47,10 @@ class TestEventDispatcher:
         mock_get_events.return_value = [quit_event]
 
         # Mock all required parameters
-        mocks = self._create_mock_parameters()
+        ctx = self._create_mock_context()
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
         assert dispatcher.running is False
@@ -67,11 +68,11 @@ class TestEventDispatcher:
         escape_event.key = pygame.K_ESCAPE
         mock_get_events.return_value = [escape_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
         assert dispatcher.running is False
@@ -87,14 +88,14 @@ class TestEventDispatcher:
         restart_event.key = pygame.K_r
         mock_get_events.return_value = [restart_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_GAME_OVER
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_GAME_OVER
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["on_restart"].assert_called_once()
+        ctx.on_restart.assert_called_once()
 
     @patch("pygame.event.get")
     def test_handle_quick_save_key(self, mock_get_events):
@@ -107,14 +108,14 @@ class TestEventDispatcher:
         save_event.key = pygame.K_F5
         mock_get_events.return_value = [save_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["on_save"].assert_called_once_with("quicksave")
+        ctx.on_save.assert_called_once_with("quicksave")
 
     @patch("pygame.event.get")
     def test_handle_inventory_toggle(self, mock_get_events):
@@ -127,12 +128,12 @@ class TestEventDispatcher:
         inv_event.key = pygame.K_i
         mock_get_events.return_value = [inv_event]
 
-        mocks = self._create_mock_parameters()
-        game_state_manager = mocks["game_state_manager"]
+        ctx = self._create_mock_context()
+        game_state_manager = ctx.game_state_manager
         game_state_manager.state = config.STATE_PLAYING
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
         game_state_manager.transition_to_inventory.assert_called_once()
@@ -148,13 +149,13 @@ class TestEventDispatcher:
         inv_event.key = pygame.K_i
         mock_get_events.return_value = [inv_event]
 
-        mocks = self._create_mock_parameters()
-        game_state_manager = mocks["game_state_manager"]
+        ctx = self._create_mock_context()
+        game_state_manager = ctx.game_state_manager
         game_state_manager.state = config.STATE_INVENTORY
         game_state_manager.return_portal = None
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
         game_state_manager.transition_from_inventory.assert_called_once()
@@ -170,15 +171,15 @@ class TestEventDispatcher:
         shop_event.key = pygame.K_s
         mock_get_events.return_value = [shop_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["on_shop_check"].return_value = (True, "")
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.on_shop_check.return_value = (True, "")
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["game_state_manager"].transition_to_shop.assert_called_once_with(True)
+        ctx.game_state_manager.transition_to_shop.assert_called_once_with(True)
 
     @patch("pygame.event.get")
     def test_handle_shop_toggle_fail(self, mock_get_events):
@@ -191,17 +192,15 @@ class TestEventDispatcher:
         shop_event.key = pygame.K_s
         mock_get_events.return_value = [shop_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["on_shop_check"].return_value = (False, "No shop nearby!")
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.on_shop_check.return_value = (False, "No shop nearby!")
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["game_state_manager"].show_message.assert_called_once_with(
-            "No shop nearby!"
-        )
+        ctx.game_state_manager.show_message.assert_called_once_with("No shop nearby!")
 
     @patch("pygame.event.get")
     def test_handle_pickup_key(self, mock_get_events):
@@ -214,16 +213,16 @@ class TestEventDispatcher:
         pickup_event.key = pygame.K_g
         mock_get_events.return_value = [pickup_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["warrior"].grid_x = 5
-        mocks["warrior"].grid_y = 10
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.warrior.grid_x = 5
+        ctx.warrior.grid_y = 10
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["on_pickup_item"].assert_called_once_with(5, 10)
+        ctx.on_pickup_item.assert_called_once_with(5, 10)
 
     @patch("pygame.event.get")
     def test_handle_potion_key(self, mock_get_events):
@@ -236,14 +235,14 @@ class TestEventDispatcher:
         potion_event.key = pygame.K_p
         mock_get_events.return_value = [potion_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["on_use_potion"].assert_called_once()
+        ctx.on_use_potion.assert_called_once()
 
     @patch("pygame.event.get")
     def test_handle_town_portal_key(self, mock_get_events):
@@ -256,14 +255,14 @@ class TestEventDispatcher:
         portal_event.key = pygame.K_t
         mock_get_events.return_value = [portal_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["on_use_town_portal"].assert_called_once()
+        ctx.on_use_town_portal.assert_called_once()
 
     @patch("pygame.event.get")
     @patch("pygame.time.get_ticks")
@@ -278,16 +277,16 @@ class TestEventDispatcher:
         move_event.key = pygame.K_w
         mock_get_events.return_value = [move_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["turn_processor"].queue_player_action.assert_called_once_with(
-            "move", mocks["warrior"], 0, -1
+        ctx.turn_processor.queue_player_action.assert_called_once_with(
+            "move", ctx.warrior, 0, -1
         )
 
     @patch("pygame.event.get")
@@ -303,16 +302,16 @@ class TestEventDispatcher:
         attack_event.key = pygame.K_SPACE
         mock_get_events.return_value = [attack_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["turn_processor"].queue_player_action.assert_called_once_with(
-            "attack", mocks["warrior"]
+        ctx.turn_processor.queue_player_action.assert_called_once_with(
+            "attack", ctx.warrior
         )
 
     @patch("pygame.event.get")
@@ -329,15 +328,15 @@ class TestEventDispatcher:
         move_event.key = pygame.K_w
         mock_get_events.return_value = [move_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["turn_processor"].queue_player_action.assert_not_called()
+        ctx.turn_processor.queue_player_action.assert_not_called()
 
     @patch("pygame.event.get")
     def test_inventory_ui_handle_input_called(self, mock_get_events):
@@ -349,15 +348,15 @@ class TestEventDispatcher:
         test_event.type = pygame.MOUSEBUTTONDOWN
         mock_get_events.return_value = [test_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_INVENTORY
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_INVENTORY
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["inventory_ui"].handle_input.assert_called_once_with(
-            test_event, mocks["warrior"].inventory, mocks["inventory_game_ref"]
+        ctx.inventory_ui.handle_input.assert_called_once_with(
+            test_event, ctx.warrior.inventory, ctx.inventory_game_ref
         )
 
     @patch("pygame.event.get")
@@ -370,15 +369,15 @@ class TestEventDispatcher:
         test_event.type = pygame.MOUSEBUTTONDOWN
         mock_get_events.return_value = [test_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SHOP
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SHOP
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["shop_ui"].handle_input.assert_called_once_with(
-            test_event, mocks["shop"], mocks["warrior"]
+        ctx.shop_ui.handle_input.assert_called_once_with(
+            test_event, ctx.shop, ctx.warrior
         )
 
     @patch("pygame.event.get")
@@ -392,15 +391,15 @@ class TestEventDispatcher:
         escape_event.key = pygame.K_ESCAPE
         mock_get_events.return_value = [escape_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SHOP
-        mocks["game_state_manager"].return_portal = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SHOP
+        ctx.game_state_manager.return_portal = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["on_use_return_portal"].assert_called_once()
+        ctx.on_use_return_portal.assert_called_once()
 
     @patch("pygame.event.get")
     def test_handle_skills_toggle_open(self, mock_get_events):
@@ -413,14 +412,14 @@ class TestEventDispatcher:
         skills_event.key = pygame.K_c
         mock_get_events.return_value = [skills_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        assert mocks["game_state_manager"].state == config.STATE_SKILLS
+        assert ctx.game_state_manager.state == config.STATE_SKILLS
 
     @patch("pygame.event.get")
     def test_handle_skills_toggle_close(self, mock_get_events):
@@ -433,14 +432,14 @@ class TestEventDispatcher:
         skills_event.key = pygame.K_c
         mock_get_events.return_value = [skills_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SKILLS
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SKILLS
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        assert mocks["game_state_manager"].state == config.STATE_PLAYING
+        assert ctx.game_state_manager.state == config.STATE_PLAYING
 
     @patch("pygame.event.get")
     def test_handle_shop_exit(self, mock_get_events):
@@ -453,14 +452,14 @@ class TestEventDispatcher:
         shop_event.key = pygame.K_s
         mock_get_events.return_value = [shop_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SHOP
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SHOP
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["game_state_manager"].transition_from_shop.assert_called_once()
+        ctx.game_state_manager.transition_from_shop.assert_called_once()
 
     @patch("pygame.event.get")
     @patch("pygame.time.get_ticks")
@@ -475,16 +474,16 @@ class TestEventDispatcher:
         move_event.key = pygame.K_DOWN
         mock_get_events.return_value = [move_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["turn_processor"].queue_player_action.assert_called_once_with(
-            "move", mocks["warrior"], 0, 1
+        ctx.turn_processor.queue_player_action.assert_called_once_with(
+            "move", ctx.warrior, 0, 1
         )
 
     @patch("pygame.event.get")
@@ -500,16 +499,16 @@ class TestEventDispatcher:
         move_event.key = pygame.K_a
         mock_get_events.return_value = [move_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["turn_processor"].queue_player_action.assert_called_once_with(
-            "move", mocks["warrior"], -1, 0
+        ctx.turn_processor.queue_player_action.assert_called_once_with(
+            "move", ctx.warrior, -1, 0
         )
 
     @patch("pygame.event.get")
@@ -525,16 +524,16 @@ class TestEventDispatcher:
         move_event.key = pygame.K_LEFT
         mock_get_events.return_value = [move_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["turn_processor"].queue_player_action.assert_called_once_with(
-            "move", mocks["warrior"], -1, 0
+        ctx.turn_processor.queue_player_action.assert_called_once_with(
+            "move", ctx.warrior, -1, 0
         )
 
     @patch("pygame.event.get")
@@ -550,16 +549,16 @@ class TestEventDispatcher:
         move_event.key = pygame.K_d
         mock_get_events.return_value = [move_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["turn_processor"].queue_player_action.assert_called_once_with(
-            "move", mocks["warrior"], 1, 0
+        ctx.turn_processor.queue_player_action.assert_called_once_with(
+            "move", ctx.warrior, 1, 0
         )
 
     @patch("pygame.event.get")
@@ -575,16 +574,16 @@ class TestEventDispatcher:
         move_event.key = pygame.K_RIGHT
         mock_get_events.return_value = [move_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["turn_processor"].queue_player_action.assert_called_once_with(
-            "move", mocks["warrior"], 1, 0
+        ctx.turn_processor.queue_player_action.assert_called_once_with(
+            "move", ctx.warrior, 1, 0
         )
 
     @patch("pygame.event.get")
@@ -598,15 +597,15 @@ class TestEventDispatcher:
         portal_event.key = pygame.K_t
         mock_get_events.return_value = [portal_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SHOP
-        mocks["game_state_manager"].return_portal = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SHOP
+        ctx.game_state_manager.return_portal = True
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["on_use_return_portal"].assert_called_once()
+        ctx.on_use_return_portal.assert_called_once()
 
     @patch("pygame.event.get")
     def test_handle_escape_in_shop_without_return_portal(self, mock_get_events):
@@ -619,15 +618,15 @@ class TestEventDispatcher:
         escape_event.key = pygame.K_ESCAPE
         mock_get_events.return_value = [escape_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SHOP
-        mocks["game_state_manager"].return_portal = None  # No return portal
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SHOP
+        ctx.game_state_manager.return_portal = None  # No return portal
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert - should not call return portal or exit
-        mocks["on_use_return_portal"].assert_not_called()
+        ctx.on_use_return_portal.assert_not_called()
         assert dispatcher.running is True  # Still running
 
     @patch("pygame.event.get")
@@ -645,15 +644,15 @@ class TestEventDispatcher:
         move_event.key = pygame.K_w
         mock_get_events.return_value = [move_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = False  # Not waiting
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = False  # Not waiting
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert - no movement should be queued
-        mocks["turn_processor"].queue_player_action.assert_not_called()
+        ctx.turn_processor.queue_player_action.assert_not_called()
 
     @patch("pygame.event.get")
     @patch("pygame.time.get_ticks")
@@ -668,16 +667,16 @@ class TestEventDispatcher:
         unknown_event.key = pygame.K_z  # Not a movement key
         mock_get_events.return_value = [unknown_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING
-        mocks["turn_processor"].waiting_for_player_input = True
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING
+        ctx.turn_processor.waiting_for_player_input = True
 
         # Act
         initial_last_key_time = dispatcher.last_key_time
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert - no action queued, last_key_time unchanged
-        mocks["turn_processor"].queue_player_action.assert_not_called()
+        ctx.turn_processor.queue_player_action.assert_not_called()
         assert dispatcher.last_key_time == initial_last_key_time
 
     @patch("pygame.event.get")
@@ -691,15 +690,15 @@ class TestEventDispatcher:
         portal_event.key = pygame.K_t
         mock_get_events.return_value = [portal_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SHOP
-        mocks["game_state_manager"].return_portal = None  # No portal
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SHOP
+        ctx.game_state_manager.return_portal = None  # No portal
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert - should not call return portal
-        mocks["on_use_return_portal"].assert_not_called()
+        ctx.on_use_return_portal.assert_not_called()
 
     @patch("pygame.event.get")
     def test_handle_t_key_when_not_in_shop(self, mock_get_events):
@@ -712,14 +711,14 @@ class TestEventDispatcher:
         portal_event.key = pygame.K_t
         mock_get_events.return_value = [portal_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_PLAYING  # Not shop
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_PLAYING  # Not shop
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert - T key does nothing when not in shop (it's town portal in playing)
-        mocks["on_use_town_portal"].assert_called_once()
+        ctx.on_use_town_portal.assert_called_once()
 
     @patch("pygame.event.get")
     def test_handle_unhandled_key_in_skills_state(self, mock_get_events):
@@ -732,16 +731,16 @@ class TestEventDispatcher:
         random_event.key = pygame.K_x  # Not a handled key
         mock_get_events.return_value = [random_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SKILLS
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SKILLS
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert - nothing should happen, all branches should be skipped
-        mocks["on_use_town_portal"].assert_not_called()
-        mocks["on_use_return_portal"].assert_not_called()
-        mocks["turn_processor"].queue_player_action.assert_not_called()
+        ctx.on_use_town_portal.assert_not_called()
+        ctx.on_use_return_portal.assert_not_called()
+        ctx.turn_processor.queue_player_action.assert_not_called()
 
     @patch("pygame.event.get")
     def test_skill_ui_handle_left_click(self, mock_get_events):
@@ -755,15 +754,15 @@ class TestEventDispatcher:
         click_event.pos = (100, 200)
         mock_get_events.return_value = [click_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SKILLS
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SKILLS
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["skill_ui"].handle_click.assert_called_once_with(
-            (100, 200), mocks["warrior"], False
+        ctx.skill_ui.handle_click.assert_called_once_with(
+            (100, 200), ctx.warrior, False
         )
 
     @patch("pygame.event.get")
@@ -778,16 +777,14 @@ class TestEventDispatcher:
         click_event.pos = (150, 250)
         mock_get_events.return_value = [click_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SKILLS
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SKILLS
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert
-        mocks["skill_ui"].handle_click.assert_called_once_with(
-            (150, 250), mocks["warrior"], True
-        )
+        ctx.skill_ui.handle_click.assert_called_once_with((150, 250), ctx.warrior, True)
 
     @patch("pygame.event.get")
     def test_skill_ui_handle_middle_click(self, mock_get_events):
@@ -801,17 +798,17 @@ class TestEventDispatcher:
         click_event.pos = (150, 250)
         mock_get_events.return_value = [click_event]
 
-        mocks = self._create_mock_parameters()
-        mocks["game_state_manager"].state = config.STATE_SKILLS
+        ctx = self._create_mock_context()
+        ctx.game_state_manager.state = config.STATE_SKILLS
 
         # Act
-        dispatcher.handle_events(**mocks)
+        dispatcher.handle_events(ctx)
 
         # Assert - should not be called for middle click
-        mocks["skill_ui"].handle_click.assert_not_called()
+        ctx.skill_ui.handle_click.assert_not_called()
 
-    def _create_mock_parameters(self):
-        """Create mock parameters for handle_events method."""
+    def _create_mock_context(self):
+        """Create mock EventContext for handle_events method."""
         warrior = Mock(spec=Warrior)
         warrior.grid_x = 0
         warrior.grid_y = 0
@@ -837,22 +834,22 @@ class TestEventDispatcher:
         skill_ui = Mock(spec=SkillUI)
         dungeon_manager = Mock()
 
-        return {
-            "warrior": warrior,
-            "game_state_manager": game_state_manager,
-            "turn_processor": turn_processor,
-            "entity_manager": entity_manager,
-            "inventory_ui": inventory_ui,
-            "shop": shop,
-            "shop_ui": shop_ui,
-            "skill_ui": skill_ui,
-            "dungeon_manager": dungeon_manager,
-            "on_restart": Mock(),
-            "on_save": Mock(),
-            "on_pickup_item": Mock(),
-            "on_use_potion": Mock(),
-            "on_use_town_portal": Mock(),
-            "on_use_return_portal": Mock(),
-            "on_shop_check": Mock(),
-            "inventory_game_ref": Mock(),
-        }
+        return EventContext(
+            warrior=warrior,
+            game_state_manager=game_state_manager,
+            turn_processor=turn_processor,
+            entity_manager=entity_manager,
+            inventory_ui=inventory_ui,
+            shop=shop,
+            shop_ui=shop_ui,
+            skill_ui=skill_ui,
+            dungeon_manager=dungeon_manager,
+            on_restart=Mock(),
+            on_save=Mock(),
+            on_pickup_item=Mock(),
+            on_use_potion=Mock(),
+            on_use_town_portal=Mock(),
+            on_use_return_portal=Mock(),
+            on_shop_check=Mock(),
+            inventory_game_ref=Mock(),
+        )
