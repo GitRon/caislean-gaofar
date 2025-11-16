@@ -147,6 +147,7 @@ class GameStateCoordinator:
             fog_of_war: FogOfWar instance
             temple: Temple instance
         """
+
         # Store callbacks for turn processor
         def on_dungeon_transition():
             # This will be handled in _get_updated_world_state

@@ -1,6 +1,6 @@
 """Tests for game_state_coordinator.py"""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import pygame
 from caislean_gaofar.core.game_state_coordinator import GameStateCoordinator
 from caislean_gaofar.core.game_state_manager import GameStateManager
@@ -178,7 +178,9 @@ class TestGameStateCoordinator:
             renderer=WorldRenderer(screen),
         )
         warrior = Warrior(5, 5)
-        item = Item(name="Potion", item_type=ItemType.CONSUMABLE, description="A potion")
+        item = Item(
+            name="Potion", item_type=ItemType.CONSUMABLE, description="A potion"
+        )
 
         # Act
         coordinator._handle_monster_death(warrior, item, "skeleton", 5)
@@ -344,7 +346,9 @@ class TestGameStateCoordinator:
                 )
                 on_monster_death(loot_item, "goblin", 10)
 
-        with patch.object(turn_processor, "process_turn", side_effect=mock_process_turn):
+        with patch.object(
+            turn_processor, "process_turn", side_effect=mock_process_turn
+        ):
             # Act
             coordinator._process_turn(
                 warrior, dungeon_manager, world_map, camera, fog_of_war, temple

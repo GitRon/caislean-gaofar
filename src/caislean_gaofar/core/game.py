@@ -3,7 +3,6 @@
 from caislean_gaofar.objects.item import Item
 from caislean_gaofar.objects.ground_item import GroundItem
 from caislean_gaofar.world.camera import Camera
-from caislean_gaofar.entities.warrior import Warrior
 
 # Import coordinator and initializer classes
 from caislean_gaofar.core.game_initializer import GameInitializer
@@ -165,7 +164,6 @@ class Game:
         # Check for dungeon transitions after turn processing
         self._check_dungeon_transition()
 
-
     def _check_dungeon_transition(self):
         """Check if player is entering or exiting a dungeon."""
         new_camera, transition_occurred = (
@@ -194,7 +192,6 @@ class Game:
             New Camera instance
         """
         return Camera(width, height)
-
 
     def _handle_pickup_item(self, grid_x: int, grid_y: int):
         """
@@ -325,7 +322,6 @@ class Game:
             color: Color of the message
         """
         self.render_coordinator.draw_game_over_screen(message, color)
-
 
     def save_game(self, filename: str = "quicksave") -> bool:
         """

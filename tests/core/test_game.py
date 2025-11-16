@@ -1243,10 +1243,14 @@ class TestGame:
 
         # Mock check_return_portal_collision in state_coordinator to return True
         with patch.object(
-            game.state_coordinator.state_manager, "check_return_portal_collision", return_value=True
+            game.state_coordinator.state_manager,
+            "check_return_portal_collision",
+            return_value=True,
         ):
             # Mock _handle_return_portal to track if behavior occurs
-            with patch.object(game.state_coordinator, "_handle_return_portal") as mock_portal:
+            with patch.object(
+                game.state_coordinator, "_handle_return_portal"
+            ) as mock_portal:
                 mock_portal.return_value = (game.camera, game.world_map)
                 # Act
                 game.update(0.016)
