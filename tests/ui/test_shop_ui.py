@@ -242,7 +242,11 @@ class TestShopUITabSwitching:
         event = Mock()
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 1
-        event.pos = shop_ui.state.buy_tab_rect.center if shop_ui.state.buy_tab_rect else (50, 150)
+        event.pos = (
+            shop_ui.state.buy_tab_rect.center
+            if shop_ui.state.buy_tab_rect
+            else (50, 150)
+        )
 
         shop_ui.handle_input(event, shop, warrior)
         assert shop_ui.state.active_tab == "buy"
@@ -261,7 +265,9 @@ class TestShopUITabSwitching:
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 1
         event.pos = (
-            shop_ui.state.sell_tab_rect.center if shop_ui.state.sell_tab_rect else (400, 150)
+            shop_ui.state.sell_tab_rect.center
+            if shop_ui.state.sell_tab_rect
+            else (400, 150)
         )
 
         shop_ui.handle_input(event, shop, warrior)
@@ -326,7 +332,9 @@ class TestShopUIBuying:
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 1
         event.pos = (
-            shop_ui.state.buy_button_rect.center if shop_ui.state.buy_button_rect else (400, 500)
+            shop_ui.state.buy_button_rect.center
+            if shop_ui.state.buy_button_rect
+            else (400, 500)
         )
 
         shop_ui.handle_input(event, shop, warrior)
@@ -412,7 +420,8 @@ class TestShopUIBuying:
             shop_ui.state.confirmation_dialog["callback"]()
             # Should show error message
             assert (
-                "gold" in shop_ui.state.message.lower() or "funds" in shop_ui.state.message.lower()
+                "gold" in shop_ui.state.message.lower()
+                or "funds" in shop_ui.state.message.lower()
             )
 
     def test_buy_inventory_full(self, shop_ui, shop, warrior):  # noqa: PBR008
@@ -449,7 +458,9 @@ class TestShopUISelling:
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 1
         event.pos = (
-            shop_ui.state.sell_button_rect.center if shop_ui.state.sell_button_rect else (400, 500)
+            shop_ui.state.sell_button_rect.center
+            if shop_ui.state.sell_button_rect
+            else (400, 500)
         )
 
         shop_ui.handle_input(event, shop, warrior)
@@ -470,7 +481,9 @@ class TestShopUISelling:
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 1
         event.pos = (
-            shop_ui.state.sell_button_rect.center if shop_ui.state.sell_button_rect else (400, 500)
+            shop_ui.state.sell_button_rect.center
+            if shop_ui.state.sell_button_rect
+            else (400, 500)
         )
 
         shop_ui.handle_input(event, shop, warrior)
@@ -548,7 +561,10 @@ class TestShopUISelling:
 
         shop_ui._handle_sell_click(shop, warrior)
         # Should show error message, not confirmation
-        assert "cannot" in shop_ui.state.message.lower() or "sold" in shop_ui.state.message.lower()
+        assert (
+            "cannot" in shop_ui.state.message.lower()
+            or "sold" in shop_ui.state.message.lower()
+        )
 
 
 class TestShopUIItemInfo:
@@ -679,7 +695,10 @@ class TestShopUIEdgeCases:
         """Test drawing with empty player inventory"""
         shop_ui.state.active_tab = "sell"
         shop_ui.draw(mock_screen, shop, warrior)
-        assert len(shop_ui.state.item_rects) == 0 or warrior.inventory.get_all_items() == []
+        assert (
+            len(shop_ui.state.item_rects) == 0
+            or warrior.inventory.get_all_items() == []
+        )
 
     def test_handle_input_returns_false_for_unknown_event(self, shop_ui, shop, warrior):
         """Test that unknown events return False"""
