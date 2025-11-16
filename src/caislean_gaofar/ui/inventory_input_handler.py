@@ -213,7 +213,9 @@ class InventoryInputHandler:
             return  # Nothing to move
 
         # Use UI's _place_item_in_slot if available (for testability), otherwise use our own
-        place_func = self.ui._place_item_in_slot if self.ui else self._place_item_in_slot
+        place_func = (
+            self.ui._place_item_in_slot if self.ui else self._place_item_in_slot
+        )
 
         # Try to place from_item in to_slot
         success = place_func(inventory, from_item, to_type, to_index)

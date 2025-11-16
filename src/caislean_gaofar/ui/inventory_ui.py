@@ -188,8 +188,12 @@ class InventoryUI:
 
         # Draw base UI elements
         self.renderer._draw_base_ui(screen, panel_x, panel_y)
-        self.renderer._draw_equipment_section(screen, inventory, self.state, panel_x, panel_y + 60)
-        self.renderer._draw_backpack_section(screen, inventory, self.state, panel_x, panel_y + 200)
+        self.renderer._draw_equipment_section(
+            screen, inventory, self.state, panel_x, panel_y + 60
+        )
+        self.renderer._draw_backpack_section(
+            screen, inventory, self.state, panel_x, panel_y + 200
+        )
         self.renderer._draw_instructions(screen, panel_x, panel_y)
 
         # Draw tooltip if hovering (call through UI for testability)

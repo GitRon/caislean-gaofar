@@ -47,7 +47,9 @@ class TestInventoryRendererEdgeCases:
         renderer = InventoryRenderer()
         state = InventoryState()
         inventory = Inventory()
-        inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10, description="A sword")
+        inventory.weapon_slot = Item(
+            "Sword", ItemType.WEAPON, attack_bonus=10, description="A sword"
+        )
 
         # Set up hovered slot (so tooltip is drawn)
         state.hovered_slot = ("weapon", 0)
@@ -203,9 +205,12 @@ class TestInventoryInputHandlerEdgeCases:
 
         # Verify the position is on both the slot and the context menu option
         assert weapon_slot_rect.collidepoint(click_pos), "Click must be on weapon slot"
-        assert first_option_rect.collidepoint(click_pos), "Click must be on context menu option"
+        assert first_option_rect.collidepoint(click_pos), (
+            "Click must be on context menu option"
+        )
 
         from unittest.mock import Mock
+
         event = Mock()
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 3  # Right click
@@ -238,6 +243,7 @@ class TestInventoryInputHandlerEdgeCases:
         click_pos = weapon_slot_rect.center
 
         from unittest.mock import Mock
+
         event = Mock()
         event.type = pygame.MOUSEBUTTONDOWN
         event.button = 3  # Right click
@@ -285,6 +291,7 @@ class TestInventoryUIBackwardCompatibility:
 
         # Mock mouse click outside context menu
         from unittest.mock import patch
+
         with patch("pygame.mouse.get_pos", return_value=(100, 100)):
             with patch("pygame.mouse.get_pressed", return_value=(True, False, False)):
                 ui.draw(mock_screen, inventory)
