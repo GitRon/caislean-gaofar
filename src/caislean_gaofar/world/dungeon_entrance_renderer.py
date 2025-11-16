@@ -108,16 +108,37 @@ class DungeonEntranceRenderer:
 
         # Rocky edges (small circles)
         rock_positions = [
-            (x + int(size * UI.CAVE_ARCH_X_FRACTION), y + int(size * UI.CAVE_INNER_Y_FRACTION)),
-            (x + int(size * (UI.CAVE_ARCH_X_FRACTION + UI.CAVE_ARCH_WIDTH_FRACTION - UI.CAVE_ARCH_X_FRACTION)),
-             y + int(size * UI.CAVE_INNER_Y_FRACTION)),
-            (x + int(size * UI.CAVE_INNER_X_FRACTION), y + int(size * UI.CAVE_ARCH_Y_FRACTION)),
-            (x + int(size * (UI.CAVE_INNER_X_FRACTION + UI.CAVE_INNER_WIDTH_FRACTION)),
-             y + int(size * UI.CAVE_ARCH_Y_FRACTION)),
+            (
+                x + int(size * UI.CAVE_ARCH_X_FRACTION),
+                y + int(size * UI.CAVE_INNER_Y_FRACTION),
+            ),
+            (
+                x
+                + int(
+                    size
+                    * (
+                        UI.CAVE_ARCH_X_FRACTION
+                        + UI.CAVE_ARCH_WIDTH_FRACTION
+                        - UI.CAVE_ARCH_X_FRACTION
+                    )
+                ),
+                y + int(size * UI.CAVE_INNER_Y_FRACTION),
+            ),
+            (
+                x + int(size * UI.CAVE_INNER_X_FRACTION),
+                y + int(size * UI.CAVE_ARCH_Y_FRACTION),
+            ),
+            (
+                x
+                + int(size * (UI.CAVE_INNER_X_FRACTION + UI.CAVE_INNER_WIDTH_FRACTION)),
+                y + int(size * UI.CAVE_ARCH_Y_FRACTION),
+            ),
         ]
         rock_radius = int(size * UI.CAVE_ROCK_RADIUS_FRACTION)
         for rx, ry in rock_positions:
-            pygame.draw.circle(screen, UI.CAVE_ROCK_COLOR, (int(rx), int(ry)), rock_radius)
+            pygame.draw.circle(
+                screen, UI.CAVE_ROCK_COLOR, (int(rx), int(ry)), rock_radius
+            )
 
     def _draw_castle_entrance(self, screen: pygame.Surface, x: int, y: int, size: int):
         """
@@ -168,12 +189,23 @@ class DungeonEntranceRenderer:
 
         # Stone blocks pattern
         for i in range(3):
-            by = y + int(size * UI.CASTLE_GATE_Y_FRACTION) + i * int(size * UI.CASTLE_GATE_WIDTH_FRACTION / 3)
+            by = (
+                y
+                + int(size * UI.CASTLE_GATE_Y_FRACTION)
+                + i * int(size * UI.CASTLE_GATE_WIDTH_FRACTION / 3)
+            )
             pygame.draw.line(
                 screen,
                 UI.CASTLE_DARK_STONE,
                 (x + int(size * UI.CASTLE_GATE_X_FRACTION), by),
-                (x + int(size * (UI.CASTLE_GATE_X_FRACTION + UI.CASTLE_GATE_WIDTH_FRACTION)), by),
+                (
+                    x
+                    + int(
+                        size
+                        * (UI.CASTLE_GATE_X_FRACTION + UI.CASTLE_GATE_WIDTH_FRACTION)
+                    ),
+                    by,
+                ),
                 UI.BORDER_WIDTH_THIN,
             )
 
@@ -191,7 +223,9 @@ class DungeonEntranceRenderer:
         radius = size // 2
 
         # Background circle for visibility
-        Draw.draw_entrance_background_circle(screen, center, radius, UI.DUNGEON_BG_COLOR)
+        Draw.draw_entrance_background_circle(
+            screen, center, radius, UI.DUNGEON_BG_COLOR
+        )
 
         # Outer glow
         glow_radius = int(size * UI.DUNGEON_GLOW_RADIUS_FRACTION)

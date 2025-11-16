@@ -45,7 +45,10 @@ class UIDrawingUtils:
         ]
         for corner in corners:
             pygame.draw.circle(
-                surface, UIConstants.ORNATE_GOLD, corner, UIConstants.ORNATE_CORNER_RADIUS
+                surface,
+                UIConstants.ORNATE_GOLD,
+                corner,
+                UIConstants.ORNATE_CORNER_RADIUS,
             )
 
     @staticmethod
@@ -127,9 +130,7 @@ class UIDrawingUtils:
         if ornate:
             UIDrawingUtils.draw_ornate_border(surface, rect)
         elif border_color:
-            pygame.draw.rect(
-                surface, border_color, rect, UIConstants.BORDER_WIDTH_THIN
-            )
+            pygame.draw.rect(surface, border_color, rect, UIConstants.BORDER_WIDTH_THIN)
 
     @staticmethod
     def draw_progress_bar(
@@ -283,9 +284,7 @@ class UIDrawingUtils:
 
         # Draw button background
         pygame.draw.rect(surface, button_color, rect)
-        pygame.draw.rect(
-            surface, border_color, rect, UIConstants.BORDER_WIDTH_THIN
-        )
+        pygame.draw.rect(surface, border_color, rect, UIConstants.BORDER_WIDTH_THIN)
 
         # Draw button text (centered)
         text_surface = font.render(text, True, current_text_color)
@@ -320,7 +319,9 @@ class UIDrawingUtils:
 
         # Draw inner circle
         if inner_radius_offset > 0:
-            pygame.draw.circle(surface, inner_color, center, radius - inner_radius_offset)
+            pygame.draw.circle(
+                surface, inner_color, center, radius - inner_radius_offset
+            )
 
     @staticmethod
     def draw_message_box(
@@ -370,9 +371,7 @@ class UIDrawingUtils:
         # Draw background
         bg_rect = text_rect.inflate(padding * 2, padding * 2)
         pygame.draw.rect(surface, bg_color, bg_rect)
-        pygame.draw.rect(
-            surface, border_color, bg_rect, UIConstants.BORDER_WIDTH_THIN
-        )
+        pygame.draw.rect(surface, border_color, bg_rect, UIConstants.BORDER_WIDTH_THIN)
 
         # Draw text
         surface.blit(text_surface, text_rect)

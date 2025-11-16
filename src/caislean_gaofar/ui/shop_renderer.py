@@ -183,7 +183,9 @@ class ShopRenderer:
             list_height,
         )
         pygame.draw.rect(screen, UI.SHOP_LIST_BG_COLOR, list_rect)
-        pygame.draw.rect(screen, config.SHOP_BORDER_COLOR, list_rect, UI.BORDER_WIDTH_THIN)
+        pygame.draw.rect(
+            screen, config.SHOP_BORDER_COLOR, list_rect, UI.BORDER_WIDTH_THIN
+        )
 
         # Enable clipping to prevent overflow
         original_clip = screen.get_clip()
@@ -227,7 +229,9 @@ class ShopRenderer:
                 bg_color = UI.SHOP_ITEM_BG_COLOR
 
             pygame.draw.rect(screen, bg_color, item_rect)
-            pygame.draw.rect(screen, config.SHOP_BORDER_COLOR, item_rect, UI.BORDER_WIDTH_MINIMAL)
+            pygame.draw.rect(
+                screen, config.SHOP_BORDER_COLOR, item_rect, UI.BORDER_WIDTH_MINIMAL
+            )
 
             # Draw item info
             self._draw_item_info(
@@ -274,7 +278,9 @@ class ShopRenderer:
             list_height,
         )
         pygame.draw.rect(screen, UI.SHOP_LIST_BG_COLOR, list_rect)
-        pygame.draw.rect(screen, config.SHOP_BORDER_COLOR, list_rect, UI.BORDER_WIDTH_THIN)
+        pygame.draw.rect(
+            screen, config.SHOP_BORDER_COLOR, list_rect, UI.BORDER_WIDTH_THIN
+        )
 
         # Enable clipping to prevent overflow
         original_clip = screen.get_clip()
@@ -318,7 +324,9 @@ class ShopRenderer:
                 bg_color = UI.SHOP_ITEM_BG_COLOR
 
             pygame.draw.rect(screen, bg_color, item_rect)
-            pygame.draw.rect(screen, config.SHOP_BORDER_COLOR, item_rect, UI.BORDER_WIDTH_MINIMAL)
+            pygame.draw.rect(
+                screen, config.SHOP_BORDER_COLOR, item_rect, UI.BORDER_WIDTH_MINIMAL
+            )
 
             # Draw item info for selling
             self._draw_item_info_sell(screen, item_rect, item)
@@ -347,7 +355,9 @@ class ShopRenderer:
         screen.blit(name_text, (item_rect.x + padding, item_rect.y + padding))
 
         # Description
-        desc_text = self.desc_font.render(item.description, True, UI.SHOP_ITEM_DESC_COLOR)
+        desc_text = self.desc_font.render(
+            item.description, True, UI.SHOP_ITEM_DESC_COLOR
+        )
         screen.blit(desc_text, (item_rect.x + padding, item_rect.y + padding + 22))
 
         # Stats
@@ -395,7 +405,9 @@ class ShopRenderer:
         screen.blit(name_text, (item_rect.x + padding, item_rect.y + padding))
 
         # Description
-        desc_text = self.desc_font.render(item.description, True, UI.SHOP_ITEM_DESC_COLOR)
+        desc_text = self.desc_font.render(
+            item.description, True, UI.SHOP_ITEM_DESC_COLOR
+        )
         screen.blit(desc_text, (item_rect.x + padding, item_rect.y + padding + 22))
 
         # Stats
@@ -497,9 +509,7 @@ class ShopRenderer:
         dialog_surface = pygame.Surface(
             (UI.SHOP_DIALOG_WIDTH, UI.SHOP_DIALOG_HEIGHT), pygame.SRCALPHA
         )
-        dialog_surface.fill(
-            (*UI.SHOP_DIALOG_BG_COLOR, UI.SHOP_DIALOG_BG_ALPHA)
-        )
+        dialog_surface.fill((*UI.SHOP_DIALOG_BG_COLOR, UI.SHOP_DIALOG_BG_ALPHA))
         screen.blit(dialog_surface, (dialog_x, dialog_y))
         pygame.draw.rect(
             screen,
@@ -518,12 +528,25 @@ class ShopRenderer:
             screen.blit(text, (text_x, text_y))
 
         # Draw buttons
-        button_y = dialog_y + UI.SHOP_DIALOG_HEIGHT - UI.SHOP_DIALOG_BUTTON_HEIGHT - UI.SHOP_DIALOG_BUTTON_MARGIN
+        button_y = (
+            dialog_y
+            + UI.SHOP_DIALOG_HEIGHT
+            - UI.SHOP_DIALOG_BUTTON_HEIGHT
+            - UI.SHOP_DIALOG_BUTTON_MARGIN
+        )
 
         # Yes button
-        yes_button_x = dialog_x + UI.SHOP_DIALOG_WIDTH // 2 - UI.SHOP_DIALOG_BUTTON_WIDTH - UI.SHOP_DIALOG_BUTTON_SPACING
+        yes_button_x = (
+            dialog_x
+            + UI.SHOP_DIALOG_WIDTH // 2
+            - UI.SHOP_DIALOG_BUTTON_WIDTH
+            - UI.SHOP_DIALOG_BUTTON_SPACING
+        )
         yes_button_rect = pygame.Rect(
-            yes_button_x, button_y, UI.SHOP_DIALOG_BUTTON_WIDTH, UI.SHOP_DIALOG_BUTTON_HEIGHT
+            yes_button_x,
+            button_y,
+            UI.SHOP_DIALOG_BUTTON_WIDTH,
+            UI.SHOP_DIALOG_BUTTON_HEIGHT,
         )
         mouse_pos = pygame.mouse.get_pos()
         yes_hovered = yes_button_rect.collidepoint(mouse_pos)
@@ -538,9 +561,14 @@ class ShopRenderer:
         )
 
         # No button
-        no_button_x = dialog_x + UI.SHOP_DIALOG_WIDTH // 2 + UI.SHOP_DIALOG_BUTTON_SPACING
+        no_button_x = (
+            dialog_x + UI.SHOP_DIALOG_WIDTH // 2 + UI.SHOP_DIALOG_BUTTON_SPACING
+        )
         no_button_rect = pygame.Rect(
-            no_button_x, button_y, UI.SHOP_DIALOG_BUTTON_WIDTH, UI.SHOP_DIALOG_BUTTON_HEIGHT
+            no_button_x,
+            button_y,
+            UI.SHOP_DIALOG_BUTTON_WIDTH,
+            UI.SHOP_DIALOG_BUTTON_HEIGHT,
         )
         no_hovered = no_button_rect.collidepoint(mouse_pos)
 
@@ -601,7 +629,9 @@ class ShopRenderer:
 
         # Draw scroll hint text if at top
         if state.scroll_offset == 0 and num_items > 4:
-            hint_text = self.small_font.render("Scroll ↓", True, UI.SHOP_SCROLL_HINT_COLOR)
+            hint_text = self.small_font.render(
+                "Scroll ↓", True, UI.SHOP_SCROLL_HINT_COLOR
+            )
             hint_x = scrollbar_x - hint_text.get_width() - 10
             hint_y = list_y + list_height - 25
             screen.blit(hint_text, (hint_x, hint_y))

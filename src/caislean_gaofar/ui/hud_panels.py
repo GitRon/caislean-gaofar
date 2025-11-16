@@ -40,9 +40,7 @@ class HealthPanelRenderer:
         panel_width = self.hud_width - UI.HUD_PANEL_WIDTH_OFFSET
         panel_x = self.hud_x + UI.HUD_PANEL_PADDING
         panel_y = self.hud_y + UI.HEALTH_PANEL_Y
-        panel_rect = pygame.Rect(
-            panel_x, panel_y, panel_width, UI.HEALTH_PANEL_HEIGHT
-        )
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, UI.HEALTH_PANEL_HEIGHT)
 
         # Draw panel
         Draw.draw_panel(screen, panel_rect)
@@ -115,15 +113,19 @@ class PotionPanelRenderer:
                 * (state.potion_glow_timer / state.potion_glow_duration)
             )
             glow_surface = pygame.Surface(
-                (UI.POTION_ICON_SIZE + UI.POTION_GLOW_RADIUS_OFFSET,
-                 UI.POTION_ICON_SIZE + UI.POTION_GLOW_RADIUS_OFFSET)
+                (
+                    UI.POTION_ICON_SIZE + UI.POTION_GLOW_RADIUS_OFFSET,
+                    UI.POTION_ICON_SIZE + UI.POTION_GLOW_RADIUS_OFFSET,
+                )
             )
             glow_surface.set_alpha(glow_alpha)
             pygame.draw.circle(
                 glow_surface,
                 UI.POTION_GLOW_COLOR,
-                (UI.POTION_ICON_SIZE // 2 + UI.POTION_GLOW_OFFSET,
-                 UI.POTION_ICON_SIZE // 2 + UI.POTION_GLOW_OFFSET),
+                (
+                    UI.POTION_ICON_SIZE // 2 + UI.POTION_GLOW_OFFSET,
+                    UI.POTION_ICON_SIZE // 2 + UI.POTION_GLOW_OFFSET,
+                ),
                 UI.POTION_ICON_SIZE // 2 + UI.POTION_GLOW_OFFSET,
             )
             screen.blit(
@@ -297,9 +299,7 @@ class StatPanelRenderer:
         panel_width = self.hud_width - UI.HUD_PANEL_WIDTH_OFFSET
         panel_x = self.hud_x + UI.HUD_PANEL_PADDING
         panel_y = self.hud_y + UI.DEFENSE_PANEL_Y
-        panel_rect = pygame.Rect(
-            panel_x, panel_y, panel_width, UI.DEFENSE_PANEL_HEIGHT
-        )
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, UI.DEFENSE_PANEL_HEIGHT)
 
         Draw.draw_panel(screen, panel_rect)
 
@@ -333,7 +333,9 @@ class StatPanelRenderer:
         # Pommel
         pygame.draw.circle(screen, UI.SWORD_HANDLE_COLOR, (icon_x, icon_y + 28), 4)
 
-    def _draw_shield_icon(self, screen: pygame.Surface, icon_center_x: int, icon_center_y: int):
+    def _draw_shield_icon(
+        self, screen: pygame.Surface, icon_center_x: int, icon_center_y: int
+    ):
         """Draw a shield icon."""
         shield_points = [
             (icon_center_x, icon_center_y - 15),
@@ -450,8 +452,12 @@ class InventoryPanelRenderer:
         pygame.draw.rect(screen, UI.BAG_BORDER, flap_rect, UI.BORDER_WIDTH_THIN)
 
         # Backpack straps
-        pygame.draw.line(screen, UI.BAG_BORDER, (icon_x + 12, icon_y), (icon_x + 12, icon_y + 8), 3)
-        pygame.draw.line(screen, UI.BAG_BORDER, (icon_x + 28, icon_y), (icon_x + 28, icon_y + 8), 3)
+        pygame.draw.line(
+            screen, UI.BAG_BORDER, (icon_x + 12, icon_y), (icon_x + 12, icon_y + 8), 3
+        )
+        pygame.draw.line(
+            screen, UI.BAG_BORDER, (icon_x + 28, icon_y), (icon_x + 28, icon_y + 8), 3
+        )
 
         # Buckle/clasp
         pygame.draw.circle(screen, UI.ORNATE_GOLD, (icon_x + 20, icon_y + 15), 3)
@@ -485,8 +491,12 @@ class SkillsPanelRenderer:
         if skill_points > 0:
             badge_x = icon_x + UI.SKILL_BADGE_X_OFFSET
             badge_y = icon_y + UI.SKILL_BADGE_Y_OFFSET
-            pygame.draw.circle(screen, config.RED, (badge_x, badge_y), UI.SKILL_BADGE_RADIUS)
-            pygame.draw.circle(screen, config.WHITE, (badge_x, badge_y), UI.SKILL_BADGE_RADIUS, 1)
+            pygame.draw.circle(
+                screen, config.RED, (badge_x, badge_y), UI.SKILL_BADGE_RADIUS
+            )
+            pygame.draw.circle(
+                screen, config.WHITE, (badge_x, badge_y), UI.SKILL_BADGE_RADIUS, 1
+            )
 
             font_badge = pygame.font.Font(None, UI.FONT_SIZE_HINT)
             badge_text = font_badge.render(str(skill_points), True, config.WHITE)
@@ -547,7 +557,13 @@ class WarningRenderer:
         # Pulsing red vignette effect
         alpha = int(
             UI.CRITICAL_HEALTH_ALPHA_BASE
-            * (0.5 + 0.5 * math.sin(state.critical_health_timer / UI.CRITICAL_HEALTH_PULSE_DIVISOR))
+            * (
+                0.5
+                + 0.5
+                * math.sin(
+                    state.critical_health_timer / UI.CRITICAL_HEALTH_PULSE_DIVISOR
+                )
+            )
         )
 
         # Create semi-transparent red overlay at game area edges
@@ -558,20 +574,34 @@ class WarningRenderer:
         # Draw vignette (darker at edges)
         vignette_width = UI.CRITICAL_HEALTH_VIGNETTE_WIDTH
         # Top
-        pygame.draw.rect(overlay, UI.HEALTH_CRITICAL, (0, 0, config.GAME_AREA_WIDTH, vignette_width))
+        pygame.draw.rect(
+            overlay, UI.HEALTH_CRITICAL, (0, 0, config.GAME_AREA_WIDTH, vignette_width)
+        )
         # Bottom
         pygame.draw.rect(
             overlay,
             UI.HEALTH_CRITICAL,
-            (0, config.GAME_AREA_HEIGHT - vignette_width, config.GAME_AREA_WIDTH, vignette_width),
+            (
+                0,
+                config.GAME_AREA_HEIGHT - vignette_width,
+                config.GAME_AREA_WIDTH,
+                vignette_width,
+            ),
         )
         # Left
-        pygame.draw.rect(overlay, UI.HEALTH_CRITICAL, (0, 0, vignette_width, config.GAME_AREA_HEIGHT))
+        pygame.draw.rect(
+            overlay, UI.HEALTH_CRITICAL, (0, 0, vignette_width, config.GAME_AREA_HEIGHT)
+        )
         # Right
         pygame.draw.rect(
             overlay,
             UI.HEALTH_CRITICAL,
-            (config.GAME_AREA_WIDTH - vignette_width, 0, vignette_width, config.GAME_AREA_HEIGHT),
+            (
+                config.GAME_AREA_WIDTH - vignette_width,
+                0,
+                vignette_width,
+                config.GAME_AREA_HEIGHT,
+            ),
         )
 
         screen.blit(overlay, (0, 0))
@@ -583,7 +613,10 @@ class WarningRenderer:
                 screen,
                 font_warning,
                 "LOW HEALTH!",
-                (config.GAME_AREA_WIDTH // 2, config.GAME_AREA_HEIGHT - UI.CRITICAL_HEALTH_TEXT_Y),
+                (
+                    config.GAME_AREA_WIDTH // 2,
+                    config.GAME_AREA_HEIGHT - UI.CRITICAL_HEALTH_TEXT_Y,
+                ),
                 UI.HEALTH_CRITICAL,
                 centered=True,
             )
