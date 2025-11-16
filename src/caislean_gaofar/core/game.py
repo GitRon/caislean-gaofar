@@ -21,6 +21,7 @@ from caislean_gaofar.core.game_state_manager import GameStateManager
 from caislean_gaofar.utils.event_dispatcher import EventDispatcher
 from caislean_gaofar.core.game_loop import GameLoop
 from caislean_gaofar.world.dungeon_transition_manager import DungeonTransitionManager
+from caislean_gaofar.utils.event_context import EventContext
 
 
 class Game:
@@ -160,8 +161,8 @@ class Game:
 
     def handle_events(self):
         """Handle pygame events."""
-        # Use event dispatcher for all event handling
-        self.event_dispatcher.handle_events(
+        # Create event context
+        ctx = EventContext(
             warrior=self.warrior,
             game_state_manager=self.state_manager,
             turn_processor=self.turn_processor,
@@ -181,14 +182,8 @@ class Game:
             inventory_game_ref=self,
         )
 
-        # Handle skill UI input separately (skills screen)
-        for event in pygame.event.get():
-            if self.state_manager.state == config.STATE_SKILLS:
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Left click - learn skill
-                        self.skill_ui.handle_click(event.pos, self.warrior, False)
-                    elif event.button == 3:  # Right click - set active
-                        self.skill_ui.handle_click(event.pos, self.warrior, True)
+        # Use event dispatcher for all event handling
+        self.event_dispatcher.handle_events(ctx)
 
     def restart(self):
         """Restart the game."""
