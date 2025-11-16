@@ -153,7 +153,7 @@ class TestGame:
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
     def test_drop_item(self, mock_caption, mock_clock, mock_display):
-        """Test dropping an item (items no longer appear on ground)"""
+        """Test dropping an item creates a ground item"""
         # Arrange
         game = Game()
         item = Item(
@@ -163,9 +163,12 @@ class TestGame:
         # Act
         game.drop_item(item, 5, 5)
 
-        # Assert - dropped items no longer appear on the ground
+        # Assert - dropped items appear on the ground
         dropped_item = game.get_item_at_position(5, 5)
-        assert dropped_item is None
+        assert dropped_item is not None
+        assert dropped_item.item == item
+        assert dropped_item.grid_x == 5
+        assert dropped_item.grid_y == 5
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
@@ -189,20 +192,21 @@ class TestGame:
     def test_pickup_item_at_position_success(
         self, mock_caption, mock_clock, mock_display
     ):
-        """Test picking up an item (items no longer drop on ground)"""
+        """Test picking up an item from the ground"""
         # Arrange
         game = Game()
         item = Item(
             name="Test Item", item_type=ItemType.MISC, description="A test item"
         )
-        # Dropped items no longer appear on the ground
+        # Drop item on the ground
         game.drop_item(item, 5, 5)
 
         # Act
         success = game.pickup_item_at_position(5, 5)
 
-        # Assert - no item on ground to pick up
-        assert success is False
+        # Assert - item successfully picked up
+        assert success is True
+        assert item in game.warrior.inventory.get_all_items()
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
@@ -507,7 +511,7 @@ class TestGame:
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
     def test_handle_pickup_item(self, mock_caption, mock_clock, mock_display):
-        """Test pickup item event handler (items no longer appear on ground)"""
+        """Test pickup item event handler"""
         # Arrange
         game = Game()
         item = Item(
@@ -518,8 +522,9 @@ class TestGame:
         # Act
         game._handle_pickup_item(5, 5)
 
-        # Assert - no item on ground since drop_item now does nothing
+        # Assert - item picked up and no longer on ground
         assert game.get_item_at_position(5, 5) is None
+        assert item in game.warrior.inventory.get_all_items()
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")

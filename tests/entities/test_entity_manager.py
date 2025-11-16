@@ -173,7 +173,7 @@ class TestEntityManager:
         assert len(manager.chests) == 3
 
     def test_drop_item(self):
-        """Test dropping an item (no longer creates ground items)."""
+        """Test dropping an item creates a ground item."""
         # Arrange
         manager = EntityManager()
         item = Item("Test Item", ItemType.MISC)
@@ -181,19 +181,18 @@ class TestEntityManager:
         # Act
         manager.drop_item(item, 5, 10)
 
-        # Assert - drop_item now does nothing
-        assert len(manager.ground_items) == 0
+        # Assert
+        assert len(manager.ground_items) == 1
+        assert manager.ground_items[0].item == item
+        assert manager.ground_items[0].grid_x == 5
+        assert manager.ground_items[0].grid_y == 10
 
     def test_get_item_at_position_found(self):
         """Test getting an item at a position when one exists."""
         # Arrange
         manager = EntityManager()
         item = Item("Test Item", ItemType.MISC)
-        # Create ground item manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        ground_item = GroundItem(item, 5, 10)
-        manager.ground_items.append(ground_item)
+        manager.drop_item(item, 5, 10)
 
         # Act
         result = manager.get_item_at_position(5, 10)
@@ -218,11 +217,7 @@ class TestEntityManager:
         # Arrange
         manager = EntityManager()
         gold_item = Item("Gold", ItemType.MISC, gold_value=50)
-        # Create ground item manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        ground_item = GroundItem(gold_item, 5, 10)
-        manager.ground_items.append(ground_item)
+        manager.drop_item(gold_item, 5, 10)
 
         warrior = Mock()
         warrior.add_gold = Mock()
@@ -241,11 +236,7 @@ class TestEntityManager:
         # Arrange
         manager = EntityManager()
         item = Item("Sword", ItemType.WEAPON)
-        # Create ground item manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        ground_item = GroundItem(item, 5, 10)
-        manager.ground_items.append(ground_item)
+        manager.drop_item(item, 5, 10)
 
         warrior = Mock()
         warrior.inventory.add_item.return_value = True
@@ -264,11 +255,7 @@ class TestEntityManager:
         # Arrange
         manager = EntityManager()
         item = Item("Sword", ItemType.WEAPON)
-        # Create ground item manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        ground_item = GroundItem(item, 5, 10)
-        manager.ground_items.append(ground_item)
+        manager.drop_item(item, 5, 10)
 
         warrior = Mock()
         warrior.inventory.add_item.return_value = False
@@ -414,11 +401,7 @@ class TestEntityManager:
         # Arrange
         manager = EntityManager()
         gold_item = Item("Gold", ItemType.MISC, gold_value=100)
-        # Create ground item manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        ground_item = GroundItem(gold_item, 5, 10)
-        manager.ground_items.append(ground_item)
+        manager.drop_item(gold_item, 5, 10)
 
         warrior = Mock()
         warrior.grid_x = 5
@@ -439,11 +422,7 @@ class TestEntityManager:
         # Arrange
         manager = EntityManager()
         item = Item("Potion", ItemType.CONSUMABLE)
-        # Create ground item manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        ground_item = GroundItem(item, 5, 10)
-        manager.ground_items.append(ground_item)
+        manager.drop_item(item, 5, 10)
 
         warrior = Mock()
         warrior.grid_x = 5
@@ -463,11 +442,7 @@ class TestEntityManager:
         # Arrange
         manager = EntityManager()
         item = Item("Potion", ItemType.CONSUMABLE)
-        # Create ground item manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        ground_item = GroundItem(item, 5, 10)
-        manager.ground_items.append(ground_item)
+        manager.drop_item(item, 5, 10)
 
         warrior = Mock()
         warrior.grid_x = 5
@@ -503,11 +478,8 @@ class TestEntityManager:
         manager = EntityManager()
         item1 = Item("Item1", ItemType.MISC)
         item2 = Item("Item2", ItemType.MISC)
-        # Create ground items manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        manager.ground_items.append(GroundItem(item1, 1, 1))
-        manager.ground_items.append(GroundItem(item2, 2, 2))
+        manager.drop_item(item1, 1, 1)
+        manager.drop_item(item2, 2, 2)
 
         # Act
         manager.clear_ground_items()
@@ -615,11 +587,8 @@ class TestEntityManager:
         manager = EntityManager()
         item1 = Item("Item1", ItemType.MISC)
         item2 = Item("Item2", ItemType.MISC)
-        # Create ground items manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        manager.ground_items.append(GroundItem(item1, 5, 10))
-        manager.ground_items.append(GroundItem(item2, 6, 11))
+        manager.drop_item(item1, 5, 10)
+        manager.drop_item(item2, 6, 11)
 
         # Act - get second item (loop must continue past first)
         result = manager.get_item_at_position(6, 11)
@@ -634,11 +603,8 @@ class TestEntityManager:
         manager = EntityManager()
         item1 = Item("Item1", ItemType.MISC)
         item2 = Item("Item2", ItemType.MISC)
-        # Create ground items manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        manager.ground_items.append(GroundItem(item1, 5, 10))
-        manager.ground_items.append(GroundItem(item2, 6, 11))
+        manager.drop_item(item1, 5, 10)
+        manager.drop_item(item2, 6, 11)
 
         warrior = Mock()
         warrior.inventory.add_item.return_value = True
@@ -656,11 +622,8 @@ class TestEntityManager:
         manager = EntityManager()
         item1 = Item("Item1", ItemType.MISC)
         item2 = Item("Item2", ItemType.MISC)
-        # Create ground items manually since drop_item no longer works
-        from caislean_gaofar.objects.ground_item import GroundItem
-
-        manager.ground_items.append(GroundItem(item1, 5, 10))
-        manager.ground_items.append(GroundItem(item2, 6, 11))
+        manager.drop_item(item1, 5, 10)
+        manager.drop_item(item2, 6, 11)
 
         warrior = Mock()
         warrior.grid_x = 6

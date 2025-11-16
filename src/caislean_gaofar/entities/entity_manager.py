@@ -152,9 +152,8 @@ class EntityManager:
             grid_x: Grid x position
             grid_y: Grid y position
         """
-        # Items that are dropped disappear completely (UX improvement)
-        # No longer create ground items when dropping from inventory
-        pass
+        ground_item = GroundItem(item, grid_x, grid_y)
+        self.ground_items.append(ground_item)
 
     def get_item_at_position(self, grid_x: int, grid_y: int) -> Optional[GroundItem]:
         """
