@@ -262,6 +262,3 @@ class InventoryInputHandler:
                 inventory.equip_from_backpack(slot_index)
         elif action == "Drop":
             inventory.remove_item_from_slot(slot_type, slot_index)
-        elif action == "Inspect":
-            # Select the slot to show it's being inspected
-            self.state.selected_slot = self.state.context_menu_slot

@@ -154,8 +154,8 @@ class TestInventoryRendererEdgeCases:
         state.context_menu_pos = (400, 300)
 
         result = renderer.get_context_menu_rects(state, inventory)
-        # Should have Drop and Inspect, but not Equip
-        assert len(result) == 2
+        # Should have Drop option only (no Equip, no Inspect)
+        assert len(result) == 1
 
     def test_get_item_from_slot_invalid_type(self):
         """Test _get_item_from_slot with invalid slot type (line 442)"""

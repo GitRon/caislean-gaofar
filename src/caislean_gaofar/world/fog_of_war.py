@@ -97,7 +97,7 @@ class FogOfWar:
             map_id: Map identifier
 
         Returns:
-            True if fog of war is enabled (dungeons only, not world map)
+            True if fog of war is enabled (dungeons only, not world map or town)
         """
-        # Fog of war is enabled for all maps except the world/overworld
-        return map_id != "world" and map_id != "overworld"
+        # Fog of war is enabled for all maps except the world/overworld and town
+        return map_id != "world" and map_id != "overworld" and map_id != "town"

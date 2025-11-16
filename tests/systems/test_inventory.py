@@ -15,7 +15,7 @@ class TestInventory:
         # Assert
         assert inventory.weapon_slot is None
         assert inventory.armor_slot is None
-        assert inventory.backpack_slots == [None] * 13
+        assert inventory.backpack_slots == [None] * 10
 
     def test_add_item_weapon_to_empty_weapon_slot(self):
         """Test adding weapon to empty weapon slot"""
@@ -547,7 +547,7 @@ class TestInventory:
         inventory = Inventory()
         inventory.weapon_slot = Item("Sword", ItemType.WEAPON)
         inventory.armor_slot = Item("Shield", ItemType.ARMOR)
-        for i in range(13):
+        for i in range(10):
             inventory.backpack_slots[i] = Item(f"Item{i}", ItemType.MISC)
 
         # Act & Assert

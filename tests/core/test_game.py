@@ -153,7 +153,7 @@ class TestGame:
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
     def test_drop_item(self, mock_caption, mock_clock, mock_display):
-        """Test dropping an item"""
+        """Test dropping an item (items no longer appear on ground)"""
         # Arrange
         game = Game()
         item = Item(
@@ -163,10 +163,9 @@ class TestGame:
         # Act
         game.drop_item(item, 5, 5)
 
-        # Assert
+        # Assert - dropped items no longer appear on the ground
         dropped_item = game.get_item_at_position(5, 5)
-        assert dropped_item is not None
-        assert dropped_item.item.name == "Test Item"
+        assert dropped_item is None
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
@@ -190,20 +189,20 @@ class TestGame:
     def test_pickup_item_at_position_success(
         self, mock_caption, mock_clock, mock_display
     ):
-        """Test picking up an item successfully"""
+        """Test picking up an item (items no longer drop on ground)"""
         # Arrange
         game = Game()
         item = Item(
             name="Test Item", item_type=ItemType.MISC, description="A test item"
         )
+        # Dropped items no longer appear on the ground
         game.drop_item(item, 5, 5)
 
         # Act
         success = game.pickup_item_at_position(5, 5)
 
-        # Assert
-        assert success is True
-        assert game.get_item_at_position(5, 5) is None
+        # Assert - no item on ground to pick up
+        assert success is False
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
@@ -508,7 +507,7 @@ class TestGame:
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
     def test_handle_pickup_item(self, mock_caption, mock_clock, mock_display):
-        """Test pickup item event handler"""
+        """Test pickup item event handler (items no longer appear on ground)"""
         # Arrange
         game = Game()
         item = Item(
@@ -519,7 +518,7 @@ class TestGame:
         # Act
         game._handle_pickup_item(5, 5)
 
-        # Assert
+        # Assert - no item on ground since drop_item now does nothing
         assert game.get_item_at_position(5, 5) is None
 
     @patch("pygame.display.set_mode")
