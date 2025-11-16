@@ -1236,21 +1236,22 @@ class TestGame:
     def test_update_with_return_portal_collision(
         self, mock_caption, mock_clock, mock_display
     ):
-        """Test update() when return portal collision is detected (lines 248-249)"""
+        """Test update() when return portal collision is detected"""
         # Arrange
         game = Game()
         game.state_manager.state = config.STATE_PLAYING
 
-        # Mock check_return_portal_collision to return True
+        # Mock check_return_portal_collision in state_coordinator to return True
         with patch.object(
-            game.state_manager, "check_return_portal_collision", return_value=True
+            game.state_coordinator.state_manager, "check_return_portal_collision", return_value=True
         ):
-            # Mock _handle_use_return_portal to track if it's called
-            with patch.object(game, "_handle_use_return_portal") as mock_portal:
+            # Mock _handle_return_portal to track if behavior occurs
+            with patch.object(game.state_coordinator, "_handle_return_portal") as mock_portal:
+                mock_portal.return_value = (game.camera, game.world_map)
                 # Act
                 game.update(0.016)
 
-                # Assert
+                # Assert - verify the handler was called
                 mock_portal.assert_called_once()
 
     @patch("pygame.display.set_mode")

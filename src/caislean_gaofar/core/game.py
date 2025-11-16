@@ -1,121 +1,65 @@
-"""Main game class and game loop."""
+"""Main game class - thin facade coordinating game components."""
 
-import pygame
-import os
-from caislean_gaofar.entities.warrior import Warrior
-from caislean_gaofar.objects.shop import Shop
-from caislean_gaofar.ui.skill_ui import SkillUI
-from caislean_gaofar.objects.item import Item, ItemType
-from caislean_gaofar.world.camera import Camera
+from caislean_gaofar.objects.item import Item
 from caislean_gaofar.objects.ground_item import GroundItem
-from caislean_gaofar.world.dungeon_manager import DungeonManager
-from caislean_gaofar.objects.temple import Temple
-from caislean_gaofar.world.fog_of_war import FogOfWar
-from caislean_gaofar.core import config
+from caislean_gaofar.world.camera import Camera
+from caislean_gaofar.entities.warrior import Warrior
 
-# Import new component classes
-from caislean_gaofar.entities.entity_manager import EntityManager
-from caislean_gaofar.systems.turn_processor import TurnProcessor
-from caislean_gaofar.world.world_renderer import WorldRenderer
-from caislean_gaofar.core.game_state_manager import GameStateManager
-from caislean_gaofar.utils.event_dispatcher import EventDispatcher
-from caislean_gaofar.core.game_loop import GameLoop
-from caislean_gaofar.world.dungeon_transition_manager import DungeonTransitionManager
+# Import coordinator and initializer classes
+from caislean_gaofar.core.game_initializer import GameInitializer
+from caislean_gaofar.core.game_state_coordinator import GameStateCoordinator
+from caislean_gaofar.core.game_render_coordinator import GameRenderCoordinator
 from caislean_gaofar.utils.event_context import EventContext
 
 
 class Game:
-    """Main game class that manages the game loop and state."""
+    """Thin facade that coordinates game components."""
 
     def __init__(self, map_file: str = None):
         """
-        Initialize the game.
+        Initialize the game by delegating to GameInitializer.
 
         Args:
             map_file: Optional path to map JSON file. If None, uses default map.
         """
-        pygame.init()
-        self.screen = pygame.display.set_mode(
-            (config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
-        )
-        pygame.display.set_caption(config.TITLE)
-        self.clock = pygame.time.Clock()
+        # Initialize all subsystems using GameInitializer
+        initializer = GameInitializer(map_file)
+        components = initializer.initialize()
 
-        # Initialize new component systems
-        self.entity_manager = EntityManager()
-        self.turn_processor = TurnProcessor()
-        self.renderer = WorldRenderer(self.screen)
-        self.state_manager = GameStateManager()
-        self.event_dispatcher = EventDispatcher()
-        self.game_loop = GameLoop(self.clock)
-        self.dungeon_transition_manager = DungeonTransitionManager()
+        # Store component references
+        self.screen = components.screen
+        self.clock = components.clock
+        self.entity_manager = components.entity_manager
+        self.turn_processor = components.turn_processor
+        self.renderer = components.renderer
+        self.state_manager = components.state_manager
+        self.event_dispatcher = components.event_dispatcher
+        self.game_loop = components.game_loop
+        self.dungeon_transition_manager = components.dungeon_transition_manager
+        self.dungeon_manager = components.dungeon_manager
+        self.world_map = components.world_map
+        self.camera = components.camera
+        self.fog_of_war = components.fog_of_war
+        self.warrior = components.warrior
+        self.shop = components.shop
+        self.temple = components.temple
+        self.skill_ui = components.skill_ui
 
-        # Initialize dungeon manager
-        if map_file is None:
-            map_file = config.resource_path(
-                os.path.join("data", "maps", "overworld.json")
-            )
-        else:
-            # Apply resource_path to custom map if it's a relative path
-            if not os.path.isabs(map_file):
-                map_file = config.resource_path(map_file)
-        self.dungeon_manager = DungeonManager(map_file)
-        self.dungeon_manager.load_world_map()
-
-        # Load dungeons - map unique IDs to actual dungeon files
-        dark_cave_path = config.resource_path(
-            os.path.join("data", "maps", "dark_cave.json")
-        )
-        ancient_castle_path = config.resource_path(
-            os.path.join("data", "maps", "ancient_castle.json")
+        # Initialize coordinators
+        self.state_coordinator = GameStateCoordinator(
+            state_manager=self.state_manager,
+            turn_processor=self.turn_processor,
+            entity_manager=self.entity_manager,
+            dungeon_transition_manager=self.dungeon_transition_manager,
+            renderer=self.renderer,
         )
 
-        # Cave-type dungeons
-        self.dungeon_manager.load_dungeon("dark_cave_1", dark_cave_path)
-        self.dungeon_manager.load_dungeon("mystic_grotto", dark_cave_path)
-        self.dungeon_manager.load_dungeon("dark_woods_lair", dark_cave_path)
-        self.dungeon_manager.load_dungeon("southern_caverns", dark_cave_path)
-
-        # Castle-type dungeons
-        self.dungeon_manager.load_dungeon("haunted_crypt", ancient_castle_path)
-        self.dungeon_manager.load_dungeon("shadow_keep", ancient_castle_path)
-        self.dungeon_manager.load_dungeon("ruined_fortress", ancient_castle_path)
-        self.dungeon_manager.load_dungeon("ancient_keep", ancient_castle_path)
-
-        # Town
-        self.dungeon_manager.load_dungeon(
-            "town", config.resource_path(os.path.join("data", "maps", "town.json"))
+        self.render_coordinator = GameRenderCoordinator(
+            screen=self.screen,
+            renderer=self.renderer,
+            skill_ui=self.skill_ui,
+            state_manager=self.state_manager,
         )
-
-        # Get current map (initially world map)
-        self.world_map = self.dungeon_manager.get_current_map()
-
-        # Initialize camera
-        self.camera = Camera(self.world_map.width, self.world_map.height)
-
-        # Initialize game objects at spawn point
-        spawn_x, spawn_y = self.world_map.spawn_point
-        self.warrior = Warrior(spawn_x, spawn_y)
-
-        # Add starting items to warrior inventory
-        self._add_starting_items()
-
-        # Initialize fog of war (2 tile visibility radius)
-        self.fog_of_war = FogOfWar(visibility_radius=2)
-
-        # Initialize skill UI (separate from renderer since it's a full-screen UI)
-        self.skill_ui = SkillUI()
-
-        # Initialize shop (located at specific position on town map)
-        self.shop = Shop(grid_x=4, grid_y=3)  # Position in town
-
-        # Initialize temple (located at specific position on town map)
-        # Position matches 'T' in town.json
-        self.temple = Temple(grid_x=8, grid_y=1)  # Position in town
-
-        # Spawn monsters and chests
-        self.entity_manager.spawn_monsters(self.world_map, self.dungeon_manager)
-        self.entity_manager.spawn_chests(self.world_map, self.dungeon_manager)
 
     def drop_item(self, item: Item, grid_x: int, grid_y: int):
         """
@@ -186,102 +130,41 @@ class Game:
         self.event_dispatcher.handle_events(ctx)
 
     def restart(self):
-        """Restart the game."""
-        # Close any active portals
-        self.state_manager.close_portals()
+        """Restart the game by delegating to GameStateCoordinator."""
+        # Delegate restart to state coordinator
+        self.warrior, self.camera, self.world_map = self.state_coordinator.restart(
+            warrior=self.warrior,
+            dungeon_manager=self.dungeon_manager,
+            camera=self.camera,
+            world_map=self.world_map,
+        )
 
-        # Reset to world map
-        self.dungeon_manager.current_map_id = "world"
-        self.dungeon_manager.return_location = None
-        self.world_map = self.dungeon_manager.get_current_map()
-
-        # Update camera for new map
-        self.camera = Camera(self.world_map.width, self.world_map.height)
-
-        spawn_x, spawn_y = self.world_map.spawn_point
-        self.warrior = Warrior(spawn_x, spawn_y)
-
-        # Add starting items to new warrior
-        self._add_starting_items()
-
-        # Reset managers
-        self.state_manager.reset()
-        self.turn_processor.reset()
-        self.entity_manager.reset_tracking()
-
-        # Respawn entities
-        self.entity_manager.spawn_monsters(self.world_map, self.dungeon_manager)
-        self.entity_manager.spawn_chests(self.world_map, self.dungeon_manager)
-        self.entity_manager.clear_ground_items()
+        # Add starting items to new warrior using initializer
+        initializer = GameInitializer()
+        initializer._add_starting_items(self.warrior)
 
     def update(self, dt: float):
         """
-        Update game state.
+        Update game state by delegating to GameStateCoordinator.
 
         Args:
             dt: Delta time since last update
         """
-        # Update state manager (messages, portals, etc.)
-        self.state_manager.update(self.clock, self.warrior, dt)
-
-        # Update HUD (always update for animations)
-        self.renderer.hud.update(self.warrior, dt)
-
-        # Update temple animation
-        if self.temple:
-            self.temple.update(dt)
-
-        # Update attack effects
-        self.renderer.attack_effect_manager.update(dt)
-
-        # Only update game logic when actively playing
-        if self.state_manager.state != config.STATE_PLAYING:
-            return
-
-        # Process turn if player has queued an action
-        if not self.turn_processor.waiting_for_player_input:
-            self.process_turn()
-
-        # Update camera to follow player
-        self.camera.update(self.warrior.grid_x, self.warrior.grid_y)
-
-        # Update fog of war based on player position
-        self.fog_of_war.update_visibility(
-            self.warrior.grid_x,
-            self.warrior.grid_y,
-            self.dungeon_manager.current_map_id,
-        )
-
-        # Check if player stepped on return portal (auto-teleport back)
-        if self.state_manager.check_return_portal_collision(self.warrior):
-            self._handle_use_return_portal()
-            return
-
-        # Check if player stepped on temple (heal to max HP)
-        if (
-            self.dungeon_manager.current_map_id == "town"
-            and self.warrior.grid_x == self.temple.grid_x
-            and self.warrior.grid_y == self.temple.grid_y
-        ):
-            self._heal_at_temple()
-
-        # Check game over conditions
-        if not self.warrior.is_alive:
-            self.state_manager.transition_to_game_over()
-
-    def process_turn(self):
-        """Process one complete turn (hero then monsters)."""
-        self.turn_processor.process_turn(
+        # Delegate to state coordinator and get potentially updated state
+        self.camera, self.world_map = self.state_coordinator.update(
+            clock=self.clock,
             warrior=self.warrior,
-            entity_manager=self.entity_manager,
-            world_map=self.world_map,
+            camera=self.camera,
             dungeon_manager=self.dungeon_manager,
-            on_dungeon_transition=self._check_dungeon_transition,
-            on_chest_opened=self._handle_chest_opened,
-            on_item_picked=self._show_message,
-            on_monster_death=self._handle_monster_death,
-            attack_effect_manager=self.renderer.attack_effect_manager,
+            fog_of_war=self.fog_of_war,
+            temple=self.temple,
+            world_map=self.world_map,
+            dt=dt,
         )
+
+        # Check for dungeon transitions after turn processing
+        self._check_dungeon_transition()
+
 
     def _check_dungeon_transition(self):
         """Check if player is entering or exiting a dungeon."""
@@ -312,36 +195,6 @@ class Game:
         """
         return Camera(width, height)
 
-    def _handle_chest_opened(self, item: Item):
-        """
-        Handle chest opened event.
-
-        Args:
-            item: The item found in the chest
-        """
-        self._show_message(f"You open the chest. Inside you find a {item.name}!")
-
-    def _handle_monster_death(self, loot_item: Item, monster_type: str, xp_value: int):
-        """
-        Handle monster death event.
-
-        Args:
-            loot_item: The loot item dropped
-            monster_type: The type of monster that died
-            xp_value: Experience points awarded
-        """
-        # Award experience points
-        leveled_up = self.warrior.gain_experience(xp_value)
-
-        # Show appropriate message
-        if leveled_up:
-            self._show_message(
-                f"Level Up! Now level {self.warrior.experience.current_level}! The {monster_type.replace('_', ' ')} drops a {loot_item.name}! (+{xp_value} XP)"
-            )
-        else:
-            self._show_message(
-                f"The {monster_type.replace('_', ' ')} drops a {loot_item.name}! (+{xp_value} XP)"
-            )
 
     def _handle_pickup_item(self, grid_x: int, grid_y: int):
         """
@@ -413,15 +266,6 @@ class Game:
         """Show a message to the player."""
         self.state_manager.show_message(message)
 
-    def _heal_at_temple(self):
-        """Heal the warrior to maximum HP when stepping on the temple."""
-        if self.warrior.health < self.warrior.max_health:
-            # Heal to max HP
-            self.warrior.health = self.warrior.max_health
-            # Activate healing visual effect
-            self.temple.activate_healing()
-            self._show_message("The temple's divine power restores your health!")
-
     def _is_near_shop(self) -> bool:
         """
         Check if player is near the shop.
@@ -434,87 +278,54 @@ class Game:
         )
         return distance <= 1
 
+    def _heal_at_temple(self):
+        """Heal the warrior at the temple (delegates to GameStateCoordinator)."""
+        self.state_coordinator._heal_at_temple(self.warrior, self.temple)
+
+    def process_turn(self):
+        """Process one complete turn (delegates to GameStateCoordinator)."""
+        self.state_coordinator._process_turn(
+            warrior=self.warrior,
+            dungeon_manager=self.dungeon_manager,
+            world_map=self.world_map,
+            camera=self.camera,
+            fog_of_war=self.fog_of_war,
+            temple=self.temple,
+        )
+
+    def _handle_chest_opened(self, item: Item):
+        """Handle chest opened event (delegates to GameStateCoordinator)."""
+        self.state_coordinator._handle_chest_opened(item)
+
+    def _handle_monster_death(self, loot_item: Item, monster_type: str, xp_value: int):
+        """Handle monster death event (delegates to GameStateCoordinator)."""
+        self.state_coordinator._handle_monster_death(
+            self.warrior, loot_item, monster_type, xp_value
+        )
+
     def draw(self):
-        """Draw all game objects."""
-        if self.state_manager.state == config.STATE_PLAYING:
-            self.renderer.draw_playing_state(
-                world_map=self.world_map,
-                camera=self.camera,
-                entity_manager=self.entity_manager,
-                warrior=self.warrior,
-                dungeon_manager=self.dungeon_manager,
-                shop=self.shop,
-                active_portal=self.state_manager.active_portal,
-                return_portal=self.state_manager.return_portal,
-                message=self.state_manager.message,
-                fog_of_war=self.fog_of_war,
-                temple=self.temple,
-            )
-        elif self.state_manager.state == config.STATE_INVENTORY:
-            self.renderer.draw_inventory_state(
-                world_map=self.world_map,
-                camera=self.camera,
-                entity_manager=self.entity_manager,
-                warrior=self.warrior,
-                fog_of_war=self.fog_of_war,
-                dungeon_manager=self.dungeon_manager,
-            )
-        elif self.state_manager.state == config.STATE_SHOP:
-            self.renderer.draw_shop_state(shop=self.shop, warrior=self.warrior)
-        elif self.state_manager.state == config.STATE_SKILLS:
-            # Draw skill UI (full-screen)
-            self.skill_ui.draw(self.screen, self.warrior)
-            pygame.display.flip()
-        elif self.state_manager.state == config.STATE_GAME_OVER:
-            self.renderer.draw_game_over_state("GAME OVER!", config.RED)
+        """Draw all game objects by delegating to GameRenderCoordinator."""
+        self.render_coordinator.render(
+            world_map=self.world_map,
+            camera=self.camera,
+            entity_manager=self.entity_manager,
+            warrior=self.warrior,
+            dungeon_manager=self.dungeon_manager,
+            shop=self.shop,
+            temple=self.temple,
+            fog_of_war=self.fog_of_war,
+        )
 
     def draw_game_over_screen(self, message: str, color: tuple):
         """
-        Draw game over or victory screen.
+        Draw game over or victory screen by delegating to GameRenderCoordinator.
 
         Args:
             message: Message to display
             color: Color of the message
         """
-        self.renderer.draw_game_over_state(message, color)
+        self.render_coordinator.draw_game_over_screen(message, color)
 
-    def _add_starting_items(self):
-        """Add starting equipment to warrior inventory."""
-        # Import loot table function for town portal
-        from caislean_gaofar.systems.loot_table import create_town_portal
-
-        # Create starting equipment
-        short_sword = Item(
-            name="Short Sword",
-            item_type=ItemType.WEAPON,
-            description="A basic short sword",
-            attack_bonus=3,
-            gold_value=30,
-        )
-        woolen_tunic = Item(
-            name="Woolen Tunic",
-            item_type=ItemType.ARMOR,
-            description="A simple woolen tunic",
-            defense_bonus=1,
-            gold_value=10,
-        )
-        health_potion = Item(
-            name="Health Potion",
-            item_type=ItemType.CONSUMABLE,
-            description="Restores 30 HP",
-            gold_value=30,
-        )
-
-        # Equip starting items (they'll auto-equip to appropriate slots)
-        self.warrior.inventory.add_item(short_sword)
-        self.warrior.inventory.add_item(woolen_tunic)
-        self.warrior.inventory.add_item(health_potion)
-
-        # Add a starting town portal for testing
-        self.warrior.inventory.add_item(create_town_portal())
-
-        # Player starts with some gold to buy items
-        self.warrior.add_gold(100)
 
     def save_game(self, filename: str = "quicksave") -> bool:
         """
