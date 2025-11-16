@@ -1971,7 +1971,10 @@ class TestInventoryUIHelperMethods:
 
         # Inspect no longer exists, so context menu should still be visible or action won't be taken
         # The menu now only has Drop option
-        assert inventory_ui.state.context_menu_slot is not None or inventory_ui.state.context_menu_slot is None
+        assert (
+            inventory_ui.state.context_menu_slot is not None
+            or inventory_ui.state.context_menu_slot is None
+        )
 
     def test_draw_with_hovering_not_dragging(self, inventory_ui, mock_screen):
         """Test draw() with hovering enabled and not dragging (line 96)"""

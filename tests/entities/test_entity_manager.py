@@ -191,6 +191,7 @@ class TestEntityManager:
         item = Item("Test Item", ItemType.MISC)
         # Create ground item manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         ground_item = GroundItem(item, 5, 10)
         manager.ground_items.append(ground_item)
 
@@ -219,6 +220,7 @@ class TestEntityManager:
         gold_item = Item("Gold", ItemType.MISC, gold_value=50)
         # Create ground item manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         ground_item = GroundItem(gold_item, 5, 10)
         manager.ground_items.append(ground_item)
 
@@ -241,6 +243,7 @@ class TestEntityManager:
         item = Item("Sword", ItemType.WEAPON)
         # Create ground item manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         ground_item = GroundItem(item, 5, 10)
         manager.ground_items.append(ground_item)
 
@@ -263,6 +266,7 @@ class TestEntityManager:
         item = Item("Sword", ItemType.WEAPON)
         # Create ground item manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         ground_item = GroundItem(item, 5, 10)
         manager.ground_items.append(ground_item)
 
@@ -412,6 +416,7 @@ class TestEntityManager:
         gold_item = Item("Gold", ItemType.MISC, gold_value=100)
         # Create ground item manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         ground_item = GroundItem(gold_item, 5, 10)
         manager.ground_items.append(ground_item)
 
@@ -436,6 +441,7 @@ class TestEntityManager:
         item = Item("Potion", ItemType.CONSUMABLE)
         # Create ground item manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         ground_item = GroundItem(item, 5, 10)
         manager.ground_items.append(ground_item)
 
@@ -459,6 +465,7 @@ class TestEntityManager:
         item = Item("Potion", ItemType.CONSUMABLE)
         # Create ground item manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         ground_item = GroundItem(item, 5, 10)
         manager.ground_items.append(ground_item)
 
@@ -498,6 +505,7 @@ class TestEntityManager:
         item2 = Item("Item2", ItemType.MISC)
         # Create ground items manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         manager.ground_items.append(GroundItem(item1, 1, 1))
         manager.ground_items.append(GroundItem(item2, 2, 2))
 
@@ -609,6 +617,7 @@ class TestEntityManager:
         item2 = Item("Item2", ItemType.MISC)
         # Create ground items manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         manager.ground_items.append(GroundItem(item1, 5, 10))
         manager.ground_items.append(GroundItem(item2, 6, 11))
 
@@ -627,6 +636,7 @@ class TestEntityManager:
         item2 = Item("Item2", ItemType.MISC)
         # Create ground items manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         manager.ground_items.append(GroundItem(item1, 5, 10))
         manager.ground_items.append(GroundItem(item2, 6, 11))
 
@@ -648,6 +658,7 @@ class TestEntityManager:
         item2 = Item("Item2", ItemType.MISC)
         # Create ground items manually since drop_item no longer works
         from caislean_gaofar.objects.ground_item import GroundItem
+
         manager.ground_items.append(GroundItem(item1, 5, 10))
         manager.ground_items.append(GroundItem(item2, 6, 11))
 
