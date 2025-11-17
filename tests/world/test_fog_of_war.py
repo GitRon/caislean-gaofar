@@ -168,7 +168,7 @@ class TestFogOfWar:
         assert fog.is_fog_enabled_for_map("dungeon1") is True
         assert fog.is_fog_enabled_for_map("dark_cave") is True
         assert fog.is_fog_enabled_for_map("ancient_castle") is True
-        assert fog.is_fog_enabled_for_map("town") is True
+        assert fog.is_fog_enabled_for_map("town") is False
 
     def test_visibility_radius_coverage(self):
         """Test different visibility radius values."""

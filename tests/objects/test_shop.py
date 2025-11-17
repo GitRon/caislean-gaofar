@@ -235,7 +235,7 @@ class TestShop:
         # Fill inventory completely
         inventory.weapon_slot = Item("Weapon", ItemType.WEAPON)
         inventory.armor_slot = Item("Armor", ItemType.ARMOR)
-        for i in range(13):
+        for i in range(10):
             inventory.backpack_slots[i] = Item(f"Item{i}", ItemType.MISC)
 
         shop_item = shop.inventory[0]

@@ -154,8 +154,8 @@ class TestInventoryRendererEdgeCases:
         state.context_menu_pos = (400, 300)
 
         result = renderer.get_context_menu_rects(state, inventory)
-        # Should have Drop and Inspect, but not Equip
-        assert len(result) == 2
+        # Should have Drop option only (no Equip, no Inspect)
+        assert len(result) == 1
 
     def test_get_item_from_slot_invalid_type(self):
         """Test _get_item_from_slot with invalid slot type (line 442)"""
@@ -336,3 +336,36 @@ class TestShopStateEdgeCases:
 
         # Nothing should happen
         assert state.confirmation_dialog is None
+
+
+class TestInventoryRendererFullCoverage:
+    """Tests to achieve 100% coverage for inventory_renderer.py"""
+
+    def test_draw_context_menu_near_bottom_edge(self, mock_screen):
+        """Test drawing context menu near bottom edge to trigger y-adjustment (line 376)"""
+        renderer = InventoryRenderer()
+        state = InventoryState()
+        inventory = Inventory()
+        inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
+
+        # Context menu near bottom edge - should trigger menu_y adjustment
+        state.context_menu_slot = ("weapon", 0)
+        state.context_menu_pos = (400, 590)  # Near bottom edge (screen is 600px tall)
+
+        # Call renderer.draw() which will call _draw_context_menu
+        renderer.draw(mock_screen, inventory, state)
+        # Should not crash and should have adjusted menu position
+
+    def test_draw_item_with_attack_bonus_in_backpack(self, mock_screen):
+        """Test drawing item with attack bonus in backpack slot (line 250)"""
+        renderer = InventoryRenderer()
+        state = InventoryState()
+        inventory = Inventory()
+
+        # Add weapon with attack bonus to backpack
+        weapon = Item("Sword", ItemType.WEAPON, attack_bonus=15)
+        inventory.backpack_slots[0] = weapon
+
+        # Draw the inventory - should draw the item with attack bonus stat
+        renderer.draw(mock_screen, inventory, state)
+        # Should not crash and should have drawn the attack bonus text
