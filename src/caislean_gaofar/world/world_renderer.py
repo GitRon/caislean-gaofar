@@ -10,6 +10,7 @@ from caislean_gaofar.ui.shop_ui import ShopUI
 from caislean_gaofar.ui.hud import HUD
 from caislean_gaofar.world.camera import Camera
 from caislean_gaofar.ui.attack_effect import AttackEffectManager
+from caislean_gaofar.world.dungeon_entrance_renderer import DungeonEntranceRenderer
 from caislean_gaofar.core import config
 
 
@@ -29,6 +30,7 @@ class WorldRenderer:
         self.shop_ui = ShopUI()
         self.hud = HUD()
         self.attack_effect_manager = AttackEffectManager()
+        self.dungeon_entrance_renderer = DungeonEntranceRenderer()
 
     def draw_playing_state(
         self,
@@ -457,13 +459,10 @@ class WorldRenderer:
             # Determine dungeon type based on terrain character at this position
             terrain_char = dungeon_manager.world_map.tiles[entrance_y][entrance_x]
 
-            # Draw different icons for different dungeon types
-            if terrain_char == "C":  # Cave entrance
-                self._draw_cave_entrance(x, y, size)
-            elif terrain_char == "K":  # Castle entrance
-                self._draw_castle_entrance(x, y, size)
-            elif terrain_char == "D":  # Generic dungeon entrance
-                self._draw_dungeon_entrance(x, y, size)
+            # Draw entrance icon using specialized renderer
+            self.dungeon_entrance_renderer.draw_entrance(
+                self.screen, terrain_char, x, y, size
+            )
 
             # Show dungeon name when player is on the entrance
             distance = abs(warrior.grid_x - entrance_x) + abs(
@@ -474,146 +473,10 @@ class WorldRenderer:
                 for spawn in dungeon_manager.world_map.get_entity_spawns("dungeons"):
                     if spawn.get("id") == dungeon_id:
                         dungeon_name = spawn.get("name", "Dungeon")
-                        font = pygame.font.Font(None, 20)
-                        text = font.render(dungeon_name, True, config.WHITE)
-                        text_x = x + size // 2 - text.get_width() // 2
-                        text_y = y - 25
-                        # Draw background for text
-                        bg_rect = pygame.Rect(
-                            text_x - 3,
-                            text_y - 3,
-                            text.get_width() + 6,
-                            text.get_height() + 6,
+                        self.dungeon_entrance_renderer.draw_entrance_name(
+                            self.screen, dungeon_name, x, y, size
                         )
-                        pygame.draw.rect(self.screen, config.BLACK, bg_rect)
-                        self.screen.blit(text, (text_x, text_y))
                         break
-
-    def _draw_cave_entrance(self, x: int, y: int, size: int):
-        """
-        Draw a cave entrance icon.
-
-        Args:
-            x: Screen x position
-            y: Screen y position
-            size: Tile size
-        """
-        # Background circle for visibility
-        pygame.draw.circle(
-            self.screen, (30, 30, 30), (x + size // 2, y + size // 2), size // 2 + 2
-        )
-        pygame.draw.circle(
-            self.screen, (200, 180, 140), (x + size // 2, y + size // 2), size // 2
-        )
-
-        # Cave entrance - dark arch with rocky edges
-        cave_color = (60, 40, 20)  # Very dark brown
-        rock_color = (120, 100, 70)  # Lighter brown for contrast
-
-        # Main cave opening (arch shape)
-        arch_rect = pygame.Rect(
-            x + size // 6, y + size // 3, size * 2 // 3, size * 2 // 3
-        )
-        pygame.draw.ellipse(self.screen, cave_color, arch_rect)
-
-        # Dark inner cave (very dark to show depth)
-        inner_rect = pygame.Rect(x + size // 4, y + size // 2, size // 2, size // 3)
-        pygame.draw.ellipse(self.screen, (20, 15, 10), inner_rect)
-
-        # Rocky edges (small circles) - make them stand out more
-        rock_positions = [
-            (x + size // 6, y + size // 2),
-            (x + size * 5 // 6, y + size // 2),
-            (x + size // 4, y + size // 3),
-            (x + size * 3 // 4, y + size // 3),
-        ]
-        for rx, ry in rock_positions:
-            pygame.draw.circle(self.screen, rock_color, (int(rx), int(ry)), size // 7)
-
-    def _draw_castle_entrance(self, x: int, y: int, size: int):
-        """
-        Draw a castle entrance icon.
-
-        Args:
-            x: Screen x position
-            y: Screen y position
-            size: Tile size
-        """
-        # Background circle for visibility
-        pygame.draw.circle(
-            self.screen, (30, 30, 30), (x + size // 2, y + size // 2), size // 2 + 2
-        )
-        pygame.draw.circle(
-            self.screen, (180, 180, 180), (x + size // 2, y + size // 2), size // 2
-        )
-
-        # Castle entrance - stone gateway with battlements
-        stone_color = (140, 130, 120)  # Lighter stone grey for visibility
-        dark_stone = (60, 55, 50)  # Very dark for contrast
-
-        # Main gate structure
-        gate_rect = pygame.Rect(
-            x + size // 6, y + size // 4, size * 2 // 3, size * 3 // 4
-        )
-        pygame.draw.rect(self.screen, stone_color, gate_rect)
-
-        # Dark gate opening
-        opening_rect = pygame.Rect(x + size // 3, y + size // 2, size // 3, size // 2)
-        pygame.draw.rect(self.screen, dark_stone, opening_rect)
-
-        # Battlements on top (crenellations)
-        battlement_width = size // 6
-        for i in range(3):
-            if i % 2 == 0:  # Every other one
-                bx = x + size // 6 + i * battlement_width
-                pygame.draw.rect(
-                    self.screen,
-                    stone_color,
-                    (bx, y + size // 8, battlement_width, size // 8),
-                )
-
-        # Stone blocks pattern
-        for i in range(3):
-            by = y + size // 3 + i * size // 6
-            pygame.draw.line(
-                self.screen, dark_stone, (x + size // 6, by), (x + size * 5 // 6, by), 2
-            )
-
-    def _draw_dungeon_entrance(self, x: int, y: int, size: int):
-        """
-        Draw a generic dungeon entrance icon.
-
-        Args:
-            x: Screen x position
-            y: Screen y position
-            size: Tile size
-        """
-        # Background circle for visibility
-        pygame.draw.circle(
-            self.screen, (30, 30, 30), (x + size // 2, y + size // 2), size // 2 + 2
-        )
-        pygame.draw.circle(
-            self.screen, (220, 220, 250), (x + size // 2, y + size // 2), size // 2
-        )
-
-        # Generic dungeon - purple/mysterious portal
-        dungeon_color = (180, 120, 240)  # Brighter purple
-        glow_color = (220, 180, 255)  # Very light purple
-
-        # Outer glow - larger
-        pygame.draw.circle(
-            self.screen, glow_color, (x + size // 2, y + size // 2), size // 3 + 2
-        )
-
-        # Inner portal
-        pygame.draw.circle(
-            self.screen, dungeon_color, (x + size // 2, y + size // 2), size // 4 + 1
-        )
-
-        # Dark center
-        pygame.draw.circle(
-            self.screen, (30, 10, 50), (x + size // 2, y + size // 2), size // 6
-        )
 
     def _draw_message(self, message: str):
         """

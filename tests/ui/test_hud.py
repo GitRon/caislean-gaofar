@@ -132,14 +132,16 @@ def test_hud_draw_with_potion_glow(hud, warrior):
 
 
 def test_hud_colors_defined(hud):
-    """Test that all HUD colors are properly defined."""
-    assert hud.renderer.wood_color is not None
-    assert hud.renderer.wood_border is not None
-    assert hud.renderer.ornate_gold is not None
-    assert hud.renderer.health_green is not None
-    assert hud.renderer.health_red is not None
-    assert hud.renderer.health_critical is not None
-    assert hud.renderer.text_color is not None
+    """Test that all HUD colors are properly defined in UIConstants."""
+    from caislean_gaofar.ui.ui_constants import UIConstants
+
+    assert UIConstants.WOOD_COLOR is not None
+    assert UIConstants.WOOD_BORDER is not None
+    assert UIConstants.ORNATE_GOLD is not None
+    assert UIConstants.HEALTH_GREEN is not None
+    assert UIConstants.HEALTH_RED is not None
+    assert UIConstants.HEALTH_CRITICAL is not None
+    assert UIConstants.TEXT_COLOR is not None
 
 
 def test_hud_health_animation_converges(hud, warrior):

@@ -1717,11 +1717,13 @@ class TestWorldRenderer:
         warrior.grid_y = 10
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert
-            mock_draw_cave.assert_called_once()
+            mock_draw_entrance.assert_called_once()
 
     def test_draw_dungeons_with_camera_castle_entrance(self):
         """Test drawing castle entrance dungeon icons."""
@@ -1752,11 +1754,13 @@ class TestWorldRenderer:
         warrior.grid_y = 10
 
         # Act
-        with patch.object(renderer, "_draw_castle_entrance") as mock_draw_castle:
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert
-            mock_draw_castle.assert_called_once()
+            mock_draw_entrance.assert_called_once()
 
     def test_draw_dungeons_with_camera_generic_entrance(self):
         """Test drawing generic dungeon entrance icons."""
@@ -1787,11 +1791,13 @@ class TestWorldRenderer:
         warrior.grid_y = 10
 
         # Act
-        with patch.object(renderer, "_draw_dungeon_entrance") as mock_draw_dungeon:
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert
-            mock_draw_dungeon.assert_called_once()
+            mock_draw_entrance.assert_called_once()
 
     def test_draw_dungeons_with_camera_not_visible(self):
         """Test dungeons not drawn when not visible to camera."""
@@ -1818,11 +1824,13 @@ class TestWorldRenderer:
         warrior.grid_y = 10
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert
-            mock_draw_cave.assert_not_called()
+            mock_draw_entrance.assert_not_called()
 
     @patch("pygame.draw.rect")
     def test_draw_dungeons_with_camera_shows_name_when_on_entrance(
@@ -1856,11 +1864,13 @@ class TestWorldRenderer:
         warrior.grid_y = 1  # Distance = 0
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert
-            mock_draw_cave.assert_called_once()
+            mock_draw_entrance.assert_called_once()
             # Verify text background was drawn
             assert mock_draw_rect.call_count >= 1
             # Verify text was drawn (blit called)
@@ -1871,11 +1881,15 @@ class TestWorldRenderer:
     def test_draw_cave_entrance(self, mock_circle, mock_ellipse):
         """Test drawing cave entrance with arch and rocky edges."""
         # Arrange
+        from caislean_gaofar.world.dungeon_entrance_renderer import (
+            DungeonEntranceRenderer,
+        )
+
         screen = Mock()
-        renderer = WorldRenderer(screen)
+        entrance_renderer = DungeonEntranceRenderer()
 
         # Act
-        renderer._draw_cave_entrance(100, 200, 50)
+        entrance_renderer.draw_entrance(screen, "C", 100, 200, 50)
 
         # Assert
         assert mock_ellipse.call_count >= 2  # Main arch + inner cave
@@ -1887,11 +1901,15 @@ class TestWorldRenderer:
     def test_draw_castle_entrance(self, mock_circle, mock_line, mock_rect):
         """Test drawing castle entrance with battlements."""
         # Arrange
+        from caislean_gaofar.world.dungeon_entrance_renderer import (
+            DungeonEntranceRenderer,
+        )
+
         screen = Mock()
-        renderer = WorldRenderer(screen)
+        entrance_renderer = DungeonEntranceRenderer()
 
         # Act
-        renderer._draw_castle_entrance(100, 200, 50)
+        entrance_renderer.draw_entrance(screen, "K", 100, 200, 50)
 
         # Assert
         assert mock_circle.call_count >= 2  # Background circles
@@ -1902,11 +1920,15 @@ class TestWorldRenderer:
     def test_draw_dungeon_entrance(self, mock_circle):
         """Test drawing generic dungeon entrance portal."""
         # Arrange
+        from caislean_gaofar.world.dungeon_entrance_renderer import (
+            DungeonEntranceRenderer,
+        )
+
         screen = Mock()
-        renderer = WorldRenderer(screen)
+        entrance_renderer = DungeonEntranceRenderer()
 
         # Act
-        renderer._draw_dungeon_entrance(100, 200, 50)
+        entrance_renderer.draw_entrance(screen, "D", 100, 200, 50)
 
         # Assert
         assert (
@@ -1947,17 +1969,13 @@ class TestWorldRenderer:
         warrior.grid_y = 10
 
         # Act
-        with (
-            patch.object(renderer, "_draw_cave_entrance") as mock_cave,
-            patch.object(renderer, "_draw_castle_entrance") as mock_castle,
-            patch.object(renderer, "_draw_dungeon_entrance") as mock_dungeon,
-        ):
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
-            # Assert - all three types should be drawn
-            mock_cave.assert_called_once()
-            mock_castle.assert_called_once()
-            mock_dungeon.assert_called_once()
+            # Assert - all three types should be drawn (3 entrances total)
+            assert mock_draw_entrance.call_count == 3
 
     def test_draw_dungeons_with_camera_warrior_far_from_dungeon(self):
         """Test dungeon name is not displayed when warrior is far."""
@@ -1988,11 +2006,13 @@ class TestWorldRenderer:
         warrior.grid_y = 10  # Distance = 18, which is > 1
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert
-            mock_draw_cave.assert_called_once()
+            mock_draw_entrance.assert_called_once()
             # Verify text was NOT drawn (warrior too far)
             screen.blit.assert_not_called()
 
@@ -2026,11 +2046,13 @@ class TestWorldRenderer:
         warrior.grid_y = 2  # Distance = 1
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert
-            mock_draw_cave.assert_called_once()
+            mock_draw_entrance.assert_called_once()
             # Name should not be drawn since no matching spawn data
             screen.blit.assert_not_called()
 
@@ -2067,15 +2089,13 @@ class TestWorldRenderer:
         warrior.grid_y = 0
 
         # Act
-        with (
-            patch.object(renderer, "_draw_cave_entrance") as mock_cave,
-            patch.object(renderer, "_draw_castle_entrance") as mock_castle,
-        ):
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert - both dungeons drawn
-            mock_cave.assert_called_once()
-            mock_castle.assert_called_once()
+            assert mock_draw_entrance.call_count == 2
             # Name shown only for cave (warrior is on it)
             assert mock_draw_rect.call_count >= 1
             # Text drawn for cave
@@ -2110,17 +2130,14 @@ class TestWorldRenderer:
         warrior.grid_y = 10
 
         # Act
-        with (
-            patch.object(renderer, "_draw_cave_entrance") as mock_cave,
-            patch.object(renderer, "_draw_castle_entrance") as mock_castle,
-            patch.object(renderer, "_draw_dungeon_entrance") as mock_dungeon,
-        ):
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
-            # Assert - no drawing methods should be called for unknown type
-            mock_cave.assert_not_called()
-            mock_castle.assert_not_called()
-            mock_dungeon.assert_not_called()
+            # Assert - drawing method should still be called once (with unknown terrain type)
+            # The draw_entrance method will be called, but it won't render anything for unknown type
+            assert mock_draw_entrance.call_count == 1
 
     @patch("pygame.draw.rect")
     def test_draw_dungeons_name_display_with_multiple_spawns(self, mock_draw_rect):
@@ -2155,11 +2172,13 @@ class TestWorldRenderer:
         warrior.grid_y = 1  # Distance = 0
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert - text should still be drawn (matching spawn found)
-            mock_draw_cave.assert_called_once()
+            mock_draw_entrance.assert_called_once()
             assert mock_draw_rect.call_count >= 1  # Background for text
             assert screen.blit.call_count >= 1  # Text rendered
 
@@ -2195,11 +2214,13 @@ class TestWorldRenderer:
         warrior.grid_y = 1  # Distance = 0
 
         # Act
-        with patch.object(renderer, "_draw_cave_entrance") as mock_draw_cave:
+        with patch.object(
+            renderer.dungeon_entrance_renderer, "draw_entrance"
+        ) as mock_draw_entrance:
             renderer._draw_dungeons_with_camera(camera, dungeon_manager, warrior)
 
             # Assert - cave drawn but no text (no matching spawn data)
-            mock_draw_cave.assert_called_once()
+            mock_draw_entrance.assert_called_once()
             # No text background or text should be drawn since no match found
             mock_draw_rect.assert_not_called()
             screen.blit.assert_not_called()
