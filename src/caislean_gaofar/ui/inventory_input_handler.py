@@ -42,7 +42,7 @@ class InventoryInputHandler:
             if event.button == 1:  # Left click
                 return self._handle_left_click(event.pos, inventory)
             elif event.button == 3:  # Right click
-                return self._handle_right_click(event.pos, inventory)
+                return self._handle_right_click(event.pos, inventory, game)
 
         # Handle mouse button up
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -116,7 +116,7 @@ class InventoryInputHandler:
         return False
 
     def _handle_right_click(
-        self, mouse_pos: Tuple[int, int], inventory: Inventory
+        self, mouse_pos: Tuple[int, int], inventory: Inventory, game=None
     ) -> bool:
         """Handle right mouse button click."""
         # Check if clicking on a slot with an item
@@ -133,7 +133,7 @@ class InventoryInputHandler:
                         for option_rect, option_text in option_rects:
                             if option_rect.collidepoint(mouse_pos):
                                 self._execute_context_menu_action(
-                                    option_text, inventory
+                                    option_text, inventory, game
                                 )
                                 self.state.close_context_menu()
                                 return True
@@ -250,7 +250,7 @@ class InventoryInputHandler:
             return True
         return False
 
-    def _execute_context_menu_action(self, action: str, inventory: Inventory):
+    def _execute_context_menu_action(self, action: str, inventory: Inventory, game=None):
         """Execute the selected context menu action."""
         if not self.state.context_menu_slot:
             return
@@ -261,4 +261,7 @@ class InventoryInputHandler:
             if slot_type == "backpack":
                 inventory.equip_from_backpack(slot_index)
         elif action == "Drop":
-            inventory.remove_item_from_slot(slot_type, slot_index)
+            item = inventory.remove_item_from_slot(slot_type, slot_index)
+            if item and game:
+                # Drop the item at the warrior's position
+                game.drop_item(item, game.warrior.grid_x, game.warrior.grid_y)
