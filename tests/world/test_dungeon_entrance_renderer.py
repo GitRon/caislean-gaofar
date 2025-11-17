@@ -13,9 +13,10 @@ class TestDungeonEntranceRenderer:
         screen = Mock()
         renderer = DungeonEntranceRenderer()
 
-        with patch("pygame.draw.ellipse") as mock_ellipse, patch(
-            "pygame.draw.circle"
-        ) as mock_circle:
+        with (
+            patch("pygame.draw.ellipse") as mock_ellipse,
+            patch("pygame.draw.circle") as mock_circle,
+        ):
             renderer.draw_entrance(screen, "C", 100, 200, 50)
 
             # Should draw background circles, arch, inner cave, and rocky edges
@@ -27,9 +28,11 @@ class TestDungeonEntranceRenderer:
         screen = Mock()
         renderer = DungeonEntranceRenderer()
 
-        with patch("pygame.draw.rect") as mock_rect, patch(
-            "pygame.draw.circle"
-        ) as mock_circle, patch("pygame.draw.line") as mock_line:
+        with (
+            patch("pygame.draw.rect") as mock_rect,
+            patch("pygame.draw.circle") as mock_circle,
+            patch("pygame.draw.line") as mock_line,
+        ):
             renderer.draw_entrance(screen, "K", 100, 200, 50)
 
             # Should draw background circles, gate structure, battlements, and stone patterns
@@ -53,9 +56,11 @@ class TestDungeonEntranceRenderer:
         screen = Mock()
         renderer = DungeonEntranceRenderer()
 
-        with patch("pygame.draw.circle") as mock_circle, patch(
-            "pygame.draw.rect"
-        ) as mock_rect, patch("pygame.draw.ellipse") as mock_ellipse:
+        with (
+            patch("pygame.draw.circle") as mock_circle,
+            patch("pygame.draw.rect") as mock_rect,
+            patch("pygame.draw.ellipse") as mock_ellipse,
+        ):
             renderer.draw_entrance(screen, "X", 100, 200, 50)
 
             # Should not draw anything for unknown type
@@ -68,9 +73,10 @@ class TestDungeonEntranceRenderer:
         screen = Mock()
         renderer = DungeonEntranceRenderer()
 
-        with patch("pygame.font.Font") as mock_font_class, patch(
-            "pygame.draw.rect"
-        ) as mock_rect:
+        with (
+            patch("pygame.font.Font") as mock_font_class,
+            patch("pygame.draw.rect") as mock_rect,
+        ):
             mock_font = Mock()
             mock_font.render.return_value = Mock(
                 get_rect=Mock(return_value=pygame.Rect(0, 0, 100, 20)),
@@ -91,9 +97,10 @@ class TestDungeonEntranceRenderer:
         screen = Mock()
         renderer = DungeonEntranceRenderer()
 
-        with patch("pygame.draw.ellipse") as mock_ellipse, patch(
-            "pygame.draw.circle"
-        ) as mock_circle:
+        with (
+            patch("pygame.draw.ellipse") as mock_ellipse,
+            patch("pygame.draw.circle") as mock_circle,
+        ):
             renderer._draw_cave_entrance(screen, 100, 200, 50)
 
             # Verify ellipse calls for arch and inner cave
@@ -106,9 +113,11 @@ class TestDungeonEntranceRenderer:
         screen = Mock()
         renderer = DungeonEntranceRenderer()
 
-        with patch("pygame.draw.rect") as mock_rect, patch(
-            "pygame.draw.circle"
-        ) as mock_circle, patch("pygame.draw.line") as mock_line:
+        with (
+            patch("pygame.draw.rect") as mock_rect,
+            patch("pygame.draw.circle") as mock_circle,
+            patch("pygame.draw.line") as mock_line,
+        ):
             renderer._draw_castle_entrance(screen, 100, 200, 50)
 
             # Verify background circles

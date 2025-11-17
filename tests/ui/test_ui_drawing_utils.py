@@ -3,7 +3,6 @@
 import pygame
 from unittest.mock import Mock, patch
 from caislean_gaofar.ui.ui_drawing_utils import UIDrawingUtils as Draw
-from caislean_gaofar.ui.ui_constants import UIConstants
 
 
 class TestUIDrawingUtils:
@@ -14,9 +13,10 @@ class TestUIDrawingUtils:
         surface = Mock()
         rect = pygame.Rect(10, 10, 100, 100)
 
-        with patch("pygame.draw.rect") as mock_rect, patch(
-            "pygame.draw.circle"
-        ) as mock_circle:
+        with (
+            patch("pygame.draw.rect") as mock_rect,
+            patch("pygame.draw.circle") as mock_circle,
+        ):
             Draw.draw_ornate_border(surface, rect)
 
             # Should draw outer border, inner border, and 4 corner circles
@@ -27,7 +27,9 @@ class TestUIDrawingUtils:
         """Test drawing shadowed text centered."""
         surface = Mock()
         font = Mock()
-        font.render.return_value = Mock(get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20)))
+        font.render.return_value = Mock(
+            get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20))
+        )
 
         result = Draw.draw_shadowed_text(
             surface, font, "Test", (100, 100), (255, 255, 255), centered=True
@@ -42,7 +44,9 @@ class TestUIDrawingUtils:
         """Test drawing shadowed text not centered."""
         surface = Mock()
         font = Mock()
-        font.render.return_value = Mock(get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20)))
+        font.render.return_value = Mock(
+            get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20))
+        )
 
         result = Draw.draw_shadowed_text(
             surface, font, "Test", (100, 100), (255, 255, 255), centered=False
@@ -57,7 +61,9 @@ class TestUIDrawingUtils:
         """Test drawing shadowed text with custom shadow offset."""
         surface = Mock()
         font = Mock()
-        font.render.return_value = Mock(get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20)))
+        font.render.return_value = Mock(
+            get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20))
+        )
 
         Draw.draw_shadowed_text(
             surface,
@@ -76,9 +82,10 @@ class TestUIDrawingUtils:
         surface = Mock()
         rect = pygame.Rect(10, 10, 100, 100)
 
-        with patch("pygame.draw.rect") as mock_rect, patch(
-            "pygame.draw.circle"
-        ) as mock_circle:
+        with (
+            patch("pygame.draw.rect") as mock_rect,
+            patch("pygame.draw.circle") as mock_circle,
+        ):
             Draw.draw_panel(surface, rect, ornate=True)
 
             # Should draw background and ornate border components
@@ -93,7 +100,11 @@ class TestUIDrawingUtils:
 
         with patch("pygame.draw.rect") as mock_rect:
             Draw.draw_panel(
-                surface, rect, bg_color=(100, 100, 100), border_color=(50, 50, 50), ornate=False
+                surface,
+                rect,
+                bg_color=(100, 100, 100),
+                border_color=(50, 50, 50),
+                ornate=False,
             )
 
             # Should draw background and border
@@ -187,10 +198,14 @@ class TestUIDrawingUtils:
         surface = Mock()
         rect = pygame.Rect(10, 10, 100, 40)
         font = Mock()
-        font.render.return_value = Mock(get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20)))
+        font.render.return_value = Mock(
+            get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20))
+        )
 
         with patch("pygame.draw.rect") as mock_rect:
-            Draw.draw_button(surface, rect, "Click", font, is_enabled=True, is_hovered=False)
+            Draw.draw_button(
+                surface, rect, "Click", font, is_enabled=True, is_hovered=False
+            )
 
             # Should draw button background and border
             assert mock_rect.call_count >= 2
@@ -200,10 +215,14 @@ class TestUIDrawingUtils:
         surface = Mock()
         rect = pygame.Rect(10, 10, 100, 40)
         font = Mock()
-        font.render.return_value = Mock(get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20)))
+        font.render.return_value = Mock(
+            get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20))
+        )
 
         with patch("pygame.draw.rect") as mock_rect:
-            Draw.draw_button(surface, rect, "Click", font, is_enabled=True, is_hovered=True)
+            Draw.draw_button(
+                surface, rect, "Click", font, is_enabled=True, is_hovered=True
+            )
 
             assert mock_rect.call_count >= 2
 
@@ -212,10 +231,14 @@ class TestUIDrawingUtils:
         surface = Mock()
         rect = pygame.Rect(10, 10, 100, 40)
         font = Mock()
-        font.render.return_value = Mock(get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20)))
+        font.render.return_value = Mock(
+            get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20))
+        )
 
         with patch("pygame.draw.rect") as mock_rect:
-            Draw.draw_button(surface, rect, "Click", font, is_enabled=False, is_hovered=False)
+            Draw.draw_button(
+                surface, rect, "Click", font, is_enabled=False, is_hovered=False
+            )
 
             assert mock_rect.call_count >= 2
 
@@ -224,7 +247,9 @@ class TestUIDrawingUtils:
         surface = Mock()
         rect = pygame.Rect(10, 10, 100, 40)
         font = Mock()
-        font.render.return_value = Mock(get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20)))
+        font.render.return_value = Mock(
+            get_rect=Mock(return_value=pygame.Rect(0, 0, 50, 20))
+        )
 
         with patch("pygame.draw.rect") as mock_rect:
             Draw.draw_button(
@@ -345,7 +370,9 @@ class TestUIDrawingUtils:
         surface = Mock()
 
         with patch("pygame.draw.circle") as mock_circle:
-            Draw.draw_entrance_background_circle(surface, (100, 100), 25, (200, 180, 140))
+            Draw.draw_entrance_background_circle(
+                surface, (100, 100), 25, (200, 180, 140)
+            )
 
             # Should draw dark outline and main background
             assert mock_circle.call_count == 2
