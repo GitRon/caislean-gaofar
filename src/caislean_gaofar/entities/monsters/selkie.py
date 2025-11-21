@@ -34,8 +34,10 @@ class Selkie(BaseMonster):
         width, height = visual_components.apply_size_tuple(self.size)
 
         # Gentle swimming/bobbing motion
-        center_y = visual_components.apply_floating_effect(
-            center_y, self.frame_count, amplitude=4, speed=0.04
+        center_y = int(
+            visual_components.apply_floating_effect(
+                center_y, self.frame_count, amplitude=4, speed=0.04
+            )
         )
 
         # Sleek seal-like body (gray-blue)
@@ -116,8 +118,10 @@ class Selkie(BaseMonster):
         width, height = visual_components.apply_size_tuple(self.size)
 
         # Gentle swimming/bobbing motion (match body)
-        center_y = visual_components.apply_floating_effect(
-            center_y, self.frame_count, amplitude=4, speed=0.04
+        center_y = int(
+            visual_components.apply_floating_effect(
+                center_y, self.frame_count, amplitude=4, speed=0.04
+            )
         )
 
         # Water droplets around (magical transformation)

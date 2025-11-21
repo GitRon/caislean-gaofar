@@ -1,5 +1,7 @@
 """Warrior class - player controlled character."""
 
+from typing import Optional
+
 import pygame
 from caislean_gaofar.entities.entity import Entity
 from caislean_gaofar.systems.inventory import Inventory
@@ -332,7 +334,7 @@ class Warrior(Entity):
         self.pending_action = ("attack",)
 
     def execute_turn(
-        self, target: "Entity" = None, world_map=None, use_skill: bool = False
+        self, target: Optional["Entity"] = None, world_map=None, use_skill: bool = False
     ) -> dict:
         """
         Execute the queued action for this turn.
@@ -352,7 +354,8 @@ class Warrior(Entity):
         action_type = self.pending_action[0]
 
         if action_type == "move":
-            _, dx, dy = self.pending_action
+            # Type checker note: pending_action is guaranteed to have 3 elements here
+            dx, dy = self.pending_action[1], self.pending_action[2]  # type: ignore[index]
             success = self.move(dx, dy, world_map)
             self.pending_action = None
             return {"success": success}

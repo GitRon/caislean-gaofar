@@ -23,7 +23,8 @@ class CombatSystem:
         distance = entity1.grid_distance_to(entity2)
         # Check if entity1 has an attack_range attribute (monsters have this)
         if hasattr(entity1, "attack_range"):
-            return distance <= entity1.attack_range
+            attack_range = getattr(entity1, "attack_range", 1)
+            return distance <= int(attack_range)  # type: ignore[arg-type]
         # Default to melee range (1 tile) for warriors and other entities
         return distance <= 1
 

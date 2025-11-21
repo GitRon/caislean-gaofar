@@ -10,7 +10,7 @@ from caislean_gaofar.core import config
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from fog_of_war import FogOfWar
+    from caislean_gaofar.world.fog_of_war import FogOfWar
 
 
 class WorldMap:

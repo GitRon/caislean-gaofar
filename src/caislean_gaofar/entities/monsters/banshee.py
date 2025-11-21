@@ -32,8 +32,10 @@ class Banshee(BaseMonster):
         width, height = visual_components.apply_size_tuple(self.size)
 
         # Apply gentle floating effect
-        center_y = visual_components.apply_floating_effect(
-            center_y, self.frame_count, amplitude=3, speed=0.05
+        center_y = int(
+            visual_components.apply_floating_effect(
+                center_y, self.frame_count, amplitude=3, speed=0.05
+            )
         )
 
         # Create semi-transparent surface for ghostly effect
@@ -95,8 +97,10 @@ class Banshee(BaseMonster):
         width, height = visual_components.apply_size_tuple(self.size)
 
         # Apply same floating effect for alignment
-        center_y = visual_components.apply_floating_effect(
-            center_y, self.frame_count, amplitude=3, speed=0.05
+        center_y = int(
+            visual_components.apply_floating_effect(
+                center_y, self.frame_count, amplitude=3, speed=0.05
+            )
         )
 
         # Wispy trailing effect (animated)

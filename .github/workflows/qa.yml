@@ -84,6 +84,41 @@ jobs:
         run: |
           pre-commit run --all-files
 
+  typechecking:
+    name: Type Checking (ty)
+    runs-on: ubuntu-latest
+    # Run independently - don't block other jobs
+    continue-on-error: true
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Python 3.13
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # 3. Install uv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      # 4. Install dependencies (including ty)
+      - name: Install dependencies
+        run: |
+          uv sync --frozen
+
+      # 5. Run ty type checker
+      - name: Run ty type checker
+        run: |
+          uv run ty check src/
+          echo "✓ Type checking completed. Found issues are tracked for gradual improvement."
+
   testing:
     name: Testing & Coverage
     runs-on: ubuntu-latest

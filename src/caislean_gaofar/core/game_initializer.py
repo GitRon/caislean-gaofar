@@ -54,7 +54,7 @@ class GameComponents:
 class GameInitializer:
     """Handles initialization of all game subsystems."""
 
-    def __init__(self, map_file: str = None):
+    def __init__(self, map_file: str | None = None):
         """
         Initialize the game initializer.
 

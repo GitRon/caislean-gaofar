@@ -21,7 +21,7 @@ class Item:
         attack_bonus: int = 0,
         defense_bonus: int = 0,
         gold_value: int = 0,
-        sell_price: int = None,
+        sell_price: int | None = None,
         unsellable: bool = False,
     ):
         self.name = name
