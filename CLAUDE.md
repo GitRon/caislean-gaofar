@@ -66,3 +66,54 @@ Centralized constants: screen size, FPS, colors, entity stats, AI ranges, game s
 - **Composition**: Warrior contains Inventory instance
 - **Delta Time**: Frame-rate independent physics
 - **Cooldowns**: Time-based using pygame.time.get_ticks()
+
+## Architecture Decision Records (ADR)
+
+**IMPORTANT**: When making significant architectural or design decisions, you MUST create an ADR.
+
+### When to Create an ADR
+
+Create an ADR when:
+- Choosing between different architectural patterns
+- Selecting a new library or framework
+- Changing core system designs (entity system, state management, etc.)
+- Making decisions that affect future development
+- Establishing new conventions or patterns
+
+Do NOT create ADRs for:
+- Minor bug fixes
+- Simple feature additions using existing patterns
+- Refactoring without changing architecture
+- Configuration changes
+
+### ADR Process
+
+1. **Check existing ADRs**: Read `docs/adr/README.md` to understand existing decisions
+2. **Create new ADR**: Use next sequential number (e.g., `0006-my-decision.md`)
+3. **Follow template**:
+   ```markdown
+   # ADR NNNN: Title
+
+   ## Status
+   Accepted | Proposed | Deprecated | Superseded
+
+   ## Context
+   What is the issue we're facing?
+
+   ## Decision
+   What did we decide to do and why?
+
+   ## Consequences
+   What are the positive, negative, and neutral outcomes?
+   ```
+4. **Update README**: Add entry to `docs/adr/README.md` index
+5. **Commit with ADR**: Include ADR in the same commit as the implementation
+
+### Example ADRs
+
+See existing ADRs for examples:
+- [ADR 0001: Entity System Design](docs/adr/0001-entity-system-design.md)
+- [ADR 0002: Inventory System Architecture](docs/adr/0002-inventory-system-architecture.md)
+- [ADR 0003: Game State Management](docs/adr/0003-game-state-management.md)
+- [ADR 0004: UI Architecture Pattern](docs/adr/0004-ui-architecture-pattern.md)
+- [ADR 0005: UV for Dependency Management](docs/adr/0005-uv-dependency-management.md)
