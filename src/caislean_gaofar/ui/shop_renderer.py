@@ -502,6 +502,10 @@ class ShopRenderer:
         self, screen: pygame.Surface, panel_x: int, panel_y: int, state: ShopState
     ):
         """Draw confirmation dialog."""
+        # Type guard: confirmation_dialog is guaranteed to be not None when this is called
+        if state.confirmation_dialog is None:  # pragma: no cover
+            return
+
         dialog_x = panel_x + (self.panel_width - UI.SHOP_DIALOG_WIDTH) // 2
         dialog_y = panel_y + (self.panel_height - UI.SHOP_DIALOG_HEIGHT) // 2
 

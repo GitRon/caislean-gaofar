@@ -9,7 +9,7 @@ from caislean_gaofar.core import config
 class DungeonManager:
     """Manages dungeon maps and transitions between world and dungeons."""
 
-    def __init__(self, world_map_path: str = None):
+    def __init__(self, world_map_path: str | None = None):
         """
         Initialize the dungeon manager.
 

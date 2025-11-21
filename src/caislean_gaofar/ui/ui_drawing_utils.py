@@ -59,7 +59,7 @@ class UIDrawingUtils:
         position: tuple,
         color: tuple,
         shadow_color: tuple = (0, 0, 0),
-        shadow_offset: int = None,
+        shadow_offset: int | None = None,
         centered: bool = False,
     ):
         """
@@ -106,8 +106,8 @@ class UIDrawingUtils:
     def draw_panel(
         surface: pygame.Surface,
         rect: pygame.Rect,
-        bg_color: tuple = None,
-        border_color: tuple = None,
+        bg_color: tuple | None = None,
+        border_color: tuple | None = None,
         ornate: bool = True,
     ):
         """
@@ -138,9 +138,9 @@ class UIDrawingUtils:
         rect: pygame.Rect,
         progress: float,
         bar_color: tuple,
-        bg_color: tuple = None,
-        border_color: tuple = None,
-        border_width: int = None,
+        bg_color: tuple | None = None,
+        border_color: tuple | None = None,
+        border_width: int | None = None,
     ):
         """
         Draw a progress bar.
@@ -231,12 +231,12 @@ class UIDrawingUtils:
         font: pygame.font.Font,
         is_enabled: bool = True,
         is_hovered: bool = False,
-        bg_color: tuple = None,
-        hover_color: tuple = None,
-        disabled_bg_color: tuple = None,
-        text_color: tuple = None,
-        disabled_text_color: tuple = None,
-        border_color: tuple = None,
+        bg_color: tuple | None = None,
+        hover_color: tuple | None = None,
+        disabled_bg_color: tuple | None = None,
+        text_color: tuple | None = None,
+        disabled_text_color: tuple | None = None,
+        border_color: tuple | None = None,
     ):
         """
         Draw a button with text.
@@ -297,7 +297,7 @@ class UIDrawingUtils:
         center: tuple,
         radius: int,
         inner_color: tuple,
-        outer_color: tuple = None,
+        outer_color: tuple | None = None,
         inner_radius_offset: int = 3,
     ):
         """
@@ -329,10 +329,10 @@ class UIDrawingUtils:
         text: str,
         position: tuple,
         font: pygame.font.Font,
-        text_color: tuple = None,
-        bg_color: tuple = None,
-        border_color: tuple = None,
-        padding: int = None,
+        text_color: tuple | None = None,
+        bg_color: tuple | None = None,
+        border_color: tuple | None = None,
+        padding: int | None = None,
         centered: bool = True,
     ):
         """

@@ -14,7 +14,7 @@ from caislean_gaofar.utils.event_context import EventContext
 class Game:
     """Thin facade that coordinates game components."""
 
-    def __init__(self, map_file: str = None):
+    def __init__(self, map_file: str | None = None):
         """
         Initialize the game by delegating to GameInitializer.
 
