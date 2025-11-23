@@ -265,7 +265,7 @@ class WorldRenderer:
         for chest in entity_manager.chests:
             if camera.is_visible(chest.grid_x, chest.grid_y):
                 # Check fog of war visibility
-                if fog_enabled and not fog_of_war.is_visible(
+                if fog_enabled and fog_of_war and not fog_of_war.is_visible(
                     chest.grid_x, chest.grid_y
                 ):
                     continue
@@ -276,7 +276,7 @@ class WorldRenderer:
         for ground_item in entity_manager.ground_items:
             if camera.is_visible(ground_item.grid_x, ground_item.grid_y):
                 # Check fog of war visibility
-                if fog_enabled and not fog_of_war.is_visible(
+                if fog_enabled and fog_of_war and not fog_of_war.is_visible(
                     ground_item.grid_x, ground_item.grid_y
                 ):
                     continue
@@ -316,7 +316,7 @@ class WorldRenderer:
         for monster in entity_manager.monsters:
             if monster.is_alive and camera.is_visible(monster.grid_x, monster.grid_y):
                 # Check fog of war visibility
-                if fog_enabled and not fog_of_war.is_visible(
+                if fog_enabled and fog_of_war and not fog_of_war.is_visible(
                     monster.grid_x, monster.grid_y
                 ):
                     continue

@@ -180,7 +180,7 @@ class WorldMap:
         for world_y in range(start_y, end_y):
             for world_x in range(start_x, end_x):
                 # Check fog of war visibility
-                if fog_enabled:
+                if fog_enabled and fog_of_war:
                     # Only draw discovered tiles
                     if not fog_of_war.is_discovered(world_x, world_y, map_id):
                         continue

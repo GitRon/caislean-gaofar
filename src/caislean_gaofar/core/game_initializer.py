@@ -1,5 +1,6 @@
 """Game initialization component - handles all subsystem initialization."""
 
+from typing import TYPE_CHECKING
 import os
 import pygame
 from caislean_gaofar.entities.warrior import Warrior
@@ -19,6 +20,9 @@ from caislean_gaofar.utils.event_dispatcher import EventDispatcher
 from caislean_gaofar.core.game_loop import GameLoop
 from caislean_gaofar.world.dungeon_transition_manager import DungeonTransitionManager
 
+if TYPE_CHECKING:
+    from caislean_gaofar.world.world_map import WorldMap
+
 
 class GameComponents:
     """Container for all initialized game components."""
@@ -26,29 +30,29 @@ class GameComponents:
     def __init__(self):
         """Initialize empty container."""
         # Core pygame objects
-        self.screen = None
-        self.clock = None
+        self.screen: pygame.Surface | None = None
+        self.clock: pygame.time.Clock | None = None
 
         # Managers
-        self.entity_manager = None
-        self.turn_processor = None
-        self.renderer = None
-        self.state_manager = None
-        self.event_dispatcher = None
-        self.game_loop = None
-        self.dungeon_transition_manager = None
-        self.dungeon_manager = None
+        self.entity_manager: EntityManager | None = None
+        self.turn_processor: TurnProcessor | None = None
+        self.renderer: WorldRenderer | None = None
+        self.state_manager: GameStateManager | None = None
+        self.event_dispatcher: EventDispatcher | None = None
+        self.game_loop: GameLoop | None = None
+        self.dungeon_transition_manager: DungeonTransitionManager | None = None
+        self.dungeon_manager: DungeonManager | None = None
 
         # World objects
-        self.world_map = None
-        self.camera = None
-        self.fog_of_war = None
+        self.world_map: "WorldMap | None" = None
+        self.camera: Camera | None = None
+        self.fog_of_war: FogOfWar | None = None
 
         # Game entities
-        self.warrior = None
-        self.shop = None
-        self.temple = None
-        self.skill_ui = None
+        self.warrior: Warrior | None = None
+        self.shop: Shop | None = None
+        self.temple: Temple | None = None
+        self.skill_ui: SkillUI | None = None
 
 
 class GameInitializer:
@@ -85,9 +89,11 @@ class GameInitializer:
         self._initialize_entities(components)
 
         # Initialize starting items
+        assert components.warrior is not None
         self._add_starting_items(components.warrior)
 
         # Spawn monsters and chests
+        assert components.entity_manager is not None
         components.entity_manager.spawn_monsters(
             components.world_map, components.dungeon_manager
         )
@@ -120,9 +126,11 @@ class GameInitializer:
         """
         components.entity_manager = EntityManager()
         components.turn_processor = TurnProcessor()
+        assert components.screen is not None
         components.renderer = WorldRenderer(components.screen)
         components.state_manager = GameStateManager()
         components.event_dispatcher = EventDispatcher()
+        assert components.clock is not None
         components.game_loop = GameLoop(components.clock)
         components.dungeon_transition_manager = DungeonTransitionManager()
 
@@ -202,6 +210,7 @@ class GameInitializer:
             components: GameComponents to populate
         """
         # Initialize warrior at spawn point
+        assert components.world_map is not None
         spawn_x, spawn_y = components.world_map.spawn_point
         components.warrior = Warrior(spawn_x, spawn_y)
 
