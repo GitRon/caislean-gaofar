@@ -66,4 +66,3 @@ Centralized constants: screen size, FPS, colors, entity stats, AI ranges, game s
 - **Composition**: Warrior contains Inventory instance
 - **Delta Time**: Frame-rate independent physics
 - **Cooldowns**: Time-based using pygame.time.get_ticks()
-
