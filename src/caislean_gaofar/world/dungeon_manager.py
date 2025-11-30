@@ -145,8 +145,14 @@ class DungeonManager:
         # Switch back to world map
         self.current_map_id = "world"
 
-        # Get return location
-        return_pos = self.return_location
+        # Get return location and offset by one tile down to avoid re-entering
+        if self.return_location:
+            return_x, return_y = self.return_location
+            # Place player one tile below the entrance to prevent immediate re-entry
+            return_pos = (return_x, return_y + 1)
+        else:
+            return_pos = None
+
         self.return_location = None
 
         return return_pos
