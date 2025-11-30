@@ -45,6 +45,7 @@ class WorldRenderer:
         message: str,
         fog_of_war=None,
         temple=None,
+        library=None,
     ):
         """
         Draw the playing state.
@@ -61,6 +62,7 @@ class WorldRenderer:
             message: Current message to display
             fog_of_war: Fog of war system (optional)
             temple: Temple instance (optional)
+            library: Library instance (optional)
         """
         self.screen.fill(config.BLACK)
 
@@ -104,6 +106,10 @@ class WorldRenderer:
             # Draw temple if present and in town
             if temple:
                 self._draw_temple_with_camera(camera, temple)
+
+            # Draw library if present and in town
+            if library:
+                self._draw_library_with_camera(camera, library)
 
         # Draw dungeon entrances if on world map
         if dungeon_manager.current_map_id == "world":
@@ -352,6 +358,17 @@ class WorldRenderer:
         """
         if camera.is_visible(temple.grid_x, temple.grid_y):
             temple.draw(self.screen, camera.x, camera.y)
+
+    def _draw_library_with_camera(self, camera: Camera, library):
+        """
+        Draw a library with camera offset applied.
+
+        Args:
+            camera: The camera instance
+            library: The library to draw
+        """
+        if camera.is_visible(library.grid_x, library.grid_y):
+            library.draw(self.screen, camera.x, camera.y)
 
     def _draw_shop_building(self, camera: Camera, shop: Shop, warrior: Warrior):
         """

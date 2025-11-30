@@ -65,6 +65,7 @@ class Game:
         self.warrior = components.warrior
         self.shop = components.shop
         self.temple = components.temple
+        self.library = components.library
         self.skill_ui = components.skill_ui
 
         # Initialize coordinators
@@ -180,6 +181,7 @@ class Game:
             dungeon_manager=self.dungeon_manager,
             fog_of_war=self.fog_of_war,
             temple=self.temple,
+            library=self.library,  # type: ignore[arg-type]
             world_map=self.world_map,
             dt=dt,
         )
@@ -311,6 +313,7 @@ class Game:
             camera=self.camera,
             fog_of_war=self.fog_of_war,
             temple=self.temple,
+            library=self.library,  # type: ignore[arg-type]
         )
 
     def _handle_chest_opened(self, item: Item):
@@ -335,6 +338,7 @@ class Game:
             dungeon_manager=self.dungeon_manager,
             shop=self.shop,
             temple=self.temple,
+            library=self.library,  # type: ignore[arg-type]
             fog_of_war=self.fog_of_war,
         )
 

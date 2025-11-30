@@ -29,6 +29,9 @@ class DungeonManager:
         # Track dungeon entrance locations on world map
         self.dungeon_entrances: Dict[str, Tuple[int, int]] = {}
 
+        # Track town entrance location on world map
+        self.town_entrance: Optional[Tuple[int, int]] = None
+
     def load_world_map(self) -> None:
         """Load the world map from file."""
         self.world_map.load_from_file(self.world_map_path)
@@ -36,6 +39,9 @@ class DungeonManager:
 
         # Load dungeon entrance locations from world map
         self._load_dungeon_entrances()
+
+        # Load town entrance location from world map
+        self._load_town_entrance()
 
     def _load_dungeon_entrances(self) -> None:
         """Load dungeon entrance locations from world map entities."""
@@ -45,6 +51,17 @@ class DungeonManager:
             dungeon_id = spawn.get("id", dungeon_name.lower().replace(" ", "_"))
             x, y = spawn["x"], spawn["y"]
             self.dungeon_entrances[dungeon_id] = (x, y)
+
+    def _load_town_entrance(self) -> None:
+        """Load town entrance location from world map by finding 'E' tile."""
+        for y in range(self.world_map.height):
+            for x in range(self.world_map.width):
+                if (
+                    self.world_map.is_valid_position(x, y)
+                    and self.world_map.tiles[y][x] == "E"
+                ):
+                    self.town_entrance = (x, y)
+                    return
 
     def load_dungeon(self, dungeon_id: str, dungeon_path: str) -> None:
         """
@@ -179,3 +196,94 @@ class DungeonManager:
             return terrain_char == "<"
 
         return False
+
+    def check_for_town_entrance(self, grid_x: int, grid_y: int) -> bool:
+        """
+        Check if player is standing on a town entrance tile.
+
+        Args:
+            grid_x: Grid x coordinate
+            grid_y: Grid y coordinate
+
+        Returns:
+            True if on town entrance tile, False otherwise
+        """
+        if self.current_map_id != "world":
+            return False
+
+        return self.town_entrance is not None and (grid_x, grid_y) == self.town_entrance
+
+    def check_for_town_exit(self, grid_x: int, grid_y: int) -> bool:
+        """
+        Check if player is standing on a town exit tile.
+
+        Args:
+            grid_x: Grid x coordinate
+            grid_y: Grid y coordinate
+
+        Returns:
+            True if on town exit tile, False otherwise
+        """
+        if self.current_map_id != "town":
+            return False
+
+        current_map = self.get_current_map()
+
+        # Check if position is an exit tile (marked with '<' character)
+        if current_map.is_valid_position(grid_x, grid_y):
+            terrain_char = current_map.tiles[grid_y][grid_x]
+            return terrain_char == "<"
+
+        return False
+
+    def enter_town(self, player_x: int, player_y: int) -> Tuple[int, int]:
+        """
+        Enter town and return spawn point.
+
+        Args:
+            player_x: Player's current x position (for return)
+            player_y: Player's current y position (for return)
+
+        Returns:
+            Tuple of (spawn_x, spawn_y) in the town
+
+        Raises:
+            ValueError: If town map not loaded
+        """
+        if "town" not in self.dungeon_maps:
+            raise ValueError("Town map not loaded")
+
+        # Save return location
+        self.return_location = (player_x, player_y)
+
+        # Switch to town map
+        self.current_map_id = "town"
+
+        # Return town spawn point
+        town_map = self.dungeon_maps["town"]
+        return town_map.spawn_point
+
+    def exit_town(self) -> Optional[Tuple[int, int]]:
+        """
+        Exit town and return to world map.
+
+        Returns:
+            Tuple of (return_x, return_y) in world map, or None if not in town
+        """
+        if self.current_map_id != "town":
+            return None
+
+        # Switch back to world map
+        self.current_map_id = "world"
+
+        # Get return location and offset by one tile down to avoid re-entering
+        if self.return_location:
+            return_x, return_y = self.return_location
+            # Place player one tile below the entrance to prevent immediate re-entry
+            return_pos = (return_x, return_y + 1)
+        else:
+            return_pos = None
+
+        self.return_location = None
+
+        return return_pos

@@ -321,6 +321,8 @@ class TestGameStateCoordinator:
         warrior = Warrior(10, 10)
         fog_of_war = FogOfWar(visibility_radius=2)
         temple = Temple(grid_x=8, grid_y=1)
+        from caislean_gaofar.objects.library import Library
+        library = Library(grid_x=2, grid_y=6)
 
         # Mock turn_processor.process_turn to call callbacks
         def mock_process_turn(*args, **kwargs):
@@ -351,7 +353,7 @@ class TestGameStateCoordinator:
         ):
             # Act
             coordinator._process_turn(
-                warrior, dungeon_manager, world_map, camera, fog_of_war, temple
+                warrior, dungeon_manager, world_map, camera, fog_of_war, temple, library
             )
 
             # Assert - if we get here, the callbacks were defined and called
