@@ -35,11 +35,6 @@ class EntityManager:
         current_map_id = dungeon_manager.current_map_id
         monster_spawns = world_map.get_entity_spawns("monsters")
 
-        # DEBUG: Log spawn information
-        print(f"[DEBUG] spawn_monsters called for map '{current_map_id}'")
-        print(f"[DEBUG]   Found {len(monster_spawns)} monster spawns")
-        print(f"[DEBUG]   Killed monsters list has {len(self.killed_monsters)} entries")
-
         for spawn in monster_spawns:
             monster_type = spawn.get("type", "banshee")
             monster_x = spawn["x"]
@@ -55,14 +50,7 @@ class EntityManager:
             )
 
             if is_killed:
-                print(
-                    f"[DEBUG]   Skipping {monster_type} at ({monster_x}, {monster_y}) - already killed"
-                )
                 continue  # Skip this monster, it's dead
-            else:
-                print(
-                    f"[DEBUG]   Spawning {monster_type} at ({monster_x}, {monster_y})"
-                )
 
             # Find matching monster class
             monster_class = None
@@ -265,9 +253,6 @@ class EntityManager:
                     "map_id": current_map_id,
                 }
                 self.killed_monsters.append(killed_entry)
-                print(
-                    f"[DEBUG] Monster killed: {monster.monster_type} at ({monster.grid_x}, {monster.grid_y}) on map '{current_map_id}'"
-                )
 
                 # Use loot_table system to generate loot
                 loot_item = get_loot_for_monster(monster.monster_type)

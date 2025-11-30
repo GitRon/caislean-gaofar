@@ -925,6 +925,28 @@ class TestInventoryUIHelperMethods:
         inventory_ui._execute_context_menu_action("Drop", inventory)
         assert inventory.weapon_slot is None
 
+    def test_execute_context_menu_drop_with_game(self, inventory_ui):
+        """Test executing Drop action from context menu with game object"""
+        from unittest.mock import Mock
+
+        inventory = Inventory()
+        inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
+        inventory_ui.state.context_menu_slot = ("weapon", 0)
+
+        # Create mock game object
+        mock_game = Mock()
+        mock_game.warrior.grid_x = 5
+        mock_game.warrior.grid_y = 10
+
+        inventory_ui._execute_context_menu_action("Drop", inventory, mock_game)
+        assert inventory.weapon_slot is None
+        # Verify drop_item was called with correct parameters
+        mock_game.drop_item.assert_called_once()
+        args = mock_game.drop_item.call_args[0]
+        assert args[0].name == "Sword"
+        assert args[1] == 5  # grid_x
+        assert args[2] == 10  # grid_y
+
     def test_execute_context_menu_inspect(self, inventory_ui):
         """Test executing Inspect action from context menu (no longer supported)"""
         inventory = Inventory()

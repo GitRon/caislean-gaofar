@@ -399,15 +399,6 @@ class Game:
         self.entity_manager.killed_monsters = save_data.get("killed_monsters", [])
         self.entity_manager.opened_chests = save_data.get("opened_chests", [])
 
-        # DEBUG: Log what was loaded
-        print(
-            f"[DEBUG] load_game_state: Loaded {len(self.entity_manager.killed_monsters)} killed monsters"
-        )
-        for km in self.entity_manager.killed_monsters:
-            print(
-                f"[DEBUG]   - {km['type']} at ({km['x']}, {km['y']}) on map '{km['map_id']}'"
-            )
-
         # Spawn monsters and chests (will filter out killed/opened ones)
         self.entity_manager.spawn_monsters(self.world_map, self.dungeon_manager)
         self.entity_manager.spawn_chests(self.world_map, self.dungeon_manager)
