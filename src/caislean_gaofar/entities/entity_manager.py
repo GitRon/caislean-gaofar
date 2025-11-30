@@ -265,16 +265,16 @@ class EntityManager:
 
         for monster in self.monsters[:]:  # Iterate over copy to allow removal
             if not monster.is_alive:
-                # Track killed monster
+                # Track killed monster by spawn position (monsters move, so use spawn_x/spawn_y)
                 killed_entry = {
                     "type": monster.monster_type,
-                    "x": monster.grid_x,
-                    "y": monster.grid_y,
+                    "x": monster.spawn_x,
+                    "y": monster.spawn_y,
                     "map_id": current_map_id,
                 }
                 self.killed_monsters.append(killed_entry)
                 print(
-                    f"[DEBUG check_monster_deaths] Killed: {monster.monster_type} at ({monster.grid_x}, {monster.grid_y}) on '{current_map_id}'"
+                    f"[DEBUG check_monster_deaths] Killed: {monster.monster_type} at spawn ({monster.spawn_x}, {monster.spawn_y}), died at ({monster.grid_x}, {monster.grid_y}) on '{current_map_id}'"
                 )
 
                 # Use loot_table system to generate loot
