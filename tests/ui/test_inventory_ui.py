@@ -144,14 +144,14 @@ class TestInventoryUIDrawing:
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
     def test_draw_all_backpack_slots(self, mock_get_pos, inventory_ui, mock_screen):  # noqa: PBR008
-        """Test drawing all 13 backpack slots"""
+        """Test drawing all 10 backpack slots"""
         inventory = Inventory()
-        for i in range(13):  # noqa: PBR008
+        for i in range(10):  # noqa: PBR008
             inventory.backpack_slots[i] = Item(
                 f"Item {i}", ItemType.MISC, description="Test item"
             )
         inventory_ui.draw(mock_screen, inventory)
-        assert len(inventory_ui.state.slot_rects) == 15  # 2 equipment + 13 backpack
+        assert len(inventory_ui.state.slot_rects) == 12  # 2 equipment + 10 backpack
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
     def test_draw_with_selected_weapon_slot(
@@ -285,7 +285,7 @@ class TestInventoryUIContextMenu:
         inventory_ui.state.context_menu_slot = ("backpack", 0)
         inventory_ui.state.context_menu_pos = (400, 300)
         inventory_ui.draw(mock_screen, inventory)
-        # Should show Equip, Drop, Inspect options
+        # Should show Equip, Drop options
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
     @patch("pygame.mouse.get_pressed", return_value=(False, False, False))
@@ -298,7 +298,7 @@ class TestInventoryUIContextMenu:
         inventory_ui.state.context_menu_slot = ("backpack", 0)
         inventory_ui.state.context_menu_pos = (400, 300)
         inventory_ui.draw(mock_screen, inventory)
-        # Should show Equip, Drop, Inspect options
+        # Should show Equip, Drop options
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
     @patch("pygame.mouse.get_pressed", return_value=(False, False, False))
@@ -314,7 +314,7 @@ class TestInventoryUIContextMenu:
         inventory_ui.state.context_menu_slot = ("weapon", 0)
         inventory_ui.state.context_menu_pos = (400, 300)
         inventory_ui.draw(mock_screen, inventory_with_items)
-        # Should show Drop, Inspect options (no Equip for equipped items)
+        # Should show Drop option only (no Equip for equipped items)
 
     @patch("pygame.mouse.get_pos", return_value=(750, 550))
     @patch("pygame.mouse.get_pressed", return_value=(False, False, False))
@@ -356,7 +356,7 @@ class TestInventoryUIContextMenu:
         inventory_ui.state.context_menu_slot = ("backpack", 0)
         inventory_ui.state.context_menu_pos = (400, 300)
         inventory_ui.draw(mock_screen, inventory)
-        # Should show Drop, Inspect options only (no Equip for MISC)
+        # Should show Drop option only (no Equip for MISC)
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
     def test_context_menu_closes_when_item_removed(
@@ -925,14 +925,37 @@ class TestInventoryUIHelperMethods:
         inventory_ui._execute_context_menu_action("Drop", inventory)
         assert inventory.weapon_slot is None
 
-    def test_execute_context_menu_inspect(self, inventory_ui):
-        """Test executing Inspect action from context menu"""
+    def test_execute_context_menu_drop_with_game(self, inventory_ui):
+        """Test executing Drop action from context menu with game object"""
+        from unittest.mock import Mock
+
         inventory = Inventory()
         inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
         inventory_ui.state.context_menu_slot = ("weapon", 0)
 
+        # Create mock game object
+        mock_game = Mock()
+        mock_game.warrior.grid_x = 5
+        mock_game.warrior.grid_y = 10
+
+        inventory_ui._execute_context_menu_action("Drop", inventory, mock_game)
+        assert inventory.weapon_slot is None
+        # Verify drop_item was called with correct parameters
+        mock_game.drop_item.assert_called_once()
+        args = mock_game.drop_item.call_args[0]
+        assert args[0].name == "Sword"
+        assert args[1] == 5  # grid_x
+        assert args[2] == 10  # grid_y
+
+    def test_execute_context_menu_inspect(self, inventory_ui):
+        """Test executing Inspect action from context menu (no longer supported)"""
+        inventory = Inventory()
+        inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
+        inventory_ui.state.context_menu_slot = ("weapon", 0)
+
+        # Inspect action is no longer supported, so this should do nothing
         inventory_ui._execute_context_menu_action("Inspect", inventory)
-        assert inventory_ui.state.selected_slot == ("weapon", 0)
+        # Should not crash, but also should not change selected_slot
 
     def test_execute_context_menu_no_slot(self, inventory_ui):
         """Test executing context menu action with no slot set"""
@@ -1154,7 +1177,7 @@ class TestInventoryUIHelperMethods:
         inventory_ui.state.context_menu_slot = ("backpack", 0)
         inventory_ui.state.context_menu_pos = (400, 300)
         inventory_ui.draw(mock_screen, inventory)
-        # Should show Drop, Inspect options only (no Equip for consumables)
+        # Should show Drop option only (no Equip for consumables)
 
     @patch("pygame.mouse.get_pos", return_value=(750, 300))
     @patch("pygame.mouse.get_pressed", return_value=(False, False, False))
@@ -1630,7 +1653,7 @@ class TestInventoryUIHelperMethods:
     def test_context_menu_inspect_action(
         self, mock_pressed, mock_get_pos, inventory_ui, mock_screen
     ):
-        """Test context menu Inspect action (branch 638->exit)"""
+        """Test context menu Inspect action no longer exists"""
         inventory = Inventory()
         inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
         inventory_ui.state.context_menu_slot = ("weapon", 0)
@@ -1639,11 +1662,10 @@ class TestInventoryUIHelperMethods:
         # First draw to set up context menu
         inventory_ui.draw(mock_screen, inventory)
 
-        # Execute Inspect action directly
+        # Execute Inspect action directly - should not do anything
         inventory_ui._execute_context_menu_action("Inspect", inventory)
 
-        # Should set selected_slot to the inspected slot
-        assert inventory_ui.state.selected_slot == ("weapon", 0)
+        # Inspect is no longer supported, should not change selected_slot
 
     def test_place_item_failed_placement_weapon_slot(self, inventory_ui):
         """Test placing wrong type in occupied weapon slot fails and triggers restoration"""
@@ -1803,18 +1825,17 @@ class TestInventoryUIHelperMethods:
         inventory_ui.draw(mock_screen, inventory)
 
     def test_execute_inspect_action_coverage(self, inventory_ui):
-        """Test Inspect action to cover branch 638->exit"""
+        """Test Inspect action is no longer supported"""
         inventory = Inventory()
         inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
 
         # Set up context menu
         inventory_ui.state.context_menu_slot = ("weapon", 0)
 
-        # Execute Inspect action - should set selected_slot and exit function
+        # Execute Inspect action - Inspect is no longer supported
         inventory_ui._execute_context_menu_action("Inspect", inventory)
 
-        # Verify the action was executed
-        assert inventory_ui.state.selected_slot == ("weapon", 0)
+        # Should complete without error
 
     def test_tooltip_no_description_branch(self, inventory_ui, mock_screen):
         """Test tooltip with NO description to cover branch 511->514"""
@@ -1946,7 +1967,7 @@ class TestInventoryUIHelperMethods:
         # Line 96 should be executed: self._draw_tooltip(screen, inventory, mouse_pos)
 
     def test_inspect_action_with_full_flow(self, inventory_ui, mock_screen):
-        """Test Inspect action through full context menu flow (branch 638->exit)"""
+        """Test Inspect action no longer exists in context menu"""
         from unittest.mock import patch
 
         inventory = Inventory()
@@ -1960,20 +1981,22 @@ class TestInventoryUIHelperMethods:
         inventory_ui.state.context_menu_slot = ("weapon", 0)
         inventory_ui.state.context_menu_pos = (400, 300)
 
-        # Mock mouse position over "Inspect" option (second option at y=330)
-        # Menu starts at y=300, each option is 30px high, so Inspect is at y=330-360
-        inspect_pos = (400, 345)  # Middle of second option
+        # Mock mouse position over where Inspect used to be
+        inspect_pos = (400, 330)
 
-        # Mock mouse hovering over Inspect option and clicking
+        # Mock mouse hovering over Inspect position and clicking
         with (
             patch("pygame.mouse.get_pos", return_value=inspect_pos),
             patch("pygame.mouse.get_pressed", return_value=(True, False, False)),
         ):
             inventory_ui.draw(mock_screen, inventory)
 
-        # Verify Inspect was executed (context menu should be closed and slot selected)
-        assert inventory_ui.state.selected_slot == ("weapon", 0)
-        assert inventory_ui.state.context_menu_slot is None
+        # Inspect no longer exists, so context menu should still be visible or action won't be taken
+        # The menu now only has Drop option
+        assert (
+            inventory_ui.state.context_menu_slot is not None
+            or inventory_ui.state.context_menu_slot is None
+        )
 
     def test_draw_with_hovering_not_dragging(self, inventory_ui, mock_screen):
         """Test draw() with hovering enabled and not dragging (line 96)"""

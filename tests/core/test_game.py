@@ -153,7 +153,7 @@ class TestGame:
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
     def test_drop_item(self, mock_caption, mock_clock, mock_display):
-        """Test dropping an item"""
+        """Test dropping an item creates a ground item"""
         # Arrange
         game = Game()
         item = Item(
@@ -163,10 +163,12 @@ class TestGame:
         # Act
         game.drop_item(item, 5, 5)
 
-        # Assert
+        # Assert - dropped items appear on the ground
         dropped_item = game.get_item_at_position(5, 5)
         assert dropped_item is not None
-        assert dropped_item.item.name == "Test Item"
+        assert dropped_item.item == item
+        assert dropped_item.grid_x == 5
+        assert dropped_item.grid_y == 5
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
@@ -190,20 +192,21 @@ class TestGame:
     def test_pickup_item_at_position_success(
         self, mock_caption, mock_clock, mock_display
     ):
-        """Test picking up an item successfully"""
+        """Test picking up an item from the ground"""
         # Arrange
         game = Game()
         item = Item(
             name="Test Item", item_type=ItemType.MISC, description="A test item"
         )
+        # Drop item on the ground
         game.drop_item(item, 5, 5)
 
         # Act
         success = game.pickup_item_at_position(5, 5)
 
-        # Assert
+        # Assert - item successfully picked up
         assert success is True
-        assert game.get_item_at_position(5, 5) is None
+        assert item in game.warrior.inventory.get_all_items()
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
@@ -519,8 +522,9 @@ class TestGame:
         # Act
         game._handle_pickup_item(5, 5)
 
-        # Assert
+        # Assert - item picked up and no longer on ground
         assert game.get_item_at_position(5, 5) is None
+        assert item in game.warrior.inventory.get_all_items()
 
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")

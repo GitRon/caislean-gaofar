@@ -19,6 +19,7 @@ class InventoryUI:
         self.state = InventoryState()
         self.renderer = InventoryRenderer()
         self.input_handler = InventoryInputHandler(self.state, self.renderer, ui=self)
+        self._game = None  # Store reference to game for immediate-mode handling
 
     # Delegate methods to input handler for backward compatibility
     def _get_item_from_slot(self, inventory, slot_type, slot_index):
@@ -32,8 +33,8 @@ class InventoryUI:
             inventory, item, slot_type, slot_index
         )
 
-    def _execute_context_menu_action(self, action, inventory):
-        return self.input_handler._execute_context_menu_action(action, inventory)
+    def _execute_context_menu_action(self, action, inventory, game=None):
+        return self.input_handler._execute_context_menu_action(action, inventory, game)
 
     # Delegate methods to renderer for backward compatibility
     def _is_pos_in_context_menu(self, pos):
@@ -132,7 +133,9 @@ class InventoryUI:
             option_rects = self.renderer.get_context_menu_rects(self.state, inventory)
             for option_rect, option_text in option_rects:
                 if option_rect.collidepoint(mouse_pos):
-                    self._execute_context_menu_action(option_text, inventory)
+                    self._execute_context_menu_action(
+                        option_text, inventory, self._game
+                    )
                     self.state.close_context_menu()
                     break
 
@@ -150,4 +153,6 @@ class InventoryUI:
         Returns:
             True if the event was handled.
         """
+        # Store game reference for immediate-mode handling in draw()
+        self._game = game
         return self.input_handler.handle_input(event, inventory, game)

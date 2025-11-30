@@ -157,9 +157,9 @@ class InventoryRenderer:
         label = self.font.render("BACKPACK", True, self.text_color)
         screen.blit(label, (panel_x + self.padding, start_y - 25))
 
-        # Draw 13 backpack slots in a 5x3 grid (5 cols, 3 rows, last row has 3 slots)
+        # Draw 10 backpack slots in a 5x2 grid (5 cols, 2 rows)
         slots_per_row = 5
-        for i in range(13):
+        for i in range(10):
             row = i // slots_per_row
             col = i % slots_per_row
 
@@ -359,7 +359,6 @@ class InventoryRenderer:
             if item.item_type in [ItemType.WEAPON, ItemType.ARMOR]:
                 options.append("Equip")
         options.append("Drop")
-        options.append("Inspect")
 
         # Menu dimensions
         menu_width = 120
@@ -462,7 +461,6 @@ class InventoryRenderer:
             if item.item_type in [ItemType.WEAPON, ItemType.ARMOR]:
                 options.append("Equip")
         options.append("Drop")
-        options.append("Inspect")
 
         # Menu dimensions
         menu_width = 120
@@ -504,7 +502,7 @@ class InventoryRenderer:
         # Count menu items
         if state.context_menu_slot:
             slot_type, _ = state.context_menu_slot
-            num_options = 3 if slot_type == "backpack" else 2
+            num_options = 2 if slot_type == "backpack" else 1
             menu_height = num_options * menu_item_height
 
             menu_x, menu_y = state.context_menu_pos
