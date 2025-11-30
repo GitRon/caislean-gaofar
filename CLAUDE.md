@@ -117,3 +117,4 @@ See existing ADRs for examples:
 - [ADR 0003: Game State Management](docs/adr/0003-game-state-management.md)
 - [ADR 0004: UI Architecture Pattern](docs/adr/0004-ui-architecture-pattern.md)
 - [ADR 0005: UV for Dependency Management](docs/adr/0005-uv-dependency-management.md)
+
