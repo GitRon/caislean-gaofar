@@ -409,8 +409,9 @@ class Game:
         for gi_data in save_data.get("ground_items", []):
             if gi_data["map_id"] == current_map_id:
                 item = SaveGame.deserialize_item(gi_data["item"])
-                ground_item = GroundItem(item, gi_data["grid_x"], gi_data["grid_y"])
-                self.entity_manager.ground_items.append(ground_item)
+                if item is not None:
+                    ground_item = GroundItem(item, gi_data["grid_x"], gi_data["grid_y"])
+                    self.entity_manager.ground_items.append(ground_item)
 
         # Reset game state
         self.state_manager.reset()
