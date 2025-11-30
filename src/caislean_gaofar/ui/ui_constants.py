@@ -48,17 +48,17 @@ class UIConstants:
 
     # XP Panel
     XP_PANEL_HEIGHT = 60
-    XP_PANEL_Y = 390
+    XP_PANEL_Y = 470
     XP_BAR_HEIGHT = 18
     XP_BAR_Y_OFFSET = 30
 
     # Inventory Panel
     INVENTORY_PANEL_HEIGHT = 60
-    INVENTORY_PANEL_Y = 470
+    INVENTORY_PANEL_Y = 540
 
     # Skills Panel
     SKILLS_PANEL_HEIGHT = 60
-    SKILLS_PANEL_Y = 530
+    SKILLS_PANEL_Y = 610
 
     # ===== Shop Panel Constants =====
     # Reasoning: These define the shop UI layout and sizing
