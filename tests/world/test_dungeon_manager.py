@@ -196,8 +196,9 @@ class TestDungeonManager:
         # Check state
         assert manager.current_map_id == "world"
         assert manager.return_location is None
+        # Player is placed one tile below entrance to avoid immediate re-entry
         assert return_x == original_x
-        assert return_y == original_y
+        assert return_y == original_y + 1
 
     def test_exit_dungeon_when_not_in_dungeon(self):
         """Test exiting dungeon when not in one returns None."""
@@ -207,6 +208,28 @@ class TestDungeonManager:
 
         result = manager.exit_dungeon()
         assert result is None
+
+    def test_exit_dungeon_with_no_return_location(self):
+        """Test exiting dungeon when return_location is None."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
+        manager.load_dungeon("dark_cave", dungeon_path)
+
+        # Manually set to dungeon without using enter_dungeon (edge case)
+        manager.current_map_id = "dark_cave"
+        manager.return_location = None
+
+        # Exit dungeon
+        result = manager.exit_dungeon()
+
+        # Should return None since return_location was None
+        assert result is None
+        assert manager.current_map_id == "world"
+        assert manager.return_location is None
 
     def test_check_for_exit(self):
         """Test checking for exit tile in dungeon."""
@@ -266,7 +289,7 @@ class TestDungeonManager:
         assert mystic_grotto_id == "mystic_grotto"
 
     def test_dungeon_state_preservation(self):
-        """Test that return location is preserved correctly."""
+        """Test that return location is preserved correctly with offset."""
         map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
         manager = DungeonManager(map_path)
         manager.load_world_map()
@@ -275,26 +298,26 @@ class TestDungeonManager:
         )
         manager.load_dungeon("dark_cave", dungeon_path)
 
-        # Test first entry/exit
+        # Test first entry/exit - player placed one tile below entrance
         manager.current_map_id = "world"
         manager.enter_dungeon("dark_cave", 11, 15)
         return_x, return_y = manager.exit_dungeon()
         assert return_x == 11
-        assert return_y == 15
+        assert return_y == 16  # Offset by +1 to avoid re-entry
 
         # Test second entry/exit
         manager.current_map_id = "world"
         manager.enter_dungeon("dark_cave", 20, 20)
         return_x, return_y = manager.exit_dungeon()
         assert return_x == 20
-        assert return_y == 20
+        assert return_y == 21  # Offset by +1 to avoid re-entry
 
         # Test third entry/exit
         manager.current_map_id = "world"
         manager.enter_dungeon("dark_cave", 5, 5)
         return_x, return_y = manager.exit_dungeon()
         assert return_x == 5
-        assert return_y == 5
+        assert return_y == 6  # Offset by +1 to avoid re-entry
 
     def test_check_for_exit_invalid_position(self):
         """Test exit check with invalid position returns False."""

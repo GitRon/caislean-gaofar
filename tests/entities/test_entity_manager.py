@@ -173,7 +173,7 @@ class TestEntityManager:
         assert len(manager.chests) == 3
 
     def test_drop_item(self):
-        """Test dropping an item on the ground."""
+        """Test dropping an item creates a ground item."""
         # Arrange
         manager = EntityManager()
         item = Item("Test Item", ItemType.MISC)

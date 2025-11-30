@@ -54,6 +54,10 @@ class BaseMonster(Entity):
         self.xp_value = self.XP_VALUE
         self.frame_count = 0  # For animation
 
+        # Track original spawn position for persistence
+        self.spawn_x = grid_x
+        self.spawn_y = grid_y
+
     def execute_turn(self, target: Entity, world_map=None):
         """
         Execute one turn of monster AI behavior.

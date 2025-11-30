@@ -35,6 +35,19 @@ class EntityManager:
         current_map_id = dungeon_manager.current_map_id
         monster_spawns = world_map.get_entity_spawns("monsters")
 
+        # DEBUG: Log spawn information
+        print(
+            f"[DEBUG spawn_monsters] map_id='{current_map_id}', spawns={len(monster_spawns)}, killed={len(self.killed_monsters)}"
+        )
+        for km in self.killed_monsters:
+            m_type = km.get("type", "unknown")
+            m_x = km.get("x", "?")
+            m_y = km.get("y", "?")
+            m_map = km.get("map_id", "?")
+            print(
+                f"[DEBUG spawn_monsters]   Killed: {m_type} at ({m_x}, {m_y}) on '{m_map}'"
+            )
+
         for spawn in monster_spawns:
             monster_type = spawn.get("type", "banshee")
             monster_x = spawn["x"]
@@ -50,7 +63,14 @@ class EntityManager:
             )
 
             if is_killed:
+                print(
+                    f"[DEBUG spawn_monsters]   Skipping (killed): {monster_type} at ({monster_x}, {monster_y})"
+                )
                 continue  # Skip this monster, it's dead
+            else:
+                print(
+                    f"[DEBUG spawn_monsters]   Spawning: {monster_type} at ({monster_x}, {monster_y})"
+                )
 
             # Find matching monster class
             monster_class = None
@@ -245,14 +265,16 @@ class EntityManager:
 
         for monster in self.monsters[:]:  # Iterate over copy to allow removal
             if not monster.is_alive:
-                # Track killed monster
-                self.killed_monsters.append(
-                    {
-                        "type": monster.monster_type,
-                        "x": monster.grid_x,
-                        "y": monster.grid_y,
-                        "map_id": current_map_id,
-                    }
+                # Track killed monster by spawn position (monsters move, so use spawn_x/spawn_y)
+                killed_entry = {
+                    "type": monster.monster_type,
+                    "x": monster.spawn_x,
+                    "y": monster.spawn_y,
+                    "map_id": current_map_id,
+                }
+                self.killed_monsters.append(killed_entry)
+                print(
+                    f"[DEBUG check_monster_deaths] Killed: {monster.monster_type} at spawn ({monster.spawn_x}, {monster.spawn_y}), died at ({monster.grid_x}, {monster.grid_y}) on '{current_map_id}'"
                 )
 
                 # Use loot_table system to generate loot
