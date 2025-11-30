@@ -97,7 +97,9 @@ class Library:
         building_height = 35
         building_y = screen_y + self.size - building_height
         pygame.draw.rect(
-            screen, wood_color, (screen_x + 5, building_y, self.size - 10, building_height)
+            screen,
+            wood_color,
+            (screen_x + 5, building_y, self.size - 10, building_height),
         )
 
         # Door
@@ -161,9 +163,7 @@ class Library:
         book_icon_y = door_y - 8
         book_icon_x = screen_x + self.size // 2
         # Book pages
-        pygame.draw.rect(
-            screen, book_color, (book_icon_x - 4, book_icon_y, 8, 6)
-        )
+        pygame.draw.rect(screen, book_color, (book_icon_x - 4, book_icon_y, 8, 6))
         # Book cover edges
         pygame.draw.line(
             screen,

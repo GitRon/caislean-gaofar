@@ -281,9 +281,13 @@ class GameStateCoordinator:
             return  # Player already has portals
 
         # Check if player has space in inventory
-        empty_slots = sum(1 for slot in warrior.inventory.backpack_slots if slot is None)
+        empty_slots = sum(
+            1 for slot in warrior.inventory.backpack_slots if slot is None
+        )
         if empty_slots == 0:
-            self._show_message("Your backpack is full! Make space to receive town portals.")
+            self._show_message(
+                "Your backpack is full! Make space to receive town portals."
+            )
             return
 
         # Create town portal items and add to inventory

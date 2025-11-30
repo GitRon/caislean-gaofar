@@ -322,6 +322,7 @@ class TestGameStateCoordinator:
         fog_of_war = FogOfWar(visibility_radius=2)
         temple = Temple(grid_x=8, grid_y=1)
         from caislean_gaofar.objects.library import Library
+
         library = Library(grid_x=2, grid_y=6)
 
         # Mock turn_processor.process_turn to call callbacks
