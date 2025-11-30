@@ -1,5 +1,7 @@
 """Main game class - thin facade coordinating game components."""
 
+from typing import TYPE_CHECKING
+
 from caislean_gaofar.objects.item import Item
 from caislean_gaofar.objects.ground_item import GroundItem
 from caislean_gaofar.world.camera import Camera
@@ -10,11 +12,14 @@ from caislean_gaofar.core.game_state_coordinator import GameStateCoordinator
 from caislean_gaofar.core.game_render_coordinator import GameRenderCoordinator
 from caislean_gaofar.utils.event_context import EventContext
 
+if TYPE_CHECKING:
+    from caislean_gaofar.world.world_map import WorldMap
+
 
 class Game:
     """Thin facade that coordinates game components."""
 
-    def __init__(self, map_file: str = None):
+    def __init__(self, map_file: str | None = None):
         """
         Initialize the game by delegating to GameInitializer.
 
@@ -25,7 +30,25 @@ class Game:
         initializer = GameInitializer(map_file)
         components = initializer.initialize()
 
-        # Store component references
+        # Store component references (assert non-None for type checker)
+        assert components.screen is not None
+        assert components.clock is not None
+        assert components.entity_manager is not None
+        assert components.turn_processor is not None
+        assert components.renderer is not None
+        assert components.state_manager is not None
+        assert components.event_dispatcher is not None
+        assert components.game_loop is not None
+        assert components.dungeon_transition_manager is not None
+        assert components.dungeon_manager is not None
+        assert components.world_map is not None
+        assert components.camera is not None
+        assert components.fog_of_war is not None
+        assert components.warrior is not None
+        assert components.shop is not None
+        assert components.temple is not None
+        assert components.skill_ui is not None
+
         self.screen = components.screen
         self.clock = components.clock
         self.entity_manager = components.entity_manager
@@ -302,8 +325,10 @@ class Game:
 
     def draw(self):
         """Draw all game objects by delegating to GameRenderCoordinator."""
+        # Type assertion: world_map is guaranteed to be WorldMap after initialization
+        world_map: "WorldMap" = self.world_map  # type: ignore[assignment]
         self.render_coordinator.render(
-            world_map=self.world_map,
+            world_map=world_map,
             camera=self.camera,
             entity_manager=self.entity_manager,
             warrior=self.warrior,

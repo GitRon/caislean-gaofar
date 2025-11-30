@@ -1,6 +1,6 @@
 """Turn processing system for managing game turns and actions."""
 
-from typing import Callable, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING
 from caislean_gaofar.entities.warrior import Warrior
 from caislean_gaofar.entities.entity_manager import EntityManager
 
@@ -25,7 +25,7 @@ class TurnProcessor:
         on_chest_opened: Callable,
         on_item_picked: Callable,
         on_monster_death: Callable,
-        attack_effect_manager: "AttackEffectManager" = None,
+        attack_effect_manager: Optional["AttackEffectManager"] = None,
     ):
         """
         Process one complete turn (hero then monsters).
