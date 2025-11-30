@@ -353,7 +353,7 @@ class WorldRenderer:
         if camera.is_visible(temple.grid_x, temple.grid_y):
             temple.draw(self.screen, camera.x, camera.y)
 
-    def _draw_shop_building(self, camera: Camera, shop: Shop, warrior: Warrior):
+    def _draw_shop_building(self, camera: Camera, shop: Shop, warrior: Warrior) -> None:
         """
         Draw the shop building on the town map.
 

@@ -1,10 +1,16 @@
 """Input handling for inventory UI."""
 
+from __future__ import annotations
+
 import pygame
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple
+
 from caislean_gaofar.systems.inventory import Inventory
 from caislean_gaofar.ui.inventory_state import InventoryState
 from caislean_gaofar.ui.inventory_renderer import InventoryRenderer
+
+if TYPE_CHECKING:
+    from caislean_gaofar.objects.item import Item
 
 
 class InventoryInputHandler:
@@ -185,7 +191,7 @@ class InventoryInputHandler:
 
     def _get_item_from_slot(
         self, inventory: Inventory, slot_type: str, slot_index: int
-    ):
+    ) -> Item | None:
         """Get the item from a specific slot."""
         if slot_type == "weapon":
             return inventory.weapon_slot
@@ -200,7 +206,7 @@ class InventoryInputHandler:
         inventory: Inventory,
         from_slot: Tuple[str, int],
         to_slot: Tuple[str, int],
-    ):
+    ) -> None:
         """Move or swap items between slots."""
         from_type, from_index = from_slot
         to_type, to_index = to_slot
@@ -252,7 +258,7 @@ class InventoryInputHandler:
 
     def _execute_context_menu_action(
         self, action: str, inventory: Inventory, game=None
-    ):
+    ) -> None:
         """Execute the selected context menu action."""
         if not self.state.context_menu_slot:
             return

@@ -500,7 +500,7 @@ class ShopRenderer:
 
     def _draw_confirmation_dialog(
         self, screen: pygame.Surface, panel_x: int, panel_y: int, state: ShopState
-    ):
+    ) -> None:
         """Draw confirmation dialog."""
         # Type guard: confirmation_dialog is guaranteed to be not None when this is called
         if state.confirmation_dialog is None:  # pragma: no cover
@@ -600,7 +600,7 @@ class ShopRenderer:
         num_items: int,
         item_height: int,
         state: ShopState,
-    ):
+    ) -> None:
         """Draw scrollbar indicator if content is scrollable."""
         # Calculate if scrollbar is needed
         total_content_height = num_items * (item_height + 5)

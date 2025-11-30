@@ -4,11 +4,18 @@ This module provides a coordinated interface for the inventory UI,
 following the MVC pattern with separate state, rendering, and input handling.
 """
 
+from __future__ import annotations
+
 import pygame
+from typing import TYPE_CHECKING
+
 from caislean_gaofar.systems.inventory import Inventory
 from caislean_gaofar.ui.inventory_state import InventoryState
 from caislean_gaofar.ui.inventory_renderer import InventoryRenderer
 from caislean_gaofar.ui.inventory_input_handler import InventoryInputHandler
+
+if TYPE_CHECKING:
+    from caislean_gaofar.objects.item import Item
 
 
 class InventoryUI:
@@ -22,38 +29,38 @@ class InventoryUI:
         self._game = None  # Store reference to game for immediate-mode handling
 
     # Delegate methods to input handler for backward compatibility
-    def _get_item_from_slot(self, inventory, slot_type, slot_index):
+    def _get_item_from_slot(self, inventory, slot_type, slot_index) -> Item | None:
         return self.input_handler._get_item_from_slot(inventory, slot_type, slot_index)
 
-    def _move_item(self, inventory, from_slot, to_slot):
+    def _move_item(self, inventory, from_slot, to_slot) -> None:
         return self.input_handler._move_item(inventory, from_slot, to_slot)
 
-    def _place_item_in_slot(self, inventory, item, slot_type, slot_index):
+    def _place_item_in_slot(self, inventory, item, slot_type, slot_index) -> bool:
         return self.input_handler._place_item_in_slot(
             inventory, item, slot_type, slot_index
         )
 
-    def _execute_context_menu_action(self, action, inventory, game=None):
+    def _execute_context_menu_action(self, action, inventory, game=None) -> None:
         return self.input_handler._execute_context_menu_action(action, inventory, game)
 
     # Delegate methods to renderer for backward compatibility
-    def _is_pos_in_context_menu(self, pos):
+    def _is_pos_in_context_menu(self, pos) -> bool:
         return self.renderer.is_pos_in_context_menu(pos, self.state)
 
-    def _update_hovered_slot(self, mouse_pos):
+    def _update_hovered_slot(self, mouse_pos) -> None:
         return self.state.update_hovered_slot(mouse_pos)
 
-    def _draw_tooltip(self, screen, inventory, mouse_pos=None):
+    def _draw_tooltip(self, screen, inventory, mouse_pos=None) -> None:
         # Support both old (3-arg) and new (4-arg) calling conventions
         if mouse_pos is None:
             mouse_pos = pygame.mouse.get_pos()
         return self.renderer._draw_tooltip(screen, inventory, self.state, mouse_pos)
 
-    def _draw_context_menu(self, screen, inventory):
+    def _draw_context_menu(self, screen, inventory) -> None:
         # Use self.state as the state parameter
         return self.renderer._draw_context_menu(screen, inventory, self.state)
 
-    def _draw_dragged_item(self, screen, mouse_pos=None):
+    def _draw_dragged_item(self, screen, mouse_pos=None) -> None:
         # Support both old (2-arg) and new (3-arg) calling conventions
         if mouse_pos is None:
             mouse_pos = pygame.mouse.get_pos()
@@ -70,7 +77,7 @@ class InventoryUI:
         is_equipped=False,
         is_selected=False,
         is_hovered=False,
-    ):
+    ) -> None:
         # Use self.state as the state parameter
         return self.renderer._draw_slot(
             screen,

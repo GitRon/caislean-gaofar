@@ -58,7 +58,7 @@ enable_django_rules = false
 # Disable overly strict Python rules that would require extensive refactoring
 exclude = [
     "PBR001",  # Positional arguments discouraged (too strict for this project)
-    "PBR002",  # Return type hints required (too strict for this project)
+    # PBR002 now enabled - return type hints required to complement ty type checker
 ]
 
 [tool.ruff.lint]

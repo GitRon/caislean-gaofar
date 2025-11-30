@@ -101,7 +101,7 @@ class ShopInputHandler:
 
         return False
 
-    def _handle_buy_click(self, shop: Shop, warrior: Warrior):
+    def _handle_buy_click(self, shop: Shop, warrior: Warrior) -> None:
         """Handle buy button click (requires confirmation)."""
         if self.state.selected_item_index is None:
             return
@@ -132,7 +132,7 @@ class ShopInputHandler:
             # Show error message
             self.state.show_message(message, config.SHOP_INSUFFICIENT_FUNDS_COLOR)
 
-    def _handle_sell_click(self, shop: Shop, warrior: Warrior):
+    def _handle_sell_click(self, shop: Shop, warrior: Warrior) -> None:
         """Handle sell button click (requires confirmation)."""
         if self.state.selected_item_index is None:
             return

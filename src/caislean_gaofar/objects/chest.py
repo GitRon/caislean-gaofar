@@ -80,7 +80,7 @@ class Chest:
         screen: pygame.Surface,
         camera_offset_x: int = 0,
         camera_offset_y: int = 0,
-    ):
+    ) -> None:
         """
         Draw the chest on the screen.
         Chests appear as 3D treasure chests with lid, body, metal bands, and lock.

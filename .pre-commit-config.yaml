@@ -22,3 +22,4 @@ repos:
     hooks:
       - id: boa-restrictor
         args: [--config=pyproject.toml]
+        exclude: ^(tests/.*|main\.py)$

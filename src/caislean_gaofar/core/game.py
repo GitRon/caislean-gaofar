@@ -94,7 +94,7 @@ class Game:
         """
         self.entity_manager.drop_item(item, grid_x, grid_y)
 
-    def get_item_at_position(self, grid_x: int, grid_y: int):
+    def get_item_at_position(self, grid_x: int, grid_y: int) -> GroundItem | None:
         """
         Get the item at a specific position.
 
