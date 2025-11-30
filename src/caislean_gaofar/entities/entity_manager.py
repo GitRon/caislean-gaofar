@@ -55,10 +55,14 @@ class EntityManager:
             )
 
             if is_killed:
-                print(f"[DEBUG]   Skipping {monster_type} at ({monster_x}, {monster_y}) - already killed")
+                print(
+                    f"[DEBUG]   Skipping {monster_type} at ({monster_x}, {monster_y}) - already killed"
+                )
                 continue  # Skip this monster, it's dead
             else:
-                print(f"[DEBUG]   Spawning {monster_type} at ({monster_x}, {monster_y})")
+                print(
+                    f"[DEBUG]   Spawning {monster_type} at ({monster_x}, {monster_y})"
+                )
 
             # Find matching monster class
             monster_class = None
@@ -261,7 +265,9 @@ class EntityManager:
                     "map_id": current_map_id,
                 }
                 self.killed_monsters.append(killed_entry)
-                print(f"[DEBUG] Monster killed: {monster.monster_type} at ({monster.grid_x}, {monster.grid_y}) on map '{current_map_id}'")
+                print(
+                    f"[DEBUG] Monster killed: {monster.monster_type} at ({monster.grid_x}, {monster.grid_y}) on map '{current_map_id}'"
+                )
 
                 # Use loot_table system to generate loot
                 loot_item = get_loot_for_monster(monster.monster_type)

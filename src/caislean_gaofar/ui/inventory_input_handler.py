@@ -250,7 +250,9 @@ class InventoryInputHandler:
             return True
         return False
 
-    def _execute_context_menu_action(self, action: str, inventory: Inventory, game=None):
+    def _execute_context_menu_action(
+        self, action: str, inventory: Inventory, game=None
+    ):
         """Execute the selected context menu action."""
         if not self.state.context_menu_slot:
             return

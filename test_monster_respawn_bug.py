@@ -4,10 +4,11 @@ import sys
 import os
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 from caislean_gaofar.core.game import Game
 from caislean_gaofar.systems.save_game import SaveGame
+
 
 def print_monsters(game, label):
     """Helper to print current monsters."""
@@ -19,6 +20,7 @@ def print_monsters(game, label):
     print(f"  Killed monsters count: {len(game.entity_manager.killed_monsters)}")
     for km in game.entity_manager.killed_monsters:
         print(f"    - {km['type']} at ({km['x']}, {km['y']}) on map {km['map_id']}")
+
 
 def main():
     print("=== Testing Monster Respawn Bug ===")
@@ -41,8 +43,12 @@ def main():
     monster1 = world_monsters[0]
     monster2 = world_monsters[1]
 
-    print(f"   Killing {monster1.monster_type} at ({monster1.grid_x}, {monster1.grid_y})")
-    print(f"   Killing {monster2.monster_type} at ({monster2.grid_x}, {monster2.grid_y})")
+    print(
+        f"   Killing {monster1.monster_type} at ({monster1.grid_x}, {monster1.grid_y})"
+    )
+    print(
+        f"   Killing {monster2.monster_type} at ({monster2.grid_x}, {monster2.grid_y})"
+    )
 
     monster1.is_alive = False
     monster2.is_alive = False
@@ -70,12 +76,12 @@ def main():
     game.warrior.grid_y = cave_y
 
     # Trigger dungeon entry through transition manager
-    result = game.dungeon_transition_manager.check_and_handle_transition(
+    game.dungeon_transition_manager.check_and_handle_transition(
         game.warrior,
         game.dungeon_manager,
         game.entity_manager,
         lambda w, h: game.camera,  # on_camera_update
-        lambda msg: print(f"   Message: {msg}")  # on_message
+        lambda msg: print(f"   Message: {msg}"),  # on_message
     )
 
     print_monsters(game, "After entering dungeon")
@@ -95,12 +101,12 @@ def main():
         break
 
     # Trigger dungeon exit
-    result = game.dungeon_transition_manager.check_and_handle_transition(
+    game.dungeon_transition_manager.check_and_handle_transition(
         game.warrior,
         game.dungeon_manager,
         game.entity_manager,
         lambda w, h: game.camera,
-        lambda msg: print(f"   Message: {msg}")
+        lambda msg: print(f"   Message: {msg}"),
     )
 
     print_monsters(game, "After exiting dungeon")
@@ -109,11 +115,21 @@ def main():
     print("\n5. Checking for bug...")
     respawned = False
     for monster in game.entity_manager.monsters:
-        if monster.grid_x == world_monsters[0].grid_x and monster.grid_y == world_monsters[0].grid_y:
-            print(f"   BUG FOUND: Monster 1 ({world_monsters[0].monster_type}) respawned!")
+        if (
+            monster.grid_x == world_monsters[0].grid_x
+            and monster.grid_y == world_monsters[0].grid_y
+        ):
+            print(
+                f"   BUG FOUND: Monster 1 ({world_monsters[0].monster_type}) respawned!"
+            )
             respawned = True
-        if monster.grid_x == world_monsters[1].grid_x and monster.grid_y == world_monsters[1].grid_y:
-            print(f"   BUG FOUND: Monster 2 ({world_monsters[1].monster_type}) respawned!")
+        if (
+            monster.grid_x == world_monsters[1].grid_x
+            and monster.grid_y == world_monsters[1].grid_y
+        ):
+            print(
+                f"   BUG FOUND: Monster 2 ({world_monsters[1].monster_type}) respawned!"
+            )
             respawned = True
 
     if not respawned:
@@ -139,11 +155,21 @@ def main():
     print("\n7. Checking for save/load bug...")
     respawned_after_load = False
     for monster in game2.entity_manager.monsters:
-        if monster.grid_x == world_monsters[0].grid_x and monster.grid_y == world_monsters[0].grid_y:
-            print(f"   BUG FOUND: Monster 1 ({world_monsters[0].monster_type}) respawned after load!")
+        if (
+            monster.grid_x == world_monsters[0].grid_x
+            and monster.grid_y == world_monsters[0].grid_y
+        ):
+            print(
+                f"   BUG FOUND: Monster 1 ({world_monsters[0].monster_type}) respawned after load!"
+            )
             respawned_after_load = True
-        if monster.grid_x == world_monsters[1].grid_x and monster.grid_y == world_monsters[1].grid_y:
-            print(f"   BUG FOUND: Monster 2 ({world_monsters[1].monster_type}) respawned after load!")
+        if (
+            monster.grid_x == world_monsters[1].grid_x
+            and monster.grid_y == world_monsters[1].grid_y
+        ):
+            print(
+                f"   BUG FOUND: Monster 2 ({world_monsters[1].monster_type}) respawned after load!"
+            )
             respawned_after_load = True
 
     if not respawned_after_load:
@@ -159,6 +185,7 @@ def main():
     else:
         print("✗ BUGS FOUND - Monsters are respawning incorrectly!")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

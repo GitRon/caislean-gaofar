@@ -133,7 +133,9 @@ class InventoryUI:
             option_rects = self.renderer.get_context_menu_rects(self.state, inventory)
             for option_rect, option_text in option_rects:
                 if option_rect.collidepoint(mouse_pos):
-                    self._execute_context_menu_action(option_text, inventory, self._game)
+                    self._execute_context_menu_action(
+                        option_text, inventory, self._game
+                    )
                     self.state.close_context_menu()
                     break
 
