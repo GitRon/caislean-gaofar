@@ -26,3 +26,4 @@ ADRs are numbered sequentially:
 3. [Game State Management](0003-game-state-management.md)
 4. [UI Architecture Pattern](0004-ui-architecture-pattern.md)
 5. [UV for Dependency Management](0005-uv-dependency-management.md)
+6. [ty Type Checker Integration](0006-ty-type-checker-integration.md)

@@ -54,6 +54,8 @@ class ShopInputHandler:
         # Handle confirmation dialog input first
         if self.state.has_confirmation() and event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left click
+                # Type guard: confirmation_dialog is not None after has_confirmation()
+                assert self.state.confirmation_dialog is not None
                 yes_rect = self.state.confirmation_dialog.get("yes_rect")
                 no_rect = self.state.confirmation_dialog.get("no_rect")
 

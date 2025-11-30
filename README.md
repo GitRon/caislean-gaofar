@@ -77,6 +77,65 @@ This project uses pre-commit hooks to enforce code quality and consistency autom
 
 Once installed, the hooks will run automatically on `git commit`. If any hook fails, the commit will be blocked until issues are resolved.
 
+### Type Checking with ty
+
+This project uses **ty** (Astral's fast type checker) to catch type-related issues early. Type checking is currently in gradual adoption mode - it runs in CI but doesn't block merges.
+
+#### Running ty Locally
+
+```bash
+# Check all source files
+uv run ty check
+
+# Check specific files or directories
+uv run ty check src/caislean_gaofar/core/
+
+# Watch mode (re-check on file changes)
+uv run ty check --watch
+
+# Verbose output for detailed diagnostics
+uv run ty check -v
+```
+
+#### Understanding Diagnostics
+
+ty provides helpful error messages with context:
+
+```
+src/file.py:10:5: error[invalid-argument-type] Argument type mismatch
+  Expected: str
+  Found: int | None
+```
+
+**Common diagnostics:**
+- `invalid-argument-type`: Passing wrong type to function
+- `possibly-missing-attribute`: Accessing attribute that may not exist (often due to Optional types)
+- `unresolved-attribute`: Attribute doesn't exist on the type
+- `invalid-parameter-default`: Default value doesn't match type annotation
+
+#### Suppressing False Positives
+
+If ty reports a false positive, you can suppress it:
+
+```python
+# Suppress for a single line
+result = some_function()  # type: ignore[invalid-argument-type]
+
+# Suppress for a block (use sparingly)
+# ty: ignore
+```
+
+**Note**: Always investigate warnings first - they usually indicate real issues!
+
+#### Configuration
+
+Type checker settings are in `pyproject.toml` under `[tool.ty]`. Current configuration:
+- Tests are excluded (focus on production code first)
+- Targets Python 3.13
+- Uses concise output format
+
+See [ADR 0006](docs/adr/0006-ty-type-checker-integration.md) for the rationale behind ty adoption.
+
 ### CI/QA Pipeline
 
 The project includes a GitHub Actions workflow (`.github/workflows/qa.yml`) that automatically runs quality checks on:
@@ -86,7 +145,7 @@ The project includes a GitHub Actions workflow (`.github/workflows/qa.yml`) that
 
 #### Pipeline Jobs
 
-The pipeline consists of three separate jobs:
+The pipeline consists of four separate jobs:
 
 **Job 1: Check Hook Updates** (runs independently, allowed to fail)
 1. **Checkout**: Clones the repository
@@ -102,7 +161,15 @@ This job provides visibility into available hook updates without blocking the pi
 3. **Install pre-commit**: Installs pre-commit package
 4. **Pre-commit Checks**: Runs all configured pre-commit hooks (must pass)
 
-**Job 3: Testing & Coverage** (only runs if linting passes)
+**Job 3: Type Checking** (runs independently, informational only)
+1. **Checkout**: Clones the repository
+2. **Python Setup**: Configures Python 3.13 environment
+3. **Install Dependencies**: Installs project dependencies including ty
+4. **Run ty**: Executes type checker on source code (reports issues but doesn't block)
+
+This job runs in parallel with other jobs and provides type safety feedback without blocking merges. Type issues are tracked for gradual improvement.
+
+**Job 4: Testing & Coverage** (only runs if linting passes)
 1. **Checkout**: Clones the repository
 2. **Python Setup**: Configures Python 3.13 environment
 3. **Install Dependencies**: Installs pytest, pytest-cov, pytest-mock, and pygame
@@ -110,7 +177,7 @@ This job provides visibility into available hook updates without blocking the pi
 5. **Upload Coverage Report**: Uploads coverage data to Codecov (optional)
 6. **Coverage Badge**: Validates 100% coverage requirement and fails if not met
 
-The pipeline will fail if any pre-commit hook fails, ensuring code quality standards are maintained. Testing only proceeds after successful linting.
+The pipeline will fail if any pre-commit hook fails or if test coverage drops below 100%. Type checking is informational and doesn't block merges.
 
 #### Manual Trigger
 

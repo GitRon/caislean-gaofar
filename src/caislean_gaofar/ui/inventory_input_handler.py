@@ -106,8 +106,8 @@ class InventoryInputHandler:
                     break
 
             if target_slot and target_slot != self.state.dragging_from:
-                # Try to move/swap items
-                self._move_item(inventory, self.state.dragging_from, target_slot)
+                # Try to move/swap items (type guard: target_slot is tuple[str, int])
+                self._move_item(inventory, self.state.dragging_from, target_slot)  # type: ignore[arg-type]
 
             # Clear drag state
             self.state.end_drag()

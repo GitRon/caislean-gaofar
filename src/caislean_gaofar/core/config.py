@@ -17,12 +17,9 @@ def resource_path(relative_path):
     Returns:
         Absolute path to the resource
     """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except AttributeError:
-        # Running in normal Python environment
-        base_path = os.path.abspath(".")
+    # PyInstaller creates a temp folder and stores path in _MEIPASS
+    # Use getattr to handle the attribute safely since it's only present at runtime
+    base_path = getattr(sys, "_MEIPASS", os.path.abspath("."))
 
     return os.path.join(base_path, relative_path)
 
