@@ -11,7 +11,7 @@ from caislean_gaofar.core import config
 
 
 @pytest.fixture
-def sample_map_data():
+def sample_map_data() -> WorldMap:
     """Sample map data for testing"""
     return {
         "metadata": {"width": 10, "height": 8, "tile_size": 50},
@@ -38,7 +38,7 @@ def sample_map_data():
 
 
 @pytest.fixture
-def temp_map_file(sample_map_data):
+def temp_map_file(sample_map_data) -> WorldMap:
     """Create a temporary map file for testing"""
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
         json.dump(sample_map_data, f)
@@ -376,7 +376,7 @@ class TestWorldMap:
         assert world_map.entity_spawns == {}
 
     @patch("pygame.draw.rect")
-    def test_draw_with_none_terrain(self, mock_draw_rect, sample_map_data):
+    def test_draw_with_none_terrain(self, mock_draw_rect, sample_map_data) -> None:
         """Test drawing when get_terrain returns None"""
         # Arrange
         world_map = WorldMap()
@@ -387,7 +387,7 @@ class TestWorldMap:
         original_get_terrain = world_map.get_terrain
         call_count = [0]
 
-        def mock_get_terrain(x, y):
+        def mock_get_terrain(x, y) -> object | None:
             call_count[0] += 1
             if call_count[0] == 1:
                 return None

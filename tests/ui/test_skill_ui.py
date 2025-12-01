@@ -1,6 +1,7 @@
 """Tests for skill_ui.py - SkillUI class"""
 
 import pytest
+from typing import Generator
 from unittest.mock import patch
 import pygame
 from caislean_gaofar.ui.skill_ui import SkillUI
@@ -9,7 +10,7 @@ from caislean_gaofar.core import config
 
 
 @pytest.fixture(autouse=True)
-def setup_pygame():
+def setup_pygame() -> Generator[None, None, None]:
     """Setup pygame before each test and cleanup after"""
     pygame.init()
     yield
@@ -17,19 +18,19 @@ def setup_pygame():
 
 
 @pytest.fixture
-def skill_ui():
+def skill_ui() -> SkillUI:
     """Create a SkillUI instance"""
     return SkillUI()
 
 
 @pytest.fixture
-def warrior():
+def warrior() -> Warrior:
     """Create a warrior instance"""
     return Warrior(5, 5)
 
 
 @pytest.fixture
-def screen():
+def screen() -> pygame.Surface:
     """Create a real pygame screen"""
     return pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 

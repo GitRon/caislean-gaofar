@@ -61,7 +61,7 @@ class UIDrawingUtils:
         shadow_color: tuple = (0, 0, 0),
         shadow_offset: int | None = None,
         centered: bool = False,
-    ):
+    ) -> pygame.Rect:
         """
         Draw text with a drop shadow for better readability.
 
@@ -334,7 +334,7 @@ class UIDrawingUtils:
         border_color: tuple | None = None,
         padding: int | None = None,
         centered: bool = True,
-    ):
+    ) -> pygame.Rect:
         """
         Draw a message box with text and background.
 

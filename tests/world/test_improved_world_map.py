@@ -14,7 +14,7 @@ class TestImprovedWorldMap:
     """Test suite for improved world map features"""
 
     @pytest.fixture
-    def overworld_map(self):
+    def overworld_map(self) -> WorldMap:
         """Load the overworld map for testing"""
         world_map = WorldMap()
         world_map.load_from_file("data/maps/overworld.json")

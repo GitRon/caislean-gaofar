@@ -1036,6 +1036,50 @@ class TestGame:
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")
+    def test_load_game_state_with_null_ground_items(
+        self, mock_caption, mock_clock, mock_display
+    ):
+        """Test loading game state handles null items in ground_items gracefully"""
+        # Arrange
+        game = Game()
+
+        # Create save data with a None item (shouldn't happen but handled defensively)
+        save_data = {
+            "player": {
+                "grid_x": 10,
+                "grid_y": 15,
+                "health": 100,
+                "max_health": 100,
+                "gold": 100,
+                "inventory": {
+                    "equipped_weapon": None,
+                    "equipped_armor": None,
+                    "items": [],
+                },
+            },
+            "current_map_id": "world",
+            "return_location": None,
+            "killed_monsters": [],
+            "opened_chests": [],
+            "ground_items": [
+                {
+                    "map_id": "world",
+                    "grid_x": 5,
+                    "grid_y": 5,
+                    "item": None,  # Null item - should be skipped
+                }
+            ],
+        }
+
+        # Act
+        game.load_game_state(save_data)
+
+        # Assert - null items should be skipped
+        assert len(game.entity_manager.ground_items) == 0
+
+    @patch("pygame.display.set_mode")
+    @patch("pygame.time.Clock")
+    @patch("pygame.display.set_caption")
     @patch("pygame.quit")
     def test_run_game_loop(self, mock_quit, mock_caption, mock_clock, mock_display):
         """Test main game loop runs"""

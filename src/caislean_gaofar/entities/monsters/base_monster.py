@@ -58,7 +58,7 @@ class BaseMonster(Entity):
         self.spawn_x = grid_x
         self.spawn_y = grid_y
 
-    def execute_turn(self, target: Entity, world_map=None):
+    def execute_turn(self, target: Entity, world_map=None) -> None:
         """
         Execute one turn of monster AI behavior.
 

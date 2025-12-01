@@ -6,7 +6,7 @@ import glob
 from caislean_gaofar.world.world_map import WorldMap
 
 
-def get_all_map_files():
+def get_all_map_files() -> list[tuple[str, str]]:
     """Get all map files from the maps directory"""
     maps_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "maps")
     map_files = glob.glob(os.path.join(maps_dir, "*.json"))

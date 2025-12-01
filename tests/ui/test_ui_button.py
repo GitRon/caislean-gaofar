@@ -1,13 +1,14 @@
 """Tests for ui_button.py - Button class"""
 
 import pytest
+from typing import Generator
 from unittest.mock import Mock, patch
 import pygame
 from caislean_gaofar.ui.ui_button import Button
 
 
 @pytest.fixture(autouse=True)
-def setup_pygame():
+def setup_pygame() -> Generator[None, None, None]:
     """Setup pygame before each test and cleanup after"""
     pygame.init()
     yield
@@ -15,7 +16,7 @@ def setup_pygame():
 
 
 @pytest.fixture
-def mock_screen():
+def mock_screen() -> pygame.Surface:
     """Create a mock pygame surface"""
     return Mock(spec=pygame.Surface)
 

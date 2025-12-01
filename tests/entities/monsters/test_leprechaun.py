@@ -2,6 +2,7 @@
 
 import pygame
 import pytest
+from typing import Generator
 
 from caislean_gaofar.entities.monsters.leprechaun import Leprechaun
 from caislean_gaofar.entities.monsters.base_monster import BaseMonster
@@ -11,7 +12,7 @@ class TestLeprechaun:
     """Tests for Leprechaun monster"""
 
     @pytest.fixture(autouse=True)
-    def setup_pygame(self):
+    def setup_pygame(self) -> Generator[None, None, None]:
         """Initialize pygame before each test."""
         pygame.init()
         pygame.display.set_mode((800, 600))

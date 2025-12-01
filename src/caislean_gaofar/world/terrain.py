@@ -13,7 +13,7 @@ class TerrainType:
     passable: bool
     color: Tuple[int, int, int]
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Make TerrainType hashable for use in dictionaries."""
         return hash(self.character)
 

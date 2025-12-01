@@ -10,7 +10,7 @@ from caislean_gaofar.core import config
 
 
 @pytest.fixture
-def mock_screen():
+def mock_screen() -> pygame.Surface:
     """Create a mock pygame surface"""
     return Mock(spec=pygame.Surface)
 
