@@ -8,14 +8,14 @@ from caislean_gaofar.core import config
 
 
 @pytest.fixture
-def hud():
+def hud() -> HUD:
     """Create a HUD instance for testing."""
     pygame.init()
     return HUD()
 
 
 @pytest.fixture
-def warrior():
+def warrior() -> Warrior:
     """Create a warrior instance for testing."""
     return Warrior(0, 0)
 

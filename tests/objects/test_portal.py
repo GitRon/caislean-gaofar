@@ -10,7 +10,7 @@ class TestPortal:
     """Test cases for the Portal class."""
 
     @pytest.fixture
-    def screen(self):
+    def screen(self) -> pygame.Surface:
         """Create a test screen surface."""
         pygame.init()
         return pygame.display.set_mode((800, 600))

@@ -8,7 +8,7 @@ from caislean_gaofar.core import config
 
 
 @pytest.fixture
-def mock_screen():
+def mock_screen() -> pygame.Surface:
     """Create a mock pygame screen."""
     pygame.init()
     screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
@@ -17,7 +17,7 @@ def mock_screen():
 
 
 @pytest.fixture
-def main_menu(mock_screen):
+def main_menu(mock_screen) -> MainMenu:
     """Create a MainMenu instance for testing."""
     return MainMenu(mock_screen)
 

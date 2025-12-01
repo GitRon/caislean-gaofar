@@ -2,6 +2,7 @@
 
 import pygame
 import pytest
+from typing import Generator
 
 from caislean_gaofar.entities.monsters.changeling import Changeling
 from caislean_gaofar.entities.monsters.base_monster import BaseMonster
@@ -11,7 +12,7 @@ class TestChangeling:
     """Tests for Changeling monster"""
 
     @pytest.fixture(autouse=True)
-    def setup_pygame(self):
+    def setup_pygame(self) -> Generator[None, None, None]:
         """Initialize pygame before each test."""
         pygame.init()
         pygame.display.set_mode((800, 600))

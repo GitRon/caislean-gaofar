@@ -9,7 +9,7 @@ class TestAttackEffect:
     """Test cases for the AttackEffect class."""
 
     @pytest.fixture
-    def screen(self):
+    def screen(self) -> pygame.Surface:
         """Create a test screen surface."""
         pygame.init()
         return pygame.display.set_mode((800, 600))
@@ -207,7 +207,7 @@ class TestAttackEffectManager:
     """Test cases for the AttackEffectManager class."""
 
     @pytest.fixture
-    def screen(self):
+    def screen(self) -> pygame.Surface:
         """Create a test screen surface."""
         pygame.init()
         return pygame.display.set_mode((800, 600))
