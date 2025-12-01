@@ -1,13 +1,19 @@
 """Entity management system for handling game entities."""
 
+from __future__ import annotations
+
 import random
-from typing import List, Optional, Dict
+from typing import TYPE_CHECKING, List, Optional, Dict
+
 from caislean_gaofar.entities.warrior import Warrior
 from caislean_gaofar.entities.monsters import ALL_MONSTER_CLASSES
 from caislean_gaofar.objects.chest import Chest
 from caislean_gaofar.objects.ground_item import GroundItem
 from caislean_gaofar.objects.item import Item
 from caislean_gaofar.systems.loot_table import get_loot_for_monster
+
+if TYPE_CHECKING:
+    from caislean_gaofar.entities.monsters.base_monster import BaseMonster
 
 
 class EntityManager:
@@ -102,7 +108,7 @@ class EntityManager:
                 monster = monster_class(default_x, default_y)
                 self.monsters.append(monster)
 
-    def spawn_chests(self, world_map, dungeon_manager):
+    def spawn_chests(self, world_map, dungeon_manager) -> None:
         """
         Spawn chests from map data or at random locations, excluding opened chests.
 
@@ -228,7 +234,7 @@ class EntityManager:
                     return False, "Inventory is full!"
         return False, ""
 
-    def get_nearest_alive_monster(self, warrior: Warrior):
+    def get_nearest_alive_monster(self, warrior: Warrior) -> BaseMonster | None:
         """
         Get the nearest alive monster to the warrior.
 

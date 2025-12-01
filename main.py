@@ -6,7 +6,7 @@ from caislean_gaofar.ui.main_menu import MainMenu
 from caislean_gaofar.core import config
 
 
-def main():
+def main() -> None:
     """Start the game."""
     # Initialize pygame for the menu
     pygame.init()

@@ -1,6 +1,7 @@
 """Tests for shop_ui.py - ShopUI class"""
 
 import pytest
+from typing import Generator
 from unittest.mock import Mock, patch
 import pygame
 from caislean_gaofar.ui.shop_ui import ShopUI
@@ -11,7 +12,7 @@ from caislean_gaofar.core import config
 
 
 @pytest.fixture(autouse=True)
-def setup_pygame():
+def setup_pygame() -> Generator[None, None, None]:
     """Setup pygame before each test and cleanup after"""
     pygame.init()
     yield
@@ -19,25 +20,25 @@ def setup_pygame():
 
 
 @pytest.fixture
-def mock_screen():
+def mock_screen() -> pygame.Surface:
     """Create a real pygame surface for testing"""
     return pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 
 
 @pytest.fixture
-def shop_ui():
+def shop_ui() -> Shop:
     """Create a ShopUI instance"""
     return ShopUI()
 
 
 @pytest.fixture
-def shop():
+def shop() -> Shop:
     """Create a shop instance"""
     return Shop(5, 5)
 
 
 @pytest.fixture
-def warrior():
+def warrior() -> Warrior:
     """Create a warrior instance with some gold"""
     w = Warrior(10, 10)
     w.add_gold(1000)

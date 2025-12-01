@@ -2,6 +2,7 @@
 
 import pygame
 import pytest
+from typing import Generator
 from caislean_gaofar.ui import visual_components
 
 
@@ -9,7 +10,7 @@ class TestVisualComponents:
     """Test visual component helper functions."""
 
     @pytest.fixture(autouse=True)
-    def setup_pygame(self):
+    def setup_pygame(self) -> Generator[None, None, None]:
         """Initialize pygame before each test."""
         pygame.init()
         pygame.display.set_mode((800, 600))

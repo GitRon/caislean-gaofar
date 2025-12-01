@@ -22,29 +22,31 @@ class ShopUI:
         self.input_handler = ShopInputHandler(self.state)
 
     # Delegate methods to renderer for backward compatibility
-    def _wrap_text(self, text, max_width):
+    def _wrap_text(self, text, max_width) -> list[str]:
         return self.renderer._wrap_text(text, max_width)
 
-    def _draw_item_info(self, screen, item_rect, item, player_gold, shop_item=None):
+    def _draw_item_info(
+        self, screen, item_rect, item, player_gold, shop_item=None
+    ) -> None:
         return self.renderer._draw_item_info(
             screen, item_rect, item, player_gold, shop_item
         )
 
     # Delegate methods to state for backward compatibility
-    def _show_message(self, message, color=None):
+    def _show_message(self, message, color=None) -> None:
         return self.state.show_message(message, color)
 
     # Delegate methods to input handler for backward compatibility
-    def _handle_buy_click(self, shop, warrior):
+    def _handle_buy_click(self, shop, warrior) -> None:
         return self.input_handler._handle_buy_click(shop, warrior)
 
-    def _execute_buy(self, shop, warrior, shop_item):
+    def _execute_buy(self, shop, warrior, shop_item) -> None:
         return self.input_handler._execute_buy(shop, warrior, shop_item)
 
-    def _handle_sell_click(self, shop, warrior):
+    def _handle_sell_click(self, shop, warrior) -> None:
         return self.input_handler._handle_sell_click(shop, warrior)
 
-    def _execute_sell(self, shop, warrior, item):
+    def _execute_sell(self, shop, warrior, item) -> None:
         return self.input_handler._execute_sell(shop, warrior, item)
 
     def draw(self, screen: pygame.Surface, shop: Shop, warrior: Warrior):

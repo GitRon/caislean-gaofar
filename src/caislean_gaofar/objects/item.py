@@ -36,5 +36,5 @@ class Item:
         self.sell_price = sell_price if sell_price is not None else gold_value // 2
         self.unsellable = unsellable  # True for quest items or unsellable items
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Item({self.name}, {self.item_type.value})"

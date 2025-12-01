@@ -1,10 +1,16 @@
 """Save game functionality for persisting game state."""
 
+from __future__ import annotations
+
 import datetime
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
+
+if TYPE_CHECKING:
+    from caislean_gaofar.objects.item import Item
+    from caislean_gaofar.systems.inventory import Inventory
 
 
 class SaveGame:
@@ -45,7 +51,7 @@ class SaveGame:
         }
 
     @staticmethod
-    def deserialize_item(data: Optional[Dict]):
+    def deserialize_item(data: Optional[Dict]) -> Item | None:
         """
         Deserialize a dictionary to an Item.
 
@@ -92,7 +98,7 @@ class SaveGame:
         }
 
     @staticmethod
-    def deserialize_inventory(data: Dict):
+    def deserialize_inventory(data: Dict) -> Inventory:
         """
         Deserialize a dictionary to an Inventory.
 

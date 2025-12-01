@@ -24,7 +24,7 @@ class AttackEffect:
         self.animation_time = 0.0
         self.max_duration = 0.5
 
-    def update(self, dt: float):
+    def update(self, dt: float) -> None:
         """
         Update the attack effect animation.
 
@@ -40,7 +40,7 @@ class AttackEffect:
         if self.effect_time <= 0:
             self.active = False
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface) -> None:
         """
         Draw the attack effect.
 

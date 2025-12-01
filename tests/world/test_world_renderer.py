@@ -986,7 +986,7 @@ class TestWorldRenderer:
         # Assert - warrior should not be drawn
         warrior.draw.assert_not_called()
 
-    def test_draw_entities_with_camera_monster_not_visible(self):
+    def test_draw_entities_with_camera_monster_not_visible(self) -> None:
         """Test drawing entities when monster is not visible."""
         # Arrange
         screen = Mock()
@@ -994,7 +994,7 @@ class TestWorldRenderer:
 
         camera = Mock()
 
-        def is_visible_check(x, y):
+        def is_visible_check(x, y) -> bool:
             # Warrior visible, monster not visible
             return x == 5 and y == 10
 

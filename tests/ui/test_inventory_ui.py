@@ -1,6 +1,7 @@
 """Tests for inventory_ui.py - InventoryUI class"""
 
 import pytest
+from typing import Generator
 from unittest.mock import Mock, patch
 import pygame
 from caislean_gaofar.ui.inventory_ui import InventoryUI
@@ -10,7 +11,7 @@ from caislean_gaofar.core import config
 
 
 @pytest.fixture(autouse=True)
-def setup_pygame():
+def setup_pygame() -> Generator[None, None, None]:
     """Setup pygame before each test and cleanup after"""
     pygame.init()
     yield
@@ -18,19 +19,19 @@ def setup_pygame():
 
 
 @pytest.fixture
-def mock_screen():
+def mock_screen() -> pygame.Surface:
     """Create a real pygame surface for testing"""
     return pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 
 
 @pytest.fixture
-def inventory_ui():
+def inventory_ui() -> Inventory:
     """Create an InventoryUI instance"""
     return InventoryUI()
 
 
 @pytest.fixture
-def inventory_with_items():
+def inventory_with_items() -> Inventory:
     """Create an inventory with some items"""
     inv = Inventory()
     inv.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
@@ -40,7 +41,7 @@ def inventory_with_items():
 
 
 @pytest.fixture
-def mock_game():
+def mock_game() -> Mock:
     """Create a mock game instance"""
     game = Mock()
     game.warrior = Mock()
@@ -1604,7 +1605,7 @@ class TestInventoryUIHelperMethods:
         inventory_ui.draw(mock_screen, inventory)
         # Should call _draw_tooltip
 
-    def test_move_item_failed_placement_with_to_item(self, inventory_ui):
+    def test_move_item_failed_placement_with_to_item(self, inventory_ui) -> None:
         """Test _move_item when placement fails and both items need restoration (lines 467-469)"""
         from unittest.mock import patch
 
@@ -1621,7 +1622,7 @@ class TestInventoryUIHelperMethods:
         original_place = inventory_ui._place_item_in_slot
         call_count = [0]
 
-        def mock_place(inv, item, slot_type, slot_index):
+        def mock_place(inv, item, slot_type, slot_index) -> bool:
             call_count[0] += 1
             if call_count[0] == 1:  # First call fails
                 return False
@@ -1791,7 +1792,7 @@ class TestInventoryUIHelperMethods:
         inventory_ui.draw(mock_screen, inventory)
         # Border should be hover_color with width 3
 
-    def test_move_item_failed_placement_no_to_item(self, inventory_ui):
+    def test_move_item_failed_placement_no_to_item(self, inventory_ui) -> None:
         """Test _move_item when placement fails with no to_item (branch 468->exit)"""
         from unittest.mock import patch
 
@@ -1803,7 +1804,7 @@ class TestInventoryUIHelperMethods:
         original_place = inventory_ui._place_item_in_slot
         call_count = [0]
 
-        def mock_place(inv, item, slot_type, slot_index):
+        def mock_place(inv, item, slot_type, slot_index) -> bool:
             call_count[0] += 1
             if call_count[0] == 1:  # First call (placement to new slot) fails
                 return False

@@ -2,6 +2,7 @@
 
 import pygame
 import pytest
+from typing import Generator
 from caislean_gaofar.ui.inventory_ui import InventoryUI
 from caislean_gaofar.ui.inventory_renderer import InventoryRenderer
 from caislean_gaofar.ui.inventory_state import InventoryState
@@ -15,7 +16,7 @@ from caislean_gaofar.core import config
 
 
 @pytest.fixture(autouse=True)
-def setup_pygame():
+def setup_pygame() -> Generator[None, None, None]:
     """Setup pygame before each test and cleanup after"""
     pygame.init()
     yield
@@ -23,7 +24,7 @@ def setup_pygame():
 
 
 @pytest.fixture
-def mock_screen():
+def mock_screen() -> pygame.Surface:
     """Create a real pygame surface for testing"""
     return pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 

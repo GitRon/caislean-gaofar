@@ -1,9 +1,15 @@
 """Rendering logic for inventory UI."""
 
+from __future__ import annotations
+
 import pygame
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple
+
 from caislean_gaofar.systems.inventory import Inventory
 from caislean_gaofar.ui.inventory_state import InventoryState
+
+if TYPE_CHECKING:
+    from caislean_gaofar.objects.item import Item
 
 
 class InventoryRenderer:
@@ -287,7 +293,7 @@ class InventoryRenderer:
         inventory: Inventory,
         state: InventoryState,
         mouse_pos: Tuple[int, int],
-    ):
+    ) -> None:
         """Draw tooltip showing item details."""
         if not state.hovered_slot:
             return
@@ -352,7 +358,7 @@ class InventoryRenderer:
 
     def _draw_context_menu(
         self, screen: pygame.Surface, inventory: Inventory, state: InventoryState
-    ):
+    ) -> None:
         """Draw right-click context menu."""
         if not state.context_menu_slot or not state.context_menu_pos:
             return
@@ -418,7 +424,7 @@ class InventoryRenderer:
 
     def _draw_dragged_item(
         self, screen: pygame.Surface, state: InventoryState, mouse_pos: Tuple[int, int]
-    ):
+    ) -> None:
         """Draw the item being dragged."""
         if not state.dragging_item:
             return
@@ -443,7 +449,7 @@ class InventoryRenderer:
 
     def _get_item_from_slot(
         self, inventory: Inventory, slot_type: str, slot_index: int
-    ):
+    ) -> Item | None:
         """Get the item from a specific slot."""
         if slot_type == "weapon":
             return inventory.weapon_slot

@@ -9,7 +9,7 @@ from caislean_gaofar.entities.warrior import Warrior
 
 
 @pytest.fixture
-def mock_screen():
+def mock_screen() -> pygame.Surface:
     """Create a mock pygame surface"""
     screen = Mock(spec=pygame.Surface)
     screen.blit = Mock()
@@ -17,7 +17,7 @@ def mock_screen():
 
 
 @pytest.fixture
-def mock_font():
+def mock_font() -> Mock:
     """Create a mock pygame font"""
     font = Mock()
     text_surface = Mock()

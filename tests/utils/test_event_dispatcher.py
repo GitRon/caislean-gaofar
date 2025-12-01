@@ -807,7 +807,7 @@ class TestEventDispatcher:
         # Assert - should not be called for middle click
         ctx.skill_ui.handle_click.assert_not_called()
 
-    def _create_mock_context(self):
+    def _create_mock_context(self) -> Mock:
         """Create mock EventContext for handle_events method."""
         warrior = Mock(spec=Warrior)
         warrior.grid_x = 0
