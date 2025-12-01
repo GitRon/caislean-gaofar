@@ -41,6 +41,7 @@ class TestItem:
         assert item.description == ""
         assert item.attack_bonus == 0
         assert item.defense_bonus == 0
+        assert item.health_restore == 0
 
     def test_item_initialization_with_description(self):
         """Test Item initialization with description"""
@@ -146,3 +147,43 @@ class TestItem:
 
         # Assert
         assert result == "Item(Key, misc)"
+
+    def test_item_initialization_with_health_restore(self):
+        """Test Item initialization with health_restore"""
+        # Arrange & Act
+        item = Item("Potion", ItemType.CONSUMABLE, health_restore=30)
+
+        # Assert
+        assert item.name == "Potion"
+        assert item.item_type == ItemType.CONSUMABLE
+        assert item.health_restore == 30
+        assert item.attack_bonus == 0
+        assert item.defense_bonus == 0
+
+    def test_item_initialization_with_all_bonuses_including_health(self):
+        """Test Item initialization with all bonuses including health_restore"""
+        # Arrange & Act
+        item = Item(
+            "Magic Elixir",
+            ItemType.CONSUMABLE,
+            description="A powerful elixir",
+            attack_bonus=5,
+            defense_bonus=3,
+            health_restore=50,
+        )
+
+        # Assert
+        assert item.name == "Magic Elixir"
+        assert item.item_type == ItemType.CONSUMABLE
+        assert item.description == "A powerful elixir"
+        assert item.attack_bonus == 5
+        assert item.defense_bonus == 3
+        assert item.health_restore == 50
+
+    def test_item_health_restore_defaults_to_zero(self):
+        """Test that health_restore defaults to 0 when not specified"""
+        # Arrange & Act
+        item = Item("Sword", ItemType.WEAPON, attack_bonus=10)
+
+        # Assert
+        assert item.health_restore == 0

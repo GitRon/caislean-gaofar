@@ -246,18 +246,29 @@ class InventoryRenderer:
         name_x = x + (self.slot_size - name_text.get_width()) // 2
         screen.blit(name_text, (name_x, y + 30))
 
-        # Draw stats
+        # Draw stats (stacked vertically if multiple)
         stats_y = y + 50
+        line_height = 16
+
         if item.attack_bonus > 0:
             stat_text = self.small_font.render(
                 f"+{item.attack_bonus} ATK", True, (255, 100, 100)
             )
             stat_x = x + (self.slot_size - stat_text.get_width()) // 2
             screen.blit(stat_text, (stat_x, stats_y))
+            stats_y += line_height
 
         if item.defense_bonus > 0:
             stat_text = self.small_font.render(
                 f"+{item.defense_bonus} DEF", True, (100, 100, 255)
+            )
+            stat_x = x + (self.slot_size - stat_text.get_width()) // 2
+            screen.blit(stat_text, (stat_x, stats_y))
+            stats_y += line_height
+
+        if item.health_restore > 0:
+            stat_text = self.small_font.render(
+                f"+{item.health_restore} HP", True, (100, 255, 100)
             )
             stat_x = x + (self.slot_size - stat_text.get_width()) // 2
             screen.blit(stat_text, (stat_x, stats_y))
@@ -306,6 +317,8 @@ class InventoryRenderer:
             lines.append(f"Attack: +{item.attack_bonus}")
         if item.defense_bonus > 0:
             lines.append(f"Defense: +{item.defense_bonus}")
+        if item.health_restore > 0:
+            lines.append(f"Restores: +{item.health_restore} HP")
 
         # Calculate tooltip size
         padding = 10

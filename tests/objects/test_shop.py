@@ -141,6 +141,22 @@ class TestShop:
         # Assert
         assert health_potion_found is True
 
+    def test_shop_health_potions_have_health_restore(self):  # noqa: PBR008
+        """Test shop health potions have health_restore property set"""
+        # Arrange
+        shop = Shop(0, 0)
+
+        # Act
+        health_potion_item = None
+        for shop_item in shop.inventory:
+            if shop_item.item.name == "Health Potion":
+                health_potion_item = shop_item.item
+                break
+
+        # Assert
+        assert health_potion_item is not None
+        assert health_potion_item.health_restore == 30
+
     def test_shop_has_town_portals(self):  # noqa: PBR008
         """Test shop sells town portals"""
         # Arrange
