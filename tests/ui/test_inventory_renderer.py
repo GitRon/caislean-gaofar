@@ -19,25 +19,25 @@ def setup_pygame():
 
 
 @pytest.fixture
-def screen():
+def screen() -> pygame.Surface:
     """Create a real pygame surface for testing"""
     return pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 
 
 @pytest.fixture
-def renderer():
+def renderer() -> InventoryRenderer:
     """Create an InventoryRenderer instance"""
     return InventoryRenderer()
 
 
 @pytest.fixture
-def inventory():
+def inventory() -> Inventory:
     """Create an empty inventory"""
     return Inventory()
 
 
 @pytest.fixture
-def state():
+def state() -> InventoryState:
     """Create an empty inventory state"""
     return InventoryState()
 
