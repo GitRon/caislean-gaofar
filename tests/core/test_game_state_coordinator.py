@@ -414,10 +414,12 @@ class TestGameStateCoordinator:
         )
         warrior = Warrior(5, 5)
         from caislean_gaofar.objects.library import Library
+
         library = Library(grid_x=2, grid_y=6)
 
         # Give warrior a town portal
         from caislean_gaofar.systems.loot_table import create_town_portal
+
         warrior.inventory.backpack_slots[0] = create_town_portal()
 
         # Act
@@ -442,6 +444,7 @@ class TestGameStateCoordinator:
         )
         warrior = Warrior(5, 5)
         from caislean_gaofar.objects.library import Library
+
         library = Library(grid_x=2, grid_y=6)
 
         # Fill all 10 backpack slots with non-portal items
@@ -471,6 +474,7 @@ class TestGameStateCoordinator:
         )
         warrior = Warrior(5, 5)
         from caislean_gaofar.objects.library import Library
+
         library = Library(grid_x=2, grid_y=6)
 
         # Fill 9 slots, leaving only 1 empty
@@ -502,6 +506,7 @@ class TestGameStateCoordinator:
         )
         warrior = Warrior(5, 5)
         from caislean_gaofar.objects.library import Library
+
         library = Library(grid_x=2, grid_y=6)
 
         # All 3 slots empty
@@ -528,6 +533,7 @@ class TestGameStateCoordinator:
         )
         warrior = Warrior(5, 5)
         from caislean_gaofar.objects.library import Library
+
         library = Library(grid_x=2, grid_y=6)
 
         # Fill 8 slots, leaving 2 empty
@@ -570,6 +576,7 @@ class TestGameStateCoordinator:
         fog_of_war = FogOfWar(visibility_radius=2)
         temple = Temple(grid_x=8, grid_y=1)
         from caislean_gaofar.objects.library import Library
+
         library = Library(grid_x=2, grid_y=6)
 
         # Place warrior on library tile
@@ -578,7 +585,15 @@ class TestGameStateCoordinator:
 
         # Act - update which should trigger library visit
         coordinator.update(
-            clock, warrior, camera, dungeon_manager, fog_of_war, temple, library, world_map, 0.016
+            clock,
+            warrior,
+            camera,
+            dungeon_manager,
+            fog_of_war,
+            temple,
+            library,
+            world_map,
+            0.016,
         )
 
         # Assert - warrior should receive town portals
@@ -615,7 +630,15 @@ class TestGameStateCoordinator:
 
         # Act - update with library=None (should not crash)
         coordinator.update(
-            clock, warrior, camera, dungeon_manager, fog_of_war, temple, None, world_map, 0.016
+            clock,
+            warrior,
+            camera,
+            dungeon_manager,
+            fog_of_war,
+            temple,
+            None,
+            world_map,
+            0.016,
         )
 
         # Assert - should complete without error
