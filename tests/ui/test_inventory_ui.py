@@ -143,6 +143,28 @@ class TestInventoryUIDrawing:
         # Test passes if no exceptions are raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_draw_item_with_health_restore(
+        self, mock_get_pos, inventory_ui, mock_screen
+    ):
+        """Test drawing item with health_restore"""
+        inventory = Inventory()
+        inventory.backpack_slots[0] = Item(
+            "Health Potion", ItemType.CONSUMABLE, health_restore=30
+        )
+        inventory_ui.draw(mock_screen, inventory)
+        # Test passes if no exceptions are raised
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_draw_item_with_all_bonuses(self, mock_get_pos, inventory_ui, mock_screen):
+        """Test drawing item with attack, defense, and health_restore bonuses"""
+        inventory = Inventory()
+        inventory.backpack_slots[0] = Item(
+            "Elixir", ItemType.CONSUMABLE, attack_bonus=5, defense_bonus=3, health_restore=50
+        )
+        inventory_ui.draw(mock_screen, inventory)
+        # Test passes if no exceptions are raised
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
     def test_draw_all_backpack_slots(self, mock_get_pos, inventory_ui, mock_screen):  # noqa: PBR008
         """Test drawing all 10 backpack slots"""
         inventory = Inventory()
@@ -230,6 +252,62 @@ class TestInventoryUITooltip:
         inventory_ui.state.hovered_slot = ("weapon", 0)
         inventory_ui.draw(mock_screen, inventory)
         # Test passes if no exceptions are raised
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_draw_tooltip_with_health_restore(
+        self, mock_get_pos, inventory_ui, mock_screen
+    ):
+        """Test drawing tooltip with health_restore"""
+        inventory = Inventory()
+        inventory.backpack_slots[0] = Item(
+            "Health Potion",
+            ItemType.CONSUMABLE,
+            health_restore=30,
+            description="Restores health",
+        )
+        inventory_ui.draw(mock_screen, inventory)
+        inventory_ui.state.hovered_slot = ("backpack", 0)
+        inventory_ui.draw(mock_screen, inventory)
+        # Test passes if no exceptions are raised
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_draw_tooltip_with_all_bonuses(
+        self, mock_get_pos, inventory_ui, mock_screen
+    ):
+        """Test drawing tooltip with attack, defense, and health_restore"""
+        inventory = Inventory()
+        inventory.backpack_slots[0] = Item(
+            "Magic Elixir",
+            ItemType.CONSUMABLE,
+            attack_bonus=5,
+            defense_bonus=3,
+            health_restore=50,
+            description="A powerful elixir",
+        )
+        inventory_ui.draw(mock_screen, inventory)
+        inventory_ui.state.hovered_slot = ("backpack", 0)
+        inventory_ui.draw(mock_screen, inventory)
+        # Test passes if no exceptions are raised
+
+    @patch("pygame.mouse.get_pos", return_value=(400, 300))
+    def test_draw_tooltip_health_restore_only(
+        self, mock_get_pos, inventory_ui, mock_screen
+    ):
+        """Test drawing tooltip with only health_restore to ensure line 315 coverage"""
+        inventory = Inventory()
+        # Item with ONLY health_restore, no attack or defense
+        inventory.backpack_slots[0] = Item(
+            "Simple Potion",
+            ItemType.CONSUMABLE,
+            attack_bonus=0,
+            defense_bonus=0,
+            health_restore=30,
+            description="A simple healing potion",
+        )
+        inventory_ui.draw(mock_screen, inventory)
+        inventory_ui.state.hovered_slot = ("backpack", 0)
+        inventory_ui.draw(mock_screen, inventory)
+        # This should hit line 315 in inventory_renderer.py
 
     @patch("pygame.mouse.get_pos", return_value=(750, 550))
     def test_draw_tooltip_near_right_edge(
@@ -1741,12 +1819,13 @@ class TestInventoryUIHelperMethods:
         """Test tooltip branches 511->514, 514->516, 516->520 with specific combinations"""
         inventory = Inventory()
 
-        # Test 1: Item with description, attack bonus, and defense bonus (all branches)
+        # Test 1: Item with description, attack bonus, defense bonus, and health_restore (all branches)
         inventory.weapon_slot = Item(
             "Complete Sword",
             ItemType.WEAPON,
             attack_bonus=10,
             defense_bonus=5,
+            health_restore=30,
             description="Has everything",
         )
         inventory_ui.state.hovered_slot = ("weapon", 0)
@@ -1768,6 +1847,13 @@ class TestInventoryUIHelperMethods:
             "Dagger", ItemType.WEAPON, attack_bonus=3, defense_bonus=0
         )
         inventory_ui.state.hovered_slot = ("backpack", 0)
+        inventory_ui.draw(mock_screen, inventory)
+
+        # Test 4: Item with only health_restore (tests health_restore branch)
+        inventory.backpack_slots[1] = Item(
+            "Health Potion", ItemType.CONSUMABLE, health_restore=50, description="Restores HP"
+        )
+        inventory_ui.state.hovered_slot = ("backpack", 1)
         inventory_ui.draw(mock_screen, inventory)
 
     @patch("pygame.mouse.get_pos", return_value=(795, 300))

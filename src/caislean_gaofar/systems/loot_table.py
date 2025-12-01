@@ -58,13 +58,14 @@ def create_common_armor(name: str, defense_bonus: int) -> Item:
     )
 
 
-def create_consumable(name: str) -> Item:
+def create_consumable(name: str, health_restore: int = 30) -> Item:
     """Create a consumable health potion item."""
     # Standard potion price
     return Item(
         name,
         ItemType.CONSUMABLE,
-        "Restores 30 health",
+        f"Restores {health_restore} health",
+        health_restore=health_restore,
         gold_value=30,
     )
 
