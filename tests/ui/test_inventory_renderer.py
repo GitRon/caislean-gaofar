@@ -2,7 +2,7 @@
 
 import pytest
 import pygame
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from caislean_gaofar.ui.inventory_renderer import InventoryRenderer
 from caislean_gaofar.ui.inventory_state import InventoryState
 from caislean_gaofar.systems.inventory import Inventory
@@ -95,17 +95,13 @@ class TestDrawSlot:
 
     def test_draw_slot_empty(self, renderer, screen, state):
         """Test drawing an empty slot"""
-        renderer._draw_slot(
-            screen, 100, 100, "TEST", None, ("backpack", 0), state
-        )
+        renderer._draw_slot(screen, 100, 100, "TEST", None, ("backpack", 0), state)
         assert ("backpack", 0) in state.slot_rects
 
     def test_draw_slot_with_item(self, renderer, screen, state):
         """Test drawing a slot with an item"""
         item = Item("Sword", ItemType.WEAPON, attack_bonus=10)
-        renderer._draw_slot(
-            screen, 100, 100, "WEAPON", item, ("weapon", 0), state
-        )
+        renderer._draw_slot(screen, 100, 100, "WEAPON", item, ("weapon", 0), state)
         assert ("weapon", 0) in state.slot_rects
 
     def test_draw_slot_equipped(self, renderer, screen, state):
@@ -137,9 +133,7 @@ class TestDrawSlot:
         item = Item("Dragged", ItemType.WEAPON, attack_bonus=5)
         state.dragging_from = ("weapon", 0)
         state.dragging_item = item
-        renderer._draw_slot(
-            screen, 100, 100, "WEAPON", item, ("weapon", 0), state
-        )
+        renderer._draw_slot(screen, 100, 100, "WEAPON", item, ("weapon", 0), state)
         # Test passes if no exception is raised
 
 
@@ -190,7 +184,13 @@ class TestDrawItemInSlot:
 
     def test_draw_item_zero_bonuses(self, renderer, screen):
         """Test drawing item with zero bonuses doesn't display them"""
-        item = Item("Plain Item", ItemType.MISC, attack_bonus=0, defense_bonus=0, health_restore=0)
+        item = Item(
+            "Plain Item",
+            ItemType.MISC,
+            attack_bonus=0,
+            defense_bonus=0,
+            health_restore=0,
+        )
         renderer._draw_item_in_slot(screen, 100, 100, item)
         # Test passes if no exception is raised
 
@@ -199,21 +199,27 @@ class TestDrawTooltip:
     """Tests for _draw_tooltip method"""
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_tooltip_no_hovered_slot(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_no_hovered_slot(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test that tooltip doesn't draw when no slot is hovered"""
         state.hovered_slot = None
         renderer._draw_tooltip(screen, inventory, state, (400, 300))
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_tooltip_empty_slot(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_empty_slot(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test that tooltip doesn't draw for empty slot"""
         state.hovered_slot = ("backpack", 0)
         renderer._draw_tooltip(screen, inventory, state, (400, 300))
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_tooltip_basic_item(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_basic_item(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test drawing tooltip for basic item"""
         inventory.weapon_slot = Item("Sword", ItemType.WEAPON)
         state.hovered_slot = ("weapon", 0)
@@ -221,15 +227,21 @@ class TestDrawTooltip:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_tooltip_with_description(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_with_description(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test drawing tooltip with description"""
-        inventory.armor_slot = Item("Shield", ItemType.ARMOR, description="A sturdy shield")
+        inventory.armor_slot = Item(
+            "Shield", ItemType.ARMOR, description="A sturdy shield"
+        )
         state.hovered_slot = ("armor", 0)
         renderer._draw_tooltip(screen, inventory, state, (400, 300))
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_tooltip_with_attack_bonus(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_with_attack_bonus(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test drawing tooltip with attack bonus"""
         inventory.weapon_slot = Item("Axe", ItemType.WEAPON, attack_bonus=20)
         state.hovered_slot = ("weapon", 0)
@@ -237,7 +249,9 @@ class TestDrawTooltip:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_tooltip_with_defense_bonus(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_with_defense_bonus(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test drawing tooltip with defense bonus"""
         inventory.armor_slot = Item("Plate", ItemType.ARMOR, defense_bonus=15)
         state.hovered_slot = ("armor", 0)
@@ -245,20 +259,24 @@ class TestDrawTooltip:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_tooltip_with_health_restore(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_with_health_restore(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test drawing tooltip with health restore - ensures line 315 coverage"""
         inventory.backpack_slots[0] = Item(
             "Health Potion",
             ItemType.CONSUMABLE,
             health_restore=30,
-            description="Restores health"
+            description="Restores health",
         )
         state.hovered_slot = ("backpack", 0)
         renderer._draw_tooltip(screen, inventory, state, (400, 300))
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_tooltip_with_all_stats(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_with_all_stats(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test drawing tooltip with all stats"""
         inventory.backpack_slots[0] = Item(
             "Magic Elixir",
@@ -273,23 +291,33 @@ class TestDrawTooltip:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(790, 300))
-    def test_draw_tooltip_repositioned_right_edge(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_repositioned_right_edge(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test tooltip repositioning near right edge"""
-        inventory.weapon_slot = Item("Sword", ItemType.WEAPON, description="A long description")
+        inventory.weapon_slot = Item(
+            "Sword", ItemType.WEAPON, description="A long description"
+        )
         state.hovered_slot = ("weapon", 0)
         renderer._draw_tooltip(screen, inventory, state, (790, 300))
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 580))
-    def test_draw_tooltip_repositioned_bottom_edge(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_repositioned_bottom_edge(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test tooltip repositioning near bottom edge"""
-        inventory.armor_slot = Item("Shield", ItemType.ARMOR, description="A description")
+        inventory.armor_slot = Item(
+            "Shield", ItemType.ARMOR, description="A description"
+        )
         state.hovered_slot = ("armor", 0)
         renderer._draw_tooltip(screen, inventory, state, (400, 580))
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(790, 580))
-    def test_draw_tooltip_repositioned_both_edges(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_tooltip_repositioned_both_edges(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test tooltip repositioning near both edges"""
         inventory.backpack_slots[0] = Item("Item", ItemType.MISC, description="Test")
         state.hovered_slot = ("backpack", 0)
@@ -301,7 +329,9 @@ class TestDrawContextMenu:
     """Tests for _draw_context_menu method"""
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_context_menu_no_slot(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_context_menu_no_slot(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test context menu doesn't draw when no slot is set"""
         state.context_menu_slot = None
         state.context_menu_pos = None
@@ -309,7 +339,9 @@ class TestDrawContextMenu:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_context_menu_empty_slot_closes(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_context_menu_empty_slot_closes(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test context menu closes for empty slot"""
         state.context_menu_slot = ("backpack", 0)
         state.context_menu_pos = (400, 300)
@@ -317,7 +349,9 @@ class TestDrawContextMenu:
         assert state.context_menu_slot is None
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_context_menu_weapon_in_backpack(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_context_menu_weapon_in_backpack(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test context menu for weapon in backpack shows Equip and Drop"""
         inventory.backpack_slots[0] = Item("Sword", ItemType.WEAPON, attack_bonus=10)
         state.context_menu_slot = ("backpack", 0)
@@ -326,7 +360,9 @@ class TestDrawContextMenu:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_context_menu_armor_in_backpack(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_context_menu_armor_in_backpack(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test context menu for armor in backpack shows Equip and Drop"""
         inventory.backpack_slots[0] = Item("Shield", ItemType.ARMOR, defense_bonus=5)
         state.context_menu_slot = ("backpack", 0)
@@ -335,7 +371,9 @@ class TestDrawContextMenu:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_context_menu_misc_item(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_context_menu_misc_item(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test context menu for misc item shows only Drop"""
         inventory.backpack_slots[0] = Item("Gem", ItemType.MISC)
         state.context_menu_slot = ("backpack", 0)
@@ -344,7 +382,9 @@ class TestDrawContextMenu:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(780, 300))
-    def test_draw_context_menu_near_right_edge(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_context_menu_near_right_edge(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test context menu repositions near right edge"""
         inventory.backpack_slots[0] = Item("Item", ItemType.MISC)
         state.context_menu_slot = ("backpack", 0)
@@ -353,7 +393,9 @@ class TestDrawContextMenu:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 580))
-    def test_draw_context_menu_near_bottom_edge(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_context_menu_near_bottom_edge(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test context menu repositions near bottom edge"""
         inventory.backpack_slots[0] = Item("Item", ItemType.MISC)
         state.context_menu_slot = ("backpack", 0)
@@ -362,7 +404,9 @@ class TestDrawContextMenu:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(450, 350))
-    def test_draw_context_menu_with_hover(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_context_menu_with_hover(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test context menu highlights hovered option"""
         inventory.backpack_slots[0] = Item("Sword", ItemType.WEAPON, attack_bonus=10)
         state.context_menu_slot = ("backpack", 0)
@@ -450,7 +494,9 @@ class TestGetContextMenuRects:
         result = renderer.get_context_menu_rects(state, inventory)
         assert result == []
 
-    def test_get_context_menu_rects_weapon_in_backpack(self, renderer, inventory, state, screen):
+    def test_get_context_menu_rects_weapon_in_backpack(
+        self, renderer, inventory, state, screen
+    ):
         """Test get_context_menu_rects for weapon shows Equip and Drop"""
         inventory.backpack_slots[0] = Item("Sword", ItemType.WEAPON)
         state.context_menu_slot = ("backpack", 0)
@@ -460,7 +506,9 @@ class TestGetContextMenuRects:
         assert result[0][1] == "Equip"
         assert result[1][1] == "Drop"
 
-    def test_get_context_menu_rects_armor_in_backpack(self, renderer, inventory, state, screen):
+    def test_get_context_menu_rects_armor_in_backpack(
+        self, renderer, inventory, state, screen
+    ):
         """Test get_context_menu_rects for armor shows Equip and Drop"""
         inventory.backpack_slots[0] = Item("Shield", ItemType.ARMOR)
         state.context_menu_slot = ("backpack", 0)
@@ -477,7 +525,9 @@ class TestGetContextMenuRects:
         assert len(result) == 1
         assert result[0][1] == "Drop"
 
-    def test_get_context_menu_rects_near_right_edge(self, renderer, inventory, state, screen):
+    def test_get_context_menu_rects_near_right_edge(
+        self, renderer, inventory, state, screen
+    ):
         """Test get_context_menu_rects repositions near right edge"""
         inventory.backpack_slots[0] = Item("Item", ItemType.MISC)
         state.context_menu_slot = ("backpack", 0)
@@ -485,7 +535,9 @@ class TestGetContextMenuRects:
         result = renderer.get_context_menu_rects(state, inventory)
         assert len(result) == 1
 
-    def test_get_context_menu_rects_near_bottom_edge(self, renderer, inventory, state, screen):
+    def test_get_context_menu_rects_near_bottom_edge(
+        self, renderer, inventory, state, screen
+    ):
         """Test get_context_menu_rects repositions near bottom edge"""
         inventory.backpack_slots[0] = Item("Item", ItemType.MISC)
         state.context_menu_slot = ("backpack", 0)
@@ -527,7 +579,9 @@ class TestDrawEquipmentSection:
         assert ("weapon", 0) in state.slot_rects
         assert ("armor", 0) in state.slot_rects
 
-    def test_draw_equipment_section_with_items(self, renderer, screen, inventory, state):
+    def test_draw_equipment_section_with_items(
+        self, renderer, screen, inventory, state
+    ):
         """Test drawing equipment section with items"""
         inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
         inventory.armor_slot = Item("Shield", ItemType.ARMOR, defense_bonus=5)
@@ -603,7 +657,9 @@ class TestMainDrawMethod:
         """Test drawing with items"""
         inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
         inventory.armor_slot = Item("Shield", ItemType.ARMOR, defense_bonus=5)
-        inventory.backpack_slots[0] = Item("Potion", ItemType.CONSUMABLE, health_restore=30)
+        inventory.backpack_slots[0] = Item(
+            "Potion", ItemType.CONSUMABLE, health_restore=30
+        )
         renderer.draw(screen, inventory, state)
         # Test passes if no exception is raised
 
@@ -635,7 +691,9 @@ class TestMainDrawMethod:
         # Test passes if no exception is raised
 
     @patch("pygame.mouse.get_pos", return_value=(400, 300))
-    def test_draw_no_tooltip_when_dragging(self, mock_pos, renderer, screen, inventory, state):
+    def test_draw_no_tooltip_when_dragging(
+        self, mock_pos, renderer, screen, inventory, state
+    ):
         """Test that tooltip doesn't show when dragging"""
         inventory.weapon_slot = Item("Sword", ItemType.WEAPON, attack_bonus=10)
         state.hovered_slot = ("weapon", 0)
