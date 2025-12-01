@@ -398,3 +398,225 @@ class TestGameStateCoordinator:
 
             # Assert - spawn_chests should not be called when in town
             assert "Returned!" in state_manager.message
+
+    @patch("pygame.display.set_mode")
+    def test_visit_library_player_already_has_portals(self, mock_display):
+        """Test _visit_library when player already has portals (early return)"""
+        # Arrange
+        screen = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        state_manager = GameStateManager()
+        coordinator = GameStateCoordinator(
+            state_manager=state_manager,
+            turn_processor=TurnProcessor(),
+            entity_manager=EntityManager(),
+            dungeon_transition_manager=DungeonTransitionManager(),
+            renderer=WorldRenderer(screen),
+        )
+        warrior = Warrior(5, 5)
+        from caislean_gaofar.objects.library import Library
+        library = Library(grid_x=2, grid_y=6)
+
+        # Give warrior a town portal
+        from caislean_gaofar.systems.loot_table import create_town_portal
+        warrior.inventory.backpack_slots[0] = create_town_portal()
+
+        # Act
+        coordinator._visit_library(warrior, library)
+
+        # Assert - no message shown, no effect activated
+        assert state_manager.message == ""
+        assert library.portal_gift_active is False
+
+    @patch("pygame.display.set_mode")
+    def test_visit_library_inventory_full(self, mock_display):
+        """Test _visit_library when player has 0 portals but inventory is full"""
+        # Arrange
+        screen = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        state_manager = GameStateManager()
+        coordinator = GameStateCoordinator(
+            state_manager=state_manager,
+            turn_processor=TurnProcessor(),
+            entity_manager=EntityManager(),
+            dungeon_transition_manager=DungeonTransitionManager(),
+            renderer=WorldRenderer(screen),
+        )
+        warrior = Warrior(5, 5)
+        from caislean_gaofar.objects.library import Library
+        library = Library(grid_x=2, grid_y=6)
+
+        # Fill all 10 backpack slots with non-portal items
+        misc_item = Item(name="Rock", item_type=ItemType.MISC, description="A rock")
+        for i in range(10):
+            warrior.inventory.backpack_slots[i] = misc_item
+
+        # Act
+        coordinator._visit_library(warrior, library)
+
+        # Assert - shows "backpack is full" message, no effect
+        assert "backpack is full" in state_manager.message.lower()
+        assert library.portal_gift_active is False
+
+    @patch("pygame.display.set_mode")
+    def test_visit_library_gives_one_portal(self, mock_display):
+        """Test _visit_library when giving exactly 1 portal (singular message)"""
+        # Arrange
+        screen = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        state_manager = GameStateManager()
+        coordinator = GameStateCoordinator(
+            state_manager=state_manager,
+            turn_processor=TurnProcessor(),
+            entity_manager=EntityManager(),
+            dungeon_transition_manager=DungeonTransitionManager(),
+            renderer=WorldRenderer(screen),
+        )
+        warrior = Warrior(5, 5)
+        from caislean_gaofar.objects.library import Library
+        library = Library(grid_x=2, grid_y=6)
+
+        # Fill 9 slots, leaving only 1 empty
+        misc_item = Item(name="Rock", item_type=ItemType.MISC, description="A rock")
+        for i in range(9):
+            warrior.inventory.backpack_slots[i] = misc_item
+
+        # Act
+        coordinator._visit_library(warrior, library)
+
+        # Assert - singular message, effect activated, 1 portal given
+        assert "a town portal!" in state_manager.message
+        assert "town portals!" not in state_manager.message  # Not plural
+        assert library.portal_gift_active is True
+        assert warrior.count_town_portals() == 1
+
+    @patch("pygame.display.set_mode")
+    def test_visit_library_gives_multiple_portals(self, mock_display):
+        """Test _visit_library when giving multiple portals (plural message)"""
+        # Arrange
+        screen = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        state_manager = GameStateManager()
+        coordinator = GameStateCoordinator(
+            state_manager=state_manager,
+            turn_processor=TurnProcessor(),
+            entity_manager=EntityManager(),
+            dungeon_transition_manager=DungeonTransitionManager(),
+            renderer=WorldRenderer(screen),
+        )
+        warrior = Warrior(5, 5)
+        from caislean_gaofar.objects.library import Library
+        library = Library(grid_x=2, grid_y=6)
+
+        # All 3 slots empty
+        # Act
+        coordinator._visit_library(warrior, library)
+
+        # Assert - plural message, effect activated, 3 portals given
+        assert "3 town portals!" in state_manager.message
+        assert library.portal_gift_active is True
+        assert warrior.count_town_portals() == 3
+
+    @patch("pygame.display.set_mode")
+    def test_visit_library_gives_two_portals(self, mock_display):
+        """Test _visit_library when giving 2 portals (ensures plural logic)"""
+        # Arrange
+        screen = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        state_manager = GameStateManager()
+        coordinator = GameStateCoordinator(
+            state_manager=state_manager,
+            turn_processor=TurnProcessor(),
+            entity_manager=EntityManager(),
+            dungeon_transition_manager=DungeonTransitionManager(),
+            renderer=WorldRenderer(screen),
+        )
+        warrior = Warrior(5, 5)
+        from caislean_gaofar.objects.library import Library
+        library = Library(grid_x=2, grid_y=6)
+
+        # Fill 8 slots, leaving 2 empty
+        misc_item = Item(name="Rock", item_type=ItemType.MISC, description="A rock")
+        for i in range(8):
+            warrior.inventory.backpack_slots[i] = misc_item
+
+        # Act
+        coordinator._visit_library(warrior, library)
+
+        # Assert - plural message with "2", effect activated
+        assert "2 town portals!" in state_manager.message
+        assert library.portal_gift_active is True
+        assert warrior.count_town_portals() == 2
+
+    @patch("pygame.display.set_mode")
+    def test_update_when_standing_on_library(self, mock_display):
+        """Test update method when warrior stands on library tile"""
+        # Arrange
+        screen = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        state_manager = GameStateManager()
+        coordinator = GameStateCoordinator(
+            state_manager=state_manager,
+            turn_processor=TurnProcessor(),
+            entity_manager=EntityManager(),
+            dungeon_transition_manager=DungeonTransitionManager(),
+            renderer=WorldRenderer(screen),
+        )
+
+        # Setup game state
+        map_file = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        dungeon_manager = DungeonManager(map_file)
+        dungeon_manager.load_world_map()
+        town_path = config.resource_path(os.path.join("data", "maps", "town.json"))
+        dungeon_manager.load_dungeon("town", town_path)
+        dungeon_manager.current_map_id = "town"
+
+        world_map = dungeon_manager.get_current_map()
+        camera = Camera(world_map.width, world_map.height)
+        fog_of_war = FogOfWar(visibility_radius=2)
+        temple = Temple(grid_x=8, grid_y=1)
+        from caislean_gaofar.objects.library import Library
+        library = Library(grid_x=2, grid_y=6)
+
+        # Place warrior on library tile
+        warrior = Warrior(2, 6)
+        clock = pygame.time.Clock()
+
+        # Act - update which should trigger library visit
+        coordinator.update(
+            clock, warrior, camera, dungeon_manager, fog_of_war, temple, library, world_map, 0.016
+        )
+
+        # Assert - warrior should receive town portals
+        assert warrior.count_town_portals() == 3
+        assert library.portal_gift_active is True
+        assert "3 town portals!" in state_manager.message
+
+    @patch("pygame.display.set_mode")
+    def test_update_with_no_library(self, mock_display):
+        """Test update method when library is None"""
+        # Arrange
+        screen = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        state_manager = GameStateManager()
+        coordinator = GameStateCoordinator(
+            state_manager=state_manager,
+            turn_processor=TurnProcessor(),
+            entity_manager=EntityManager(),
+            dungeon_transition_manager=DungeonTransitionManager(),
+            renderer=WorldRenderer(screen),
+        )
+
+        # Setup game state
+        map_file = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        dungeon_manager = DungeonManager(map_file)
+        dungeon_manager.load_world_map()
+
+        world_map = dungeon_manager.get_current_map()
+        camera = Camera(world_map.width, world_map.height)
+        fog_of_war = FogOfWar(visibility_radius=2)
+        temple = Temple(grid_x=8, grid_y=1)
+
+        warrior = Warrior(5, 5)
+        clock = pygame.time.Clock()
+
+        # Act - update with library=None (should not crash)
+        coordinator.update(
+            clock, warrior, camera, dungeon_manager, fog_of_war, temple, None, world_map, 0.016
+        )
+
+        # Assert - should complete without error
+        assert warrior is not None

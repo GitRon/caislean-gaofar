@@ -216,3 +216,110 @@ class TestDungeonTransitionManager:
         on_camera_update.assert_called_once()
         # on_message should not be called when no matching spawn is found
         on_message.assert_not_called()
+
+    def test_check_and_handle_transition_entering_town(self):
+        """Test entering town from world map"""
+        # Arrange
+        manager = DungeonTransitionManager()
+        warrior = Warrior(8, 5)  # Town entrance position
+        entity_manager = EntityManager()
+
+        # Create dungeon manager with world map
+        map_file = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        dungeon_manager = DungeonManager(map_file)
+        dungeon_manager.load_world_map()
+
+        # Load town map
+        town_path = config.resource_path(os.path.join("data", "maps", "town.json"))
+        dungeon_manager.load_dungeon("town", town_path)
+
+        on_camera_update = MagicMock(return_value=Camera(100, 100))
+        on_message = MagicMock()
+
+        # Act
+        new_camera, transition_occurred = manager.check_and_handle_transition(
+            warrior=warrior,
+            dungeon_manager=dungeon_manager,
+            entity_manager=entity_manager,
+            on_camera_update=on_camera_update,
+            on_message=on_message,
+        )
+
+        # Assert
+        assert new_camera is not None
+        assert transition_occurred is True
+        on_camera_update.assert_called_once()
+        on_message.assert_called_once()
+        assert "town" in on_message.call_args[0][0].lower()
+        assert dungeon_manager.current_map_id == "town"
+        assert len(entity_manager.monsters) == 0  # Town is safe
+
+    def test_check_and_handle_transition_exiting_town(self):
+        """Test exiting town to world map"""
+        # Arrange
+        manager = DungeonTransitionManager()
+        warrior = Warrior(7, 6)  # Town exit position
+        entity_manager = EntityManager()
+
+        # Create dungeon manager with world map
+        map_file = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        dungeon_manager = DungeonManager(map_file)
+        dungeon_manager.load_world_map()
+
+        # Load town map
+        town_path = config.resource_path(os.path.join("data", "maps", "town.json"))
+        dungeon_manager.load_dungeon("town", town_path)
+
+        # Enter town first
+        dungeon_manager.enter_town(8, 5)
+        warrior.grid_x = 7
+        warrior.grid_y = 6
+
+        on_camera_update = MagicMock(return_value=Camera(100, 100))
+        on_message = MagicMock()
+
+        # Act
+        new_camera, transition_occurred = manager.check_and_handle_transition(
+            warrior=warrior,
+            dungeon_manager=dungeon_manager,
+            entity_manager=entity_manager,
+            on_camera_update=on_camera_update,
+            on_message=on_message,
+        )
+
+        # Assert
+        assert new_camera is not None
+        assert transition_occurred is True
+        on_camera_update.assert_called_once()
+        on_message.assert_called_once()
+        assert "world" in on_message.call_args[0][0].lower()
+        assert dungeon_manager.current_map_id == "world"
+
+    def test_handle_town_exit_with_no_return_position(self):
+        """Test exiting town when exit_town returns None"""
+        # Arrange
+        manager = DungeonTransitionManager()
+        warrior = Warrior(5, 5)
+        entity_manager = EntityManager()
+
+        # Mock dungeon manager
+        dungeon_manager = MagicMock()
+        dungeon_manager.exit_town.return_value = None
+
+        on_camera_update = MagicMock()
+        on_message = MagicMock()
+
+        # Act
+        new_camera, transition_occurred = manager._handle_town_exit(
+            warrior=warrior,
+            dungeon_manager=dungeon_manager,
+            entity_manager=entity_manager,
+            on_camera_update=on_camera_update,
+            on_message=on_message,
+        )
+
+        # Assert
+        assert new_camera is None
+        assert transition_occurred is False
+        on_camera_update.assert_not_called()
+        on_message.assert_not_called()
