@@ -405,6 +405,10 @@ class TestGame:
         """Test entering a dungeon"""
         # Arrange
         game = Game()
+        # Game starts in town, exit to world map first
+        game.dungeon_manager.current_map_id = "world"
+        game.world_map = game.dungeon_manager.get_current_map()
+
         # Position warrior on a dungeon entrance
         for spawn in game.world_map.get_entity_spawns("dungeons"):  # noqa: PBR008
             game.warrior.grid_x = spawn["x"]
@@ -428,6 +432,10 @@ class TestGame:
         """Test exiting a dungeon"""
         # Arrange
         game = Game()
+        # Game starts in town, switch to world map first
+        game.dungeon_manager.current_map_id = "world"
+        game.world_map = game.dungeon_manager.get_current_map()
+
         # First enter a dungeon
         for spawn in game.world_map.get_entity_spawns("dungeons"):  # noqa: PBR008
             dungeon_id = spawn["id"]
@@ -631,6 +639,10 @@ class TestGame:
         """Test using return portal successfully"""
         # Arrange
         game = Game()
+        # Game starts in town, switch to world map first
+        game.dungeon_manager.current_map_id = "world"
+        game.world_map = game.dungeon_manager.get_current_map()
+
         # Enter dungeon, use town portal, then use return portal
         for spawn in game.world_map.get_entity_spawns("dungeons"):  # noqa: PBR008
             dungeon_id = spawn["id"]

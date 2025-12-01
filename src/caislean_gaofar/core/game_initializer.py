@@ -161,7 +161,10 @@ class GameInitializer:
         # Load all dungeons
         self._load_dungeons(components.dungeon_manager)
 
-        # Get current map (initially world map)
+        # Start in town instead of world map
+        components.dungeon_manager.current_map_id = "town"
+
+        # Get current map (initially town)
         components.world_map = components.dungeon_manager.get_current_map()
 
         # Initialize camera

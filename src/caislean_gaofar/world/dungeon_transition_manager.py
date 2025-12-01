@@ -254,7 +254,7 @@ class DungeonTransitionManager:
             entity_manager.spawn_chests(world_map, dungeon_manager)
             entity_manager.clear_ground_items()
 
-            on_message("You return to the world map.")
+            on_message("You leave the town and step into the wilderness.")
             return new_camera, True
 
         return None, False

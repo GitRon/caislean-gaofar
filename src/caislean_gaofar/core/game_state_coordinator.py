@@ -122,7 +122,8 @@ class GameStateCoordinator:
 
         # Check if player stepped on temple (heal to max HP)
         if (
-            dungeon_manager.current_map_id == "town"
+            temple
+            and dungeon_manager.current_map_id == "town"
             and warrior.grid_x == temple.grid_x
             and warrior.grid_y == temple.grid_y
         ):
@@ -130,7 +131,8 @@ class GameStateCoordinator:
 
         # Check if player stepped on library (give town portals)
         if (
-            dungeon_manager.current_map_id == "town"
+            library
+            and dungeon_manager.current_map_id == "town"
             and warrior.grid_x == library.grid_x
             and warrior.grid_y == library.grid_y
         ):
@@ -290,25 +292,20 @@ class GameStateCoordinator:
             )
             return
 
-        # Create town portal items and add to inventory
+        # Create town portal item and add to inventory
         from caislean_gaofar.systems.loot_table import create_town_portal
 
-        portals_to_give = min(3, empty_slots)  # Give up to 3 portals
-        portals_given = 0
-
+        # Give exactly 1 town portal
         for i, slot in enumerate(warrior.inventory.backpack_slots):
-            if slot is None and portals_given < portals_to_give:
+            if slot is None:
                 warrior.inventory.backpack_slots[i] = create_town_portal()
-                portals_given += 1
+                break
 
         # Activate visual effect
         library.activate_portal_gift()
 
         # Show message
-        if portals_given == 1:
-            self._show_message("The library grants you a town portal!")
-        else:
-            self._show_message(f"The library grants you {portals_given} town portals!")
+        self._show_message("The library grants you a town portal!")
 
     def _handle_return_portal(
         self, warrior: Warrior, dungeon_manager: DungeonManager, camera: Camera

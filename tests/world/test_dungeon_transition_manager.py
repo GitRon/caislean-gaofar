@@ -292,7 +292,7 @@ class TestDungeonTransitionManager:
         assert transition_occurred is True
         on_camera_update.assert_called_once()
         on_message.assert_called_once()
-        assert "world" in on_message.call_args[0][0].lower()
+        assert "wilderness" in on_message.call_args[0][0].lower()
         assert dungeon_manager.current_map_id == "world"
 
     def test_handle_town_exit_with_no_return_position(self):

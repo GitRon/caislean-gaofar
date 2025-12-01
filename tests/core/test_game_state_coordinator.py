@@ -490,8 +490,8 @@ class TestGameStateCoordinator:
         assert warrior.count_town_portals() == 1
 
     @patch("pygame.display.set_mode")
-    def test_visit_library_gives_multiple_portals(self, mock_display):
-        """Test _visit_library when giving multiple portals (plural message)"""
+    def test_visit_library_gives_one_portal_always(self, mock_display):
+        """Test _visit_library always gives exactly 1 portal"""
         # Arrange
         screen = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
         state_manager = GameStateManager()
@@ -507,44 +507,14 @@ class TestGameStateCoordinator:
 
         library = Library(grid_x=2, grid_y=6)
 
-        # All 3 slots empty
+        # All slots empty
         # Act
         coordinator._visit_library(warrior, library)
 
-        # Assert - plural message, effect activated, 3 portals given
-        assert "3 town portals!" in state_manager.message
+        # Assert - singular message, effect activated, 1 portal given
+        assert "a town portal!" in state_manager.message
         assert library.portal_gift_active is True
-        assert warrior.count_town_portals() == 3
-
-    @patch("pygame.display.set_mode")
-    def test_visit_library_gives_two_portals(self, mock_display):
-        """Test _visit_library when giving 2 portals (ensures plural logic)"""
-        # Arrange
-        screen = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
-        state_manager = GameStateManager()
-        coordinator = GameStateCoordinator(
-            state_manager=state_manager,
-            turn_processor=TurnProcessor(),
-            entity_manager=EntityManager(),
-            dungeon_transition_manager=DungeonTransitionManager(),
-            renderer=WorldRenderer(screen),
-        )
-        warrior = Warrior(5, 5)
-        from caislean_gaofar.objects.library import Library
-
-        library = Library(grid_x=2, grid_y=6)
-
-        # Fill 8 slots, leaving 2 empty
-        misc_item = Item(name="Rock", item_type=ItemType.MISC, description="A rock")
-        warrior.inventory.backpack_slots = [misc_item] * 8 + [None, None]
-
-        # Act
-        coordinator._visit_library(warrior, library)
-
-        # Assert - plural message with "2", effect activated
-        assert "2 town portals!" in state_manager.message
-        assert library.portal_gift_active is True
-        assert warrior.count_town_portals() == 2
+        assert warrior.count_town_portals() == 1
 
     @patch("pygame.display.set_mode")
     def test_update_when_standing_on_library(self, mock_display):
@@ -593,10 +563,10 @@ class TestGameStateCoordinator:
             0.016,
         )
 
-        # Assert - warrior should receive town portals
-        assert warrior.count_town_portals() == 3
+        # Assert - warrior should receive town portal
+        assert warrior.count_town_portals() == 1
         assert library.portal_gift_active is True
-        assert "3 town portals!" in state_manager.message
+        assert "a town portal!" in state_manager.message
 
     @patch("pygame.display.set_mode")
     def test_update_with_no_library(self, mock_display):
