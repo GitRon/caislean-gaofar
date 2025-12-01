@@ -159,7 +159,11 @@ class TestInventoryUIDrawing:
         """Test drawing item with attack, defense, and health_restore bonuses"""
         inventory = Inventory()
         inventory.backpack_slots[0] = Item(
-            "Elixir", ItemType.CONSUMABLE, attack_bonus=5, defense_bonus=3, health_restore=50
+            "Elixir",
+            ItemType.CONSUMABLE,
+            attack_bonus=5,
+            defense_bonus=3,
+            health_restore=50,
         )
         inventory_ui.draw(mock_screen, inventory)
         # Test passes if no exceptions are raised
@@ -1851,7 +1855,10 @@ class TestInventoryUIHelperMethods:
 
         # Test 4: Item with only health_restore (tests health_restore branch)
         inventory.backpack_slots[1] = Item(
-            "Health Potion", ItemType.CONSUMABLE, health_restore=50, description="Restores HP"
+            "Health Potion",
+            ItemType.CONSUMABLE,
+            health_restore=50,
+            description="Restores HP",
         )
         inventory_ui.state.hovered_slot = ("backpack", 1)
         inventory_ui.draw(mock_screen, inventory)
