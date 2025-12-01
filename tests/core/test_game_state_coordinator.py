@@ -449,8 +449,7 @@ class TestGameStateCoordinator:
 
         # Fill all 10 backpack slots with non-portal items
         misc_item = Item(name="Rock", item_type=ItemType.MISC, description="A rock")
-        for i in range(10):
-            warrior.inventory.backpack_slots[i] = misc_item
+        warrior.inventory.backpack_slots = [misc_item] * 10
 
         # Act
         coordinator._visit_library(warrior, library)
@@ -479,8 +478,7 @@ class TestGameStateCoordinator:
 
         # Fill 9 slots, leaving only 1 empty
         misc_item = Item(name="Rock", item_type=ItemType.MISC, description="A rock")
-        for i in range(9):
-            warrior.inventory.backpack_slots[i] = misc_item
+        warrior.inventory.backpack_slots = [misc_item] * 9 + [None]
 
         # Act
         coordinator._visit_library(warrior, library)
@@ -538,8 +536,7 @@ class TestGameStateCoordinator:
 
         # Fill 8 slots, leaving 2 empty
         misc_item = Item(name="Rock", item_type=ItemType.MISC, description="A rock")
-        for i in range(8):
-            warrior.inventory.backpack_slots[i] = misc_item
+        warrior.inventory.backpack_slots = [misc_item] * 8 + [None, None]
 
         # Act
         coordinator._visit_library(warrior, library)
