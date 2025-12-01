@@ -10,6 +10,7 @@ from caislean_gaofar.world.camera import Camera
 from caislean_gaofar.world.dungeon_manager import DungeonManager
 from caislean_gaofar.objects.shop import Shop
 from caislean_gaofar.objects.temple import Temple
+from caislean_gaofar.objects.library import Library
 from caislean_gaofar.world.fog_of_war import FogOfWar
 from caislean_gaofar.ui.skill_ui import SkillUI
 from caislean_gaofar.core.game_state_manager import GameStateManager
@@ -48,6 +49,7 @@ class GameRenderCoordinator:
         dungeon_manager: DungeonManager,
         shop: Shop,
         temple: Temple,
+        library: Library,
         fog_of_war: FogOfWar,
     ):
         """
@@ -61,6 +63,7 @@ class GameRenderCoordinator:
             dungeon_manager: DungeonManager instance
             shop: Shop instance
             temple: Temple instance
+            library: Library instance
             fog_of_war: FogOfWar instance
         """
         state = self.state_manager.state
@@ -74,6 +77,7 @@ class GameRenderCoordinator:
                 dungeon_manager,
                 shop,
                 temple,
+                library,
                 fog_of_war,
             )
         elif state == config.STATE_INVENTORY:
@@ -96,6 +100,7 @@ class GameRenderCoordinator:
         dungeon_manager: DungeonManager,
         shop: Shop,
         temple: Temple,
+        library: Library,
         fog_of_war: FogOfWar,
     ):
         """
@@ -109,6 +114,7 @@ class GameRenderCoordinator:
             dungeon_manager: DungeonManager instance
             shop: Shop instance
             temple: Temple instance
+            library: Library instance
             fog_of_war: FogOfWar instance
         """
         self.renderer.draw_playing_state(
@@ -123,6 +129,7 @@ class GameRenderCoordinator:
             message=self.state_manager.message,
             fog_of_war=fog_of_war,
             temple=temple,
+            library=library,
         )
 
     def _render_inventory_state(

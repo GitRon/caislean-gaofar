@@ -9,6 +9,7 @@ from caislean_gaofar.world.camera import Camera
 from caislean_gaofar.world.dungeon_manager import DungeonManager
 from caislean_gaofar.world.fog_of_war import FogOfWar
 from caislean_gaofar.objects.temple import Temple
+from caislean_gaofar.objects.library import Library
 from caislean_gaofar.core.game_state_manager import GameStateManager
 from caislean_gaofar.world.world_renderer import WorldRenderer
 from caislean_gaofar.world.dungeon_transition_manager import DungeonTransitionManager
@@ -50,6 +51,7 @@ class GameStateCoordinator:
         dungeon_manager: DungeonManager,
         fog_of_war: FogOfWar,
         temple: Temple,
+        library: Library,
         world_map,
         dt: float,
     ) -> tuple[Camera, object]:
@@ -63,6 +65,7 @@ class GameStateCoordinator:
             dungeon_manager: DungeonManager instance
             fog_of_war: FogOfWar instance
             temple: Temple instance
+            library: Library instance
             world_map: Current world map
             dt: Delta time since last update
 
@@ -79,6 +82,10 @@ class GameStateCoordinator:
         if temple:
             temple.update(dt)
 
+        # Update library animation
+        if library:
+            library.update(dt)
+
         # Update attack effects
         self.renderer.attack_effect_manager.update(dt)
 
@@ -89,7 +96,7 @@ class GameStateCoordinator:
         # Process turn if player has queued an action
         if not self.turn_processor.waiting_for_player_input:
             self._process_turn(
-                warrior, dungeon_manager, world_map, camera, fog_of_war, temple
+                warrior, dungeon_manager, world_map, camera, fog_of_war, temple, library
             )
             # Get potentially updated camera and world_map after turn processing
             camera, world_map = self._get_updated_world_state(
@@ -121,6 +128,14 @@ class GameStateCoordinator:
         ):
             self._heal_at_temple(warrior, temple)
 
+        # Check if player stepped on library (give town portals)
+        if (
+            dungeon_manager.current_map_id == "town"
+            and warrior.grid_x == library.grid_x
+            and warrior.grid_y == library.grid_y
+        ):
+            self._visit_library(warrior, library)
+
         # Check game over conditions
         if not warrior.is_alive:
             self.state_manager.transition_to_game_over()
@@ -135,6 +150,7 @@ class GameStateCoordinator:
         camera: Camera,
         fog_of_war: FogOfWar,
         temple: Temple,
+        library: Library,
     ):
         """
         Process one complete turn (hero then monsters).
@@ -146,6 +162,7 @@ class GameStateCoordinator:
             camera: Camera instance
             fog_of_war: FogOfWar instance
             temple: Temple instance
+            library: Library instance
         """
 
         # Store callbacks for turn processor
@@ -249,6 +266,49 @@ class GameStateCoordinator:
             # Activate healing visual effect
             temple.activate_healing()
             self._show_message("The temple's divine power restores your health!")
+
+    def _visit_library(self, warrior: Warrior, library: Library):
+        """
+        Give town portals to the warrior when stepping on the library.
+
+        Args:
+            warrior: Warrior instance
+            library: Library instance
+        """
+        # Only give portals if player has 0 town portals
+        portal_count = warrior.count_town_portals()
+        if portal_count > 0:
+            return  # Player already has portals
+
+        # Check if player has space in inventory
+        empty_slots = sum(
+            1 for slot in warrior.inventory.backpack_slots if slot is None
+        )
+        if empty_slots == 0:
+            self._show_message(
+                "Your backpack is full! Make space to receive town portals."
+            )
+            return
+
+        # Create town portal items and add to inventory
+        from caislean_gaofar.systems.loot_table import create_town_portal
+
+        portals_to_give = min(3, empty_slots)  # Give up to 3 portals
+        portals_given = 0
+
+        for i, slot in enumerate(warrior.inventory.backpack_slots):
+            if slot is None and portals_given < portals_to_give:
+                warrior.inventory.backpack_slots[i] = create_town_portal()
+                portals_given += 1
+
+        # Activate visual effect
+        library.activate_portal_gift()
+
+        # Show message
+        if portals_given == 1:
+            self._show_message("The library grants you a town portal!")
+        else:
+            self._show_message(f"The library grants you {portals_given} town portals!")
 
     def _handle_return_portal(
         self, warrior: Warrior, dungeon_manager: DungeonManager, camera: Camera

@@ -359,3 +359,179 @@ class TestDungeonManager:
         # The entrance exists but dungeon is not loaded
         dungeon_id = manager.get_dungeon_at_position(11, 15)
         assert dungeon_id is None
+
+    def test_load_town_entrance(self):
+        """Test loading town entrance from world map."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        # Town entrance should be loaded
+        assert manager.town_entrance is not None
+        assert isinstance(manager.town_entrance, tuple)
+        assert len(manager.town_entrance) == 2
+
+    def test_check_for_town_entrance(self):
+        """Test checking for town entrance on world map."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        # Check town entrance location (8, 5 from overworld.json)
+        is_town_entrance = manager.check_for_town_entrance(8, 5)
+        assert is_town_entrance
+
+        # Check non-entrance location
+        is_town_entrance = manager.check_for_town_entrance(10, 10)
+        assert not is_town_entrance
+
+    def test_check_for_town_entrance_when_in_dungeon(self):
+        """Test town entrance check returns False when in dungeon."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+        dungeon_path = config.resource_path(
+            os.path.join("data", "maps", "dark_cave.json")
+        )
+        manager.load_dungeon("dark_cave", dungeon_path)
+
+        # Enter dungeon
+        manager.enter_dungeon("dark_cave", 11, 15)
+
+        # Should return False when in dungeon
+        is_town_entrance = manager.check_for_town_entrance(8, 5)
+        assert not is_town_entrance
+
+    def test_enter_town(self):
+        """Test entering town from world map."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        # Load town map
+        town_path = config.resource_path(os.path.join("data", "maps", "town.json"))
+        manager.load_dungeon("town", town_path)
+
+        # Enter town
+        player_x, player_y = 8, 5
+        spawn_x, spawn_y = manager.enter_town(player_x, player_y)
+
+        # Check state
+        assert manager.current_map_id == "town"
+        assert manager.return_location == (player_x, player_y)
+        assert spawn_x >= 0
+        assert spawn_y >= 0
+
+    def test_enter_town_not_loaded(self):
+        """Test entering town when town map not loaded raises error."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        with pytest.raises(ValueError, match="Town map not loaded"):
+            manager.enter_town(8, 5)
+
+    def test_exit_town(self):
+        """Test exiting town to world map."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        # Load town map
+        town_path = config.resource_path(os.path.join("data", "maps", "town.json"))
+        manager.load_dungeon("town", town_path)
+
+        # Enter town
+        original_x, original_y = 8, 5
+        manager.enter_town(original_x, original_y)
+
+        # Exit town
+        return_x, return_y = manager.exit_town()
+
+        # Check state
+        assert manager.current_map_id == "world"
+        assert manager.return_location is None
+        # Player is placed one tile below entrance to avoid immediate re-entry
+        assert return_x == original_x
+        assert return_y == original_y + 1
+
+    def test_exit_town_when_not_in_town(self):
+        """Test exiting town when not in town returns None."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        result = manager.exit_town()
+        assert result is None
+
+    def test_check_for_town_exit(self):
+        """Test checking for exit tile in town."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        # Load town map
+        town_path = config.resource_path(os.path.join("data", "maps", "town.json"))
+        manager.load_dungeon("town", town_path)
+
+        # Enter town
+        manager.enter_town(8, 5)
+
+        # Check exit location (from town.json - exit at 7, 6)
+        is_exit = manager.check_for_town_exit(7, 6)
+        assert is_exit
+
+        # Check non-exit location
+        is_exit = manager.check_for_town_exit(5, 5)
+        assert not is_exit
+
+    def test_check_for_town_exit_when_not_in_town(self):
+        """Test town exit check returns False when not in town."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        is_exit = manager.check_for_town_exit(7, 6)
+        assert not is_exit
+
+    def test_check_for_town_exit_invalid_position(self):
+        """Test town exit check returns False for invalid position."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        # Load town map
+        town_path = config.resource_path(os.path.join("data", "maps", "town.json"))
+        manager.load_dungeon("town", town_path)
+
+        # Enter town
+        manager.enter_town(8, 5)
+
+        # Check invalid position (out of bounds)
+        is_exit = manager.check_for_town_exit(-1, -1)
+        assert not is_exit
+
+        is_exit = manager.check_for_town_exit(1000, 1000)
+        assert not is_exit
+
+    def test_exit_town_with_no_return_location(self):
+        """Test exit_town when return_location is None."""
+        map_path = config.resource_path(os.path.join("data", "maps", "overworld.json"))
+        manager = DungeonManager(map_path)
+        manager.load_world_map()
+
+        # Load town map
+        town_path = config.resource_path(os.path.join("data", "maps", "town.json"))
+        manager.load_dungeon("town", town_path)
+
+        # Manually set to town without using enter_town (edge case)
+        manager.current_map_id = "town"
+        manager.return_location = None
+
+        # Exit town
+        result = manager.exit_town()
+
+        # Should return None since return_location was None
+        assert result is None
+        assert manager.current_map_id == "world"
+        assert manager.return_location is None

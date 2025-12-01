@@ -10,6 +10,7 @@ from caislean_gaofar.objects.item import Item, ItemType
 from caislean_gaofar.world.camera import Camera
 from caislean_gaofar.world.dungeon_manager import DungeonManager
 from caislean_gaofar.objects.temple import Temple
+from caislean_gaofar.objects.library import Library
 from caislean_gaofar.world.fog_of_war import FogOfWar
 from caislean_gaofar.core import config
 from caislean_gaofar.entities.entity_manager import EntityManager
@@ -52,6 +53,7 @@ class GameComponents:
         self.warrior: Warrior | None = None
         self.shop: Shop | None = None
         self.temple: Temple | None = None
+        self.library: Library | None = None
         self.skill_ui: SkillUI | None = None
 
 
@@ -222,6 +224,9 @@ class GameInitializer:
 
         # Initialize temple (located at specific position on town map)
         components.temple = Temple(grid_x=8, grid_y=1)
+
+        # Initialize library (located at specific position on town map)
+        components.library = Library(grid_x=2, grid_y=6)
 
     def _add_starting_items(self, warrior: Warrior):
         """
