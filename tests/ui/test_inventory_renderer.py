@@ -609,13 +609,26 @@ class TestDrawBackpackSection:
     def test_draw_backpack_section_empty(self, renderer, screen, inventory, state):
         """Test drawing empty backpack section"""
         renderer._draw_backpack_section(screen, inventory, state, 100, 200)
-        for i in range(10):
-            assert ("backpack", i) in state.slot_rects
+        # Verify all 10 backpack slots have rects created
+        assert ("backpack", 0) in state.slot_rects
+        assert ("backpack", 1) in state.slot_rects
+        assert ("backpack", 2) in state.slot_rects
+        assert ("backpack", 3) in state.slot_rects
+        assert ("backpack", 4) in state.slot_rects
+        assert ("backpack", 5) in state.slot_rects
+        assert ("backpack", 6) in state.slot_rects
+        assert ("backpack", 7) in state.slot_rects
+        assert ("backpack", 8) in state.slot_rects
+        assert ("backpack", 9) in state.slot_rects
 
     def test_draw_backpack_section_with_items(self, renderer, screen, inventory, state):
         """Test drawing backpack section with items"""
-        for i in range(5):
-            inventory.backpack_slots[i] = Item(f"Item {i}", ItemType.MISC)
+        # Add items to first 5 slots
+        inventory.backpack_slots[0] = Item("Item 0", ItemType.MISC)
+        inventory.backpack_slots[1] = Item("Item 1", ItemType.MISC)
+        inventory.backpack_slots[2] = Item("Item 2", ItemType.MISC)
+        inventory.backpack_slots[3] = Item("Item 3", ItemType.MISC)
+        inventory.backpack_slots[4] = Item("Item 4", ItemType.MISC)
         renderer._draw_backpack_section(screen, inventory, state, 100, 200)
         # Test passes if no exception is raised
 
