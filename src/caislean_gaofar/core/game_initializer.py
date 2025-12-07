@@ -252,6 +252,7 @@ class GameInitializer:
             name="Health Potion",
             item_type=ItemType.CONSUMABLE,
             description="Restores 30 HP",
+            health_restore=30,
             gold_value=30,
         )
 
