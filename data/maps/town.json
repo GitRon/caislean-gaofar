@@ -22,9 +22,9 @@
       "color": [200, 150, 50]
     },
     "<": {
-      "name": "exit",
+      "name": "path_to_world",
       "passable": true,
-      "color": [200, 180, 50]
+      "color": [139, 90, 43]
     },
     "=": {
       "name": "wood_floor",

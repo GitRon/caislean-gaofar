@@ -57,9 +57,9 @@
       "color": [90, 90, 110]
     },
     "E": {
-      "name": "town_entrance",
+      "name": "path_to_town",
       "passable": true,
-      "color": [255, 215, 0]
+      "color": [139, 90, 43]
     }
   },
   "tiles": [

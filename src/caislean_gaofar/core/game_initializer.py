@@ -164,6 +164,13 @@ class GameInitializer:
         # Start in town instead of world map
         components.dungeon_manager.current_map_id = "town"
 
+        # Set return location to town entrance on world map
+        # This ensures first-time exit from town works correctly
+        if components.dungeon_manager.town_entrance:
+            components.dungeon_manager.return_location = (
+                components.dungeon_manager.town_entrance
+            )
+
         # Get current map (initially town)
         components.world_map = components.dungeon_manager.get_current_map()
 
