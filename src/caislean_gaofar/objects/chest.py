@@ -332,18 +332,21 @@ class Chest:
                 "Health Potion",
                 ItemType.CONSUMABLE,
                 "Restores 30 HP",
+                health_restore=30,
                 gold_value=30,
             ),
             Item(
                 "Minor Health Potion",
                 ItemType.CONSUMABLE,
-                "Restores 30 HP",
+                "Restores 20 HP",
+                health_restore=20,
                 gold_value=25,
             ),
             Item(
                 "Greater Health Potion",
                 ItemType.CONSUMABLE,
-                "Restores 30 HP",
+                "Restores 50 HP",
+                health_restore=50,
                 gold_value=50,
             ),
             # Misc
