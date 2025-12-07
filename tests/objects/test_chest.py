@@ -209,3 +209,24 @@ class TestChest:
         # Assert
         assert item.item_type == ItemType.MISC
         assert item == misc_item
+
+    def test_chest_health_potions_have_health_restore(self):  # noqa: PBR008
+        """Test that chest potions have health_restore property set correctly"""
+        # Arrange - Generate many random items to check all potion types
+        potion_items = {}
+
+        # Generate 100 random items to likely get all potion types
+        for _ in range(100):  # noqa: PBR008
+            item = Chest._generate_random_item()
+            if item.item_type == ItemType.CONSUMABLE and "Potion" in item.name:
+                potion_items[item.name] = item
+
+        # Assert - Check that we found potions and they have correct health_restore
+        if "Health Potion" in potion_items:
+            assert potion_items["Health Potion"].health_restore == 30
+
+        if "Minor Health Potion" in potion_items:
+            assert potion_items["Minor Health Potion"].health_restore == 20
+
+        if "Greater Health Potion" in potion_items:
+            assert potion_items["Greater Health Potion"].health_restore == 50

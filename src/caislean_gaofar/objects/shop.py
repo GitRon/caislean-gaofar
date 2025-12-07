@@ -59,6 +59,7 @@ class Shop:
             name="Health Potion",
             item_type=ItemType.CONSUMABLE,
             description="Restores 30 HP",
+            health_restore=30,
             gold_value=25,
         )
         self.inventory.append(ShopItem(health_potion, quantity=999, infinite=True))

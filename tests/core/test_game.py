@@ -908,6 +908,15 @@ class TestGame:
         assert "Woolen Tunic" in item_names
         assert "Health Potion" in item_names
 
+        # Verify Health Potion has health_restore property
+        health_potion = None
+        for item in game.warrior.inventory.backpack_slots:  # noqa: PBR008
+            if item and item.name == "Health Potion":
+                health_potion = item
+                break
+        assert health_potion is not None
+        assert health_potion.health_restore == 30
+
     @patch("pygame.display.set_mode")
     @patch("pygame.time.Clock")
     @patch("pygame.display.set_caption")

@@ -114,6 +114,20 @@ class TestCreateFunctions:
         assert potion.name == "Health Potion"
         assert potion.item_type == ItemType.CONSUMABLE
         assert potion.description == "Restores 30 health"
+        assert potion.health_restore == 30
+        assert potion.attack_bonus == 0
+        assert potion.defense_bonus == 0
+
+    def test_create_consumable_custom_health_restore(self):
+        """Test create_consumable with custom health_restore value"""
+        # Arrange & Act
+        potion = create_consumable("Greater Health Potion", health_restore=50)
+
+        # Assert
+        assert potion.name == "Greater Health Potion"
+        assert potion.item_type == ItemType.CONSUMABLE
+        assert potion.description == "Restores 50 health"
+        assert potion.health_restore == 50
         assert potion.attack_bonus == 0
         assert potion.defense_bonus == 0
 
